@@ -1,1636 +1,297 @@
-# OpenClaw Providers Documentation
-
-## Volcengine (Doubao) - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/volcengine
-
-[Skip to main content](https://docs.openclaw.ai/providers/volcengine#content-area)\n\n[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)\n\n![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)\n\nEnglish\n\nSearch...\n\nCtrl K\n\nSearch...\n\nNavigation\n\nProviders\n\nVolcengine (Doubao)\n\n[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)\n\nOn this page\n\n- [Getting started](https://docs.openclaw.ai/providers/volcengine#getting-started)\n- [Providers and endpoints](https://docs.openclaw.ai/providers/volcengine#providers-and-endpoints)\n- [Built-in catalog](https://docs.openclaw.ai/providers/volcengine#built-in-catalog)\n- [Text-to-speech](https://docs.openclaw.ai/providers/volcengine#text-to-speech)\n- [Advanced configuration](https://docs.openclaw.ai/providers/volcengine#advanced-configuration)\n- [Related](https://docs.openclaw.ai/providers/volcengine#related)\n\nThe Volcengine provider gives access to Doubao models and third-party models\nhosted on Volcano Engine, with separate endpoints for general and coding\nworkloads. The same bundled plugin can also register Volcengine Speech as a TTS\nprovider.\n\n| Detail | Value |\n| --- | --- |\n| Providers | `volcengine` (general + TTS) + `volcengine-plan` (coding) |\n| Model auth | `VOLCANO_ENGINE_API_KEY` |\n| TTS auth | `VOLCENGINE_TTS_API_KEY` or `BYTEPLUS_SEED_SPEECH_API_KEY` |\n| API | OpenAI-compatible models, BytePlus Seed Speech TTS |\n\n## [​](https://docs.openclaw.ai/providers/volcengine\\#getting-started)  Getting started\n\n1\n\n[Navigate to header](https://docs.openclaw.ai/providers/volcengine#)\n\nSet the API key\n\nRun interactive onboarding:\n\n```\nopenclaw onboard --auth-choice volcengine-api-key\n```\n\nThis registers both the general (`volcengine`) and coding (`volcengine-plan`) providers from a single API key.\n\n2\n\n[Navigate to header](https://docs.openclaw.ai/providers/volcengine#)\n\nSet a default model\n\n```\n{\n  agents: {\n    defaults: {\n      model: { primary: \"volcengine-plan/ark-code-latest\" },\n    },\n  },\n}\n```\n\n3\n\n[Navigate to header](https://docs.openclaw.ai/providers/volcengine#)\n\nVerify the model is available\n\n```\nopenclaw models list --provider volcengine\nopenclaw models list --provider volcengine-plan\n```\n\nFor non-interactive setup (CI, scripting), pass the key directly:\n\n```\nopenclaw onboard --non-interactive \\\n  --mode local \\\n  --auth-choice volcengine-api-key \\\n  --volcengine-api-key \"$VOLCANO_ENGINE_API_KEY\"\n```\n\n## [​](https://docs.openclaw.ai/providers/volcengine\\#providers-and-endpoints)  Providers and endpoints\n\n| Provider | Endpoint | Use case |\n| --- | --- | --- |\n| `volcengine` | `ark.cn-beijing.volces.com/api/v3` | General models |\n| `volcengine-plan` | `ark.cn-beijing.volces.com/api/coding/v3` | Coding models |\n\nBoth providers are configured from a single API key. Setup registers both automatically.\n\n## [​](https://docs.openclaw.ai/providers/volcengine\\#built-in-catalog)  Built-in catalog\n\n- General (volcengine)\n\n- Coding (volcengine-plan)\n\n\n| Model ref | Name | Input | Context |\n| --- | --- | --- | --- |\n| `volcengine/doubao-seed-1-8-251228` | Doubao Seed 1.8 | text, image | 256,000 |\n| `volcengine/doubao-seed-code-preview-251028` | doubao-seed-code-preview-251028 | text, image | 256,000 |\n| `volcengine/kimi-k2-5-260127` | Kimi K2.5 | text, image | 256,000 |\n| `volcengine/glm-4-7-251222` | GLM 4.7 | text, image | 200,000 |\n| `volcengine/deepseek-v3-2-251201` | DeepSeek V3.2 | text, image | 128,000 |\n\n| Model ref | Name | Input | Context |\n| --- | --- | --- | --- |\n| `volcengine-plan/ark-code-latest` | Ark Coding Plan | text | 256,000 |\n| `volcengine-plan/doubao-seed-code` | Doubao Seed Code | text | 256,000 |\n| `volcengine-plan/glm-4.7` | GLM 4.7 Coding | text | 200,000 |\n| `volcengine-plan/kimi-k2-thinking` | Kimi K2 Thinking | text | 256,000 |\n| `volcengine-plan/kimi-k2.5` | Kimi K2.5 Coding | text | 256,000 |\n| `volcengine-plan/doubao-seed-code-preview-251028` | Doubao Seed Code Preview | text | 256,000 |\n\n## [​](https://docs.openclaw.ai/providers/volcengine\\#text-to-speech)  Text-to-speech\n\nVolcengine TTS uses the BytePlus Seed Speech HTTP API and is configured\nseparately from the OpenAI-compatible Doubao model API key. In the BytePlus\nconsole, open Seed Speech > Settings > API Keys and copy the API key, then set:\n\n```\nexport VOLCENGINE_TTS_API_KEY=\"byteplus_seed_speech_api_key\"\nexport VOLCENGINE_TTS_RESOURCE_ID=\"seed-tts-1.0\"\n```\n\nThen enable it in `openclaw.json`:\n\n```\n{\n  messages: {\n    tts: {\n      auto: \"always\",\n      provider: \"volcengine\",\n      providers: {\n        volcengine: {\n          apiKey: \"byteplus_seed_speech_api_key\",\n          voice: \"en_female_anna_mars_bigtts\",\n          speedRatio: 1.0,\n        },\n      },\n    },\n  },\n}\n```\n\nFor voice-note targets, OpenClaw asks Volcengine for provider-native\n`ogg_opus`. For normal audio attachments, it asks for `mp3`. Provider aliases\n`bytedance` and `doubao` also resolve to the same speech provider.The default resource id is `seed-tts-1.0` because that is what BytePlus grants\nto newly created Seed Speech API keys in the default project. If your project\nhas TTS 2.0 entitlement, set `VOLCENGINE_TTS_RESOURCE_ID=seed-tts-2.0`.\n\n`VOLCANO_ENGINE_API_KEY` is for the ModelArk/Doubao model endpoints and is not a\nSeed Speech API key. TTS needs a Seed Speech API key from the BytePlus Speech\nConsole, or a legacy Speech Console AppID/token pair.\n\nLegacy AppID/token auth remains supported for older Speech Console applications:\n\n```\nexport VOLCENGINE_TTS_APPID=\"speech_app_id\"\nexport VOLCENGINE_TTS_TOKEN=\"speech_access_token\"\nexport VOLCENGINE_TTS_CLUSTER=\"volcano_tts\"\n```\n\n## [​](https://docs.openclaw.ai/providers/volcengine\\#advanced-configuration)  Advanced configuration\n\nDefault model after onboarding\n\n`openclaw onboard --auth-choice volcengine-api-key` currently sets\n`volcengine-plan/ark-code-latest` as the default model while also registering\nthe general `volcengine` catalog.\n\nModel picker fallback behavior\n\nDuring onboarding/configure model selection, the Volcengine auth choice prefers\nboth `volcengine/*` and `volcengine-plan/*` rows. If those models are not\nloaded yet, OpenClaw falls back to the unfiltered catalog instead of showing an\nempty provider-scoped picker.\n\nEnvironment variables for daemon processes\n\nIf the Gateway runs as a daemon (launchd/systemd), make sure model and TTS\nenv vars such as `VOLCANO_ENGINE_API_KEY`, `VOLCENGINE_TTS_API_KEY`,\n`BYTEPLUS_SEED_SPEECH_API_KEY`, `VOLCENGINE_TTS_APPID`, and\n`VOLCENGINE_TTS_TOKEN` are available to that process (for example, in\n`~/.openclaw/.env` or via `env.shellEnv`).\n\nWhen running OpenClaw as a background service, environment variables set in your\ninteractive shell are not automatically inherited. See the daemon note above.\n\n## [​](https://docs.openclaw.ai/providers/volcengine\\#related)  Related\n\n[**Model selection** \\\\\n\\\\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)\n\n[**Configuration** \\\\\n\\\\\nFull config reference for agents, models, and providers.](https://docs.openclaw.ai/gateway/configuration)\n\n[**Troubleshooting** \\\\\n\\\\\nCommon issues and debugging steps.](https://docs.openclaw.ai/help/troubleshooting)\n\n[**FAQ** \\\\\n\\\\\nFrequently asked questions about OpenClaw setup.](https://docs.openclaw.ai/help/faq)\n\n[vLLM](https://docs.openclaw.ai/providers/vllm) [Vydra](https://docs.openclaw.ai/providers/vydra)\n\nCtrl+I
-
----
-
-## OpenAI
-**Source:** https://docs.openclaw.ai/providers/openai
-
-[Skip to main content](https://docs.openclaw.ai/providers/openai#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-OpenAI
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Quick choice](https://docs.openclaw.ai/providers/openai#quick-choice)
-- [Naming map](https://docs.openclaw.ai/providers/openai#naming-map)
-- [OpenClaw feature coverage](https://docs.openclaw.ai/providers/openai#openclaw-feature-coverage)
-- [Memory embeddings](https://docs.openclaw.ai/providers/openai#memory-embeddings)
-- [Getting started](https://docs.openclaw.ai/providers/openai#getting-started)
-- [Route summary](https://docs.openclaw.ai/providers/openai#route-summary)
-- [Config example](https://docs.openclaw.ai/providers/openai#config-example)
-- [Native Codex app-server auth](https://docs.openclaw.ai/providers/openai#native-codex-app-server-auth)
-- [Image generation](https://docs.openclaw.ai/providers/openai#image-generation)
-- [Video generation](https://docs.openclaw.ai/providers/openai#video-generation)
-- [GPT-5 prompt contribution](https://docs.openclaw.ai/providers/openai#gpt-5-prompt-contribution)
-- [Voice and speech](https://docs.openclaw.ai/providers/openai#voice-and-speech)
-- [Azure OpenAI endpoints](https://docs.openclaw.ai/providers/openai#azure-openai-endpoints)
-- [Configuration](https://docs.openclaw.ai/providers/openai#configuration)
-- [API version](https://docs.openclaw.ai/providers/openai#api-version)
-- [Model names are deployment names](https://docs.openclaw.ai/providers/openai#model-names-are-deployment-names)
-- [Regional availability](https://docs.openclaw.ai/providers/openai#regional-availability)
-- [Parameter differences](https://docs.openclaw.ai/providers/openai#parameter-differences)
-- [Advanced configuration](https://docs.openclaw.ai/providers/openai#advanced-configuration)
-- [Related](https://docs.openclaw.ai/providers/openai#related)
-
-OpenAI provides developer APIs for GPT models, and Codex is also available as a
-ChatGPT-plan coding agent through OpenAI’s Codex clients. OpenClaw keeps those
-surfaces separate so config stays predictable.OpenClaw supports three OpenAI-family routes. The model prefix selects the
-provider/auth route; a separate runtime setting selects who executes the
-embedded agent loop:
-
-- **API key** — direct OpenAI Platform access with usage-based billing (`openai/*` models)
-- **Codex subscription through PI** — ChatGPT/Codex sign-in with subscription access (`openai-codex/*` models)
-- **Codex app-server harness** — native Codex app-server execution (`openai/*` models plus `agents.defaults.agentRuntime.id: \"codex\"`)
-
-OpenAI explicitly supports subscription OAuth usage in external tools and workflows like OpenClaw.Provider, model, runtime, and channel are separate layers. If those labels are
-getting mixed together, read [Agent runtimes](https://docs.openclaw.ai/concepts/agent-runtimes) before
-changing config.
-
-## [​](https://docs.openclaw.ai/providers/openai\\#quick-choice)  Quick choice
-
-| Goal | Use | Notes |
-| --- | --- | --- |
-| Direct API-key billing | `openai/gpt-5.5` | Set `OPENAI_API_KEY` or run OpenAI API-key onboarding. |
-| GPT-5.5 with ChatGPT/Codex subscription auth | `openai-codex/gpt-5.5` | Default PI route for Codex OAuth. Best first choice for subscription setups. |
-| GPT-5.5 with native Codex app-server behavior | `openai/gpt-5.5` plus `agentRuntime.id: \"codex\"` | Forces the Codex app-server harness for that model ref. |
-| Image generation or editing | `openai/gpt-image-2` | Works with either `OPENAI_API_KEY` or OpenAI Codex OAuth. |
-| Transparent-background images | `openai/gpt-image-1.5` | Use `outputFormat=png` or `webp` and `openai.background=transparent`. |
-
-## [​](https://docs.openclaw.ai/providers/openai\\#naming-map)  Naming map
-
-The names are similar but not interchangeable:
-
-| Name you see | Layer | Meaning |
-| --- | --- | --- |
-| `openai` | Provider prefix | Direct OpenAI Platform API route. |
-| `openai-codex` | Provider prefix | OpenAI Codex OAuth/subscription route through the normal OpenClaw PI runner. |
-| `codex` plugin | Plugin | Bundled OpenClaw plugin that provides native Codex app-server runtime and `/codex` chat controls. |
-| `agentRuntime.id: codex` | Agent runtime | Force the native Codex app-server harness for embedded turns. |
-| `/codex ...` | Chat command set | Bind/control Codex app-server threads from a conversation. |
-| `runtime: \"acp\", agentId: \"codex\"` | ACP session route | Explicit fallback path that runs Codex through ACP/acpx. |
-
-This means a config can intentionally contain both `openai-codex/*` and the
-`codex` plugin. That is valid when you want Codex OAuth through PI and also want
-native `/codex` chat controls available. `openclaw doctor` warns about that
-combination so you can confirm it is intentional; it does not rewrite it.
-
-GPT-5.5 is available through both direct OpenAI Platform API-key access and
-subscription/OAuth routes. Use `openai/gpt-5.5` for direct `OPENAI_API_KEY`
-traffic, `openai-codex/gpt-5.5` for Codex OAuth through PI, or
-`openai/gpt-5.5` with `agentRuntime.id: \"codex\"` for the native Codex
-app-server harness.
-
-Enabling the OpenAI plugin, or selecting an `openai-codex/*` model, does not
-enable the bundled Codex app-server plugin. OpenClaw enables that plugin only
-when you explicitly select the native Codex harness with
-`agentRuntime.id: \"codex\"` or use a legacy `codex/*` model ref.
-If the bundled `codex` plugin is enabled but `openai-codex/*` still resolves
-through PI, `openclaw doctor` warns and leaves the route unchanged.
-
-## [​](https://docs.openclaw.ai/providers/openai\\#openclaw-feature-coverage)  OpenClaw feature coverage
-
-| OpenAI capability | OpenClaw surface | Status |
-| --- | --- | --- |
-| Chat / Responses | `openai/<model>` model provider | Yes |
-| Codex subscription models | `openai-codex/<model>` with `openai-codex` OAuth | Yes |
-| Codex app-server harness | `openai/<model>` with `agentRuntime.id: codex` | Yes |
-| Server-side web search | Native OpenAI Responses tool | Yes, when web search is enabled and no provider pinned |
-| Images | `image_generate` | Yes |
-| Videos | `video_generate` | Yes |
-| Text-to-speech | `messages.tts.provider: \"openai\"` / `tts` | Yes |
-| Batch speech-to-text | `tools.media.audio` / media understanding | Yes |
-| Streaming speech-to-text | Voice Call `streaming.provider: \"openai\"` | Yes |
-| Realtime voice | Voice Call `realtime.provider: \"openai\"` / Control UI Talk | Yes |
-| Embeddings | memory embedding provider | Yes |
-
-## [​](https://docs.openclaw.ai/providers/openai\\#memory-embeddings)  Memory embeddings
-
-OpenClaw can use OpenAI, or an OpenAI-compatible embedding endpoint, for
-`memory_search` indexing and query embeddings:
-
-```
-{
-  agents: {
-    defaults: {
-      memorySearch: {
-        provider: \"openai\",
-        model: \"text-embedding-3-small\",
-      },
-    },
-  },
-}
-```
-
-For OpenAI-compatible endpoints that require asymmetric embedding labels, set
-`queryInputType` and `documentInputType` under `memorySearch`. OpenClaw forwards
-those as provider-specific `input_type` request fields: query embeddings use
-`queryInputType`; indexed memory chunks and batch indexing use
-`documentInputType`. See the [Memory configuration reference](https://docs.openclaw.ai/reference/memory-config#provider-specific-config) for the full example.
-
-## [​](https://docs.openclaw.ai/providers/openai\\#getting-started)  Getting started
-
-Choose your preferred auth method and follow the setup steps.
-
-- API key (OpenAI Platform)
-
-- Codex subscription
-
-
-**Best for:** direct API access and usage-based billing.
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/openai#)
-
-Get your API key
-
-Create or copy an API key from the [OpenAI Platform dashboard](https://platform.openai.com/api-keys).
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/openai#)
-
-Run onboarding
-
-```
-openclaw onboard --auth-choice openai-api-key
-```
-
-Or pass the key directly:
-
-```
-openclaw onboard --openai-api-key \"$OPENAI_API_KEY\"
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/openai#)
-
-Verify the model is available
-
-```
-openclaw models list --provider openai
-```
-
-### [​](https://docs.openclaw.ai/providers/openai\\#route-summary)  Route summary
-
-| Model ref | Runtime config | Route | Auth |
-| --- | --- | --- | --- |
-| `openai/gpt-5.5` | omitted / `agentRuntime.id: \"pi\"` | Direct OpenAI Platform API | `OPENAI_API_KEY` |
-| `openai/gpt-5.4-mini` | omitted / `agentRuntime.id: \"pi\"` | Direct OpenAI Platform API | `OPENAI_API_KEY` |
-| `openai/gpt-5.5` | `agentRuntime.id: \"codex\"` | Codex app-server harness | Codex app-server |
-
-`openai/*` is the direct OpenAI API-key route unless you explicitly force
-the Codex app-server harness. Use `openai-codex/*` for Codex OAuth through
-the default PI runner, or use `openai/gpt-5.5` with
-`agentRuntime.id: \"codex\"` for native Codex app-server execution.
-
-### [​](https://docs.openclaw.ai/providers/openai\\#config-example)  Config example
-
-```
-{
-  env: { OPENAI_API_KEY: \"sk-...\" },
-  agents: { defaults: { model: { primary: \"openai/gpt-5.5\" } } },
-}
-```
-
-OpenClaw does **not** expose `openai/gpt-5.3-codex-spark`. Live OpenAI API requests reject that model, and the current Codex catalog does not expose it either.
-
-**Best for:** using your ChatGPT/Codex subscription instead of a separate API key. Codex cloud requires ChatGPT sign-in.
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/openai#)
-
-Run Codex OAuth
-
-```
-openclaw onboard --auth-choice openai-codex
-```
-
-Or run OAuth directly:
-
-```
-openclaw models auth login --provider openai-codex
-```
-
-For headless or callback-hostile setups, add `--device-code` to sign in with a ChatGPT device-code flow instead of the localhost browser callback:
-
-```
-openclaw models auth login --provider openai-codex --device-code
-```
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/openai#)
-
-Set the default model
-
-```
-openclaw config set agents.defaults.model.primary openai-codex/gpt-5.5
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/openai#)
-
-Verify the model is available
-
-```
-openclaw models list --provider openai-codex
-```
-
-### [​](https://docs.openclaw.ai/providers/openai\\#route-summary-2)  Route summary
-
-| Model ref | Runtime config | Route | Auth |
-| --- | --- | --- | --- |
-| `openai-codex/gpt-5.5` | omitted / `runtime: \"pi\"` | ChatGPT/Codex OAuth through PI | Codex sign-in |
-| `openai-codex/gpt-5.5` | `runtime: \"auto\"` | Still PI unless a plugin explicitly claims `openai-codex` | Codex sign-in |
-| `openai/gpt-5.5` | `agentRuntime.id: \"codex\"` | Codex app-server harness | Codex app-server auth |
-
-Keep using the `openai-codex` provider id for auth/profile commands. The
-`openai-codex/*` model prefix is also the explicit PI route for Codex OAuth.
-It does not select or auto-enable the bundled Codex app-server harness.
-
-`openai-codex/gpt-5.4-mini` is not a supported Codex OAuth route. Use
-`openai/gpt-5.4-mini` with an OpenAI API key, or use
-`openai-codex/gpt-5.5` with Codex OAuth.
-
-### [​](https://docs.openclaw.ai/providers/openai\\#config-example-2)  Config example
-
-```
-{
-  agents: { defaults: { model: { primary: \"openai-codex/gpt-5.5\" } } },
-}
-```
-
-Onboarding no longer imports OAuth material from `~/.codex`. Sign in with browser OAuth (default) or the device-code flow above — OpenClaw manages the resulting credentials in its own agent auth store.
-
-### [​](https://docs.openclaw.ai/providers/openai\\#status-indicator)  Status indicator
-
-Chat `/status` shows which model runtime is active for the current session.
-The default PI harness appears as `Runtime: OpenClaw Pi Default`. When the
-bundled Codex app-server harness is selected, `/status` shows
-`Runtime: OpenAI Codex`. Existing sessions keep their recorded harness id, so use
-`/new` or `/reset` after changing `agentRuntime` if you want `/status` to
-reflect a new PI/Codex choice.
-
-### [​](https://docs.openclaw.ai/providers/openai\\#doctor-warning)  Doctor warning
-
-If the bundled `codex` plugin is enabled while this tab’s
-`openai-codex/*` route is selected, `openclaw doctor` warns that the model
-still resolves through PI. Keep the config unchanged when that is the
-intended subscription-auth route. Switch to `openai/<model>` plus
-`agentRuntime.id: \"codex\"` only when you want native Codex
-app-server execution.
-
-### [​](https://openclaw.ai/providers/openai\\#context-window-cap)  Context window cap
-
-OpenClaw treats model metadata and the runtime context cap as separate values.For `openai-codex/gpt-5.5` through Codex OAuth:
-
-- Native `contextWindow`: `1000000`
-- Default runtime `contextTokens` cap: `272000`
-
-The smaller default cap has better latency and quality characteristics in practice. Override it with `contextTokens`:
-
-```
-{
-  models: {
-    providers: {
-      \"openai-codex\": {
-        models: [{ id: \"gpt-5.5\", contextTokens: 160000 }],
-      },
-    },
-  },
-}
-```
-
-Use `contextWindow` to declare native model metadata. Use `contextTokens` to limit the runtime context budget.
-
-### [​](https://docs.openclaw.ai/providers/openai\\#catalog-recovery)  Catalog recovery
-
-OpenClaw uses upstream Codex catalog metadata for `gpt-5.5` when it is
-present. If live Codex discovery omits the `openai-codex/gpt-5.5` row while
-the account is authenticated, OpenClaw synthesizes that OAuth model row so
-cron, sub-agent, and configured default-model runs do not fail with
-`Unknown model`.
-
-## [​](https://docs.openclaw.ai/providers/openai\\#native-codex-app-server-auth)  Native Codex app-server auth
-
-The native Codex app-server harness uses `openai/*` model refs plus
-`agentRuntime.id: \"codex\"`, but its auth is still account-based. OpenClaw
-selects auth in this order:
-
-1. An explicit OpenClaw `openai-codex` auth profile bound to the agent.
-2. The app-server’s existing account, such as a local Codex CLI ChatGPT sign-in.
-3. For local stdio app-server launches only, `CODEX_API_KEY`, then
-`OPENAI_API_KEY`, when the app-server reports no account and still requires
-OpenAI auth.
-
-That means a local ChatGPT/Codex subscription sign-in is not replaced just
-because the gateway process also has `OPENAI_API_KEY` for direct OpenAI models
-or embeddings. Env API-key fallback is only the local stdio no-account path; it
-is not sent to WebSocket app-server connections. When a subscription-style Codex
-profile is selected, OpenClaw also keeps `CODEX_API_KEY` and `OPENAI_API_KEY`
-out of the spawned stdio app-server child and sends the selected credentials
-through the app-server login RPC.
-
-## [​](https://docs.openclaw.ai/providers/openai\\#image-generation)  Image generation
-
-The bundled `openai` plugin registers image generation through the `image_generate` tool.
-It supports both OpenAI API-key image generation and Codex OAuth image
-generation through the same `openai/gpt-image-2` model ref.
-
-| Capability | OpenAI API key | Codex OAuth |
-| --- | --- | --- |
-| Model ref | `openai/gpt-image-2` | `openai/gpt-image-2` |
-| Auth | `OPENAI_API_KEY` | OpenAI Codex OAuth sign-in |
-| Transport | OpenAI Images API | Codex Responses backend |
-| Max images per request | 4 | 4 |
-| Edit mode | Enabled (up to 5 reference images) | Enabled (up to 5 reference images) |
-| Size overrides | Supported, including 2K/4K sizes | Supported, including 2K/4K sizes |
-| Aspect ratio / resolution | Not forwarded to OpenAI Images API | Mapped to a supported size when safe |
-
-```
-{
-  agents: {
-    defaults: {
-      imageGenerationModel: { primary: \"openai/gpt-image-2\" },
-    },
-  },
-}
-```
-
-See [Image Generation](https://docs.openclaw.ai/tools/image-generation) for shared tool parameters, provider selection, and failover behavior.
-
-`gpt-image-2` is the default for both OpenAI text-to-image generation and image
-editing. `gpt-image-1.5`, `gpt-image-1`, and `gpt-image-1-mini` remain usable as
-explicit model overrides. Use `openai/gpt-image-1.5` for transparent-background
-PNG/WebP output; the current `gpt-image-2` API rejects
-`background: \"transparent\"`.For a transparent-background request, agents should call `image_generate` with
-`model: \"openai/gpt-image-1.5\"`, `outputFormat: \"png\"` or `\"webp\"`, and
-`background: \"transparent\"`; the older `openai.background` provider option is
-still accepted. OpenClaw also protects the public OpenAI and
-OpenAI Codex OAuth routes by rewriting default `openai/gpt-image-2` transparent
-requests to `gpt-image-1.5`; Azure and custom OpenAI-compatible endpoints keep
-their configured deployment/model names.The same setting is exposed for headless CLI runs:
-
-```
-openclaw infer image generate \\\
-  --model openai/gpt-image-1.5 \\\
-  --output-format png \\\
-  --background transparent \\\
-  --prompt \"A simple red circle sticker on a transparent background\" \\\
-  --json
-```
-
-Use the same `--output-format` and `--background` flags with
-`openclaw infer image edit` when starting from an input file.
-`--openai-background` remains available as an OpenAI-specific alias.For Codex OAuth installs, keep the same `openai/gpt-image-2` ref. When an
-`openai-codex` OAuth profile is configured, OpenClaw resolves that stored OAuth
-access token and sends image requests through the Codex Responses backend. It
-does not first try `OPENAI_API_KEY` or silently fall back to an API key for that
-request. Configure `models.providers.openai` explicitly with an API key,
-custom base URL, or Azure endpoint when you want the direct OpenAI Images API
-route instead.
-If that custom image endpoint is on a trusted LAN/private address, also set
-`browser.ssrfPolicy.dangerouslyAllowPrivateNetwork: true`; OpenClaw keeps
-private/internal OpenAI-compatible image endpoints blocked unless this opt-in is
-present.Generate:
-
-```
-/tool image_generate model=openai/gpt-image-2 prompt=\"A polished launch poster for OpenClaw on macOS\" size=3840x2160 count=1
-```
-
-Generate a transparent PNG:
-
-```
-/tool image_generate model=openai/gpt-image-1.5 prompt=\"A simple red circle sticker on a transparent background\" outputFormat=png background=transparent
-```
-
-Edit:
-
-```
-/tool image_generate model=openai/gpt-image-2 prompt=\"Preserve the object shape, change the material to translucent glass\" image=/path/to/reference.png size=1024x1536
-```
-
-## [​](https://docs.openclaw.ai/providers/openai\\#video-generation)  Video generation
-
-The bundled `openai` plugin registers video generation through the `video_generat...(content truncated)
-
----
-
-## Deepgram - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/deepgram
-
-[Skip to main content](https://docs.openclaw.ai/providers/deepgram#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-Deepgram
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Getting started](https://docs.openclaw.ai/providers/deepgram#getting-started)
-- [Configuration options](https://docs.openclaw.ai/providers/deepgram#configuration-options)
-- [Voice Call streaming STT](https://docs.openclaw.ai/providers/deepgram#voice-call-streaming-stt)
-- [Notes](https://docs.openclaw.ai/providers/deepgram#notes)
-- [Related](https://docs.openclaw.ai/providers/deepgram#related)
-
-Deepgram is a speech-to-text API. In OpenClaw it is used for inbound
-audio/voice-note transcription through `tools.media.audio` and for Voice Call
-streaming STT through `plugins.entries.voice-call.config.streaming`.For batch transcription, OpenClaw uploads the complete audio file to Deepgram
-and injects the transcript into the reply pipeline (`{{Transcript}}` +
-`[Audio]` block). For Voice Call streaming, OpenClaw forwards live G.711
-u-law frames over Deepgram’s WebSocket `listen` endpoint and emits partial or
-final transcripts as Deepgram returns them.
-
-| Detail | Value |
-| --- | --- |
-| Website | [deepgram.com](https://deepgram.com/) |
-| Docs | [developers.deepgram.com](https://developers.deepgram.com/) |
-| Auth | `DEEPGRAM_API_KEY` |
-| Default model | `nova-3` |
-
-## [​](https://docs.openclaw.ai/providers/deepgram\\#getting-started)  Getting started
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/deepgram#)
-
-Set your API key
-
-Add your Deepgram API key to the environment:
-
-```
-DEEPGRAM_API_KEY=dg_...
-```
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/deepgram#)
-
-Enable the audio provider
-
-```
-{
-  tools: {
-    media: {
-      audio: {
-        enabled: true,
-        models: [{ provider: \"deepgram\", model: \"nova-3\" }],
-      },
-    },
-  },
-}
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/deepgram#)
-
-Send a voice note
-
-Send an audio message through any connected channel. OpenClaw transcribes it
-via Deepgram and injects the transcript into the reply pipeline.
-
-## [​](https://docs.openclaw.ai/providers/deepgram\\#configuration-options)  Configuration options
-
-| Option | Path | Description |
-| --- | --- | --- |
-| `model` | `tools.media.audio.models[].model` | Deepgram model id (default: `nova-3`) |
-| `language` | `tools.media.audio.models[].language` | Language hint (optional) |
-| `detect_language` | `tools.media.audio.providerOptions.deepgram.detect_language` | Enable language detection (optional) |
-| `punctuate` | `tools.media.audio.providerOptions.deepgram.punctuate` | Enable punctuation (optional) |
-| `smart_format` | `tools.media.audio.providerOptions.deepgram.smart_format` | Enable smart formatting (optional) |
-
-- With language hint
-
-- With Deepgram options
-
-
-```
-{
-  tools: {
-    media: {
-      audio: {
-        enabled: true,
-        models: [{ provider: \"deepgram\", model: \"nova-3\", language: \"en\" }],
-      },
-    },
-  },
-}
-```
-
-```
-{
-  tools: {
-    media: {
-      audio: {
-        enabled: true,
-        providerOptions: {
-          deepgram: {
-            detect_language: true,
-            punctuate: true,
-            smart_format: true,
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Alibaba Model Studio
+
+OpenClaw ships a bundled `alibaba` plugin that registers a video-generation provider for Wan models on Alibaba Model Studio (the international name for DashScope). The plugin is enabled by default; you only need to set an API key.
+
+| Property         | Value                                                                           |
+| ---------------- | ------------------------------------------------------------------------------- |
+| Provider id      | `alibaba`                                                                       |
+| Plugin           | bundled, `enabledByDefault: true`                                               |
+| Auth env vars    | `MODELSTUDIO_API_KEY` → `DASHSCOPE_API_KEY` → `QWEN_API_KEY` (first match wins) |
+| Onboarding flag  | `--auth-choice alibaba-model-studio-api-key`                                    |
+| Direct CLI flag  | `--alibaba-model-studio-api-key <key>`                                          |
+| Default model    | `alibaba/wan2.6-t2v`                                                            |
+| Default base URL | `https://dashscope-intl.aliyuncs.com`                                           |
+
+## Getting started
+
+<Steps>
+  <Step title="Set an API key">
+    Use onboarding to store the key against the `alibaba` provider:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw onboard --auth-choice alibaba-model-studio-api-key
+    ```
+
+    Or pass the key directly during install/onboarding:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw onboard --alibaba-model-studio-api-key <your-key>
+    ```
+
+    Or export any of the accepted env vars before starting the Gateway:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    export MODELSTUDIO_API_KEY=sk-...
+    # or DASHSCOPE_API_KEY=...
+    # or QWEN_API_KEY=...
+    ```
+  </Step>
+
+  <Step title="Set a default video model">
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          videoGenerationModel: {
+            primary: "alibaba/wan2.6-t2v",
           },
         },
-        models: [{ provider: \"deepgram\", model: \"nova-3\" }],
       },
-    },
-  },
-}
-```
+    }
+    ```
+  </Step>
 
-## [​](https://docs.openclaw.ai/providers/deepgram\\#voice-call-streaming-stt)  Voice Call streaming STT
+  <Step title="Verify the provider is configured">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw models list --provider alibaba
+    ```
 
-The bundled `deepgram` plugin also registers a realtime transcription provider
-for the Voice Call plugin.
+    The list should include all five bundled Wan models. If `MODELSTUDIO_API_KEY` is unresolved, `openclaw models status --json` reports the missing credential under `auth.unusableProfiles`.
+  </Step>
+</Steps>
 
-| Setting | Config path | Default |
-| --- | --- | --- |
-| API key | `plugins.entries.voice-call.config.streaming.providers.deepgram.apiKey` | Falls back to `DEEPGRAM_API_KEY` |
-| Model | `...deepgram.model` | `nova-3` |
-| Language | `...deepgram.language` | (unset) |
-| Encoding | `...deepgram.encoding` | `mulaw` |
-| Sample rate | `...deepgram.sampleRate` | `8000` |
-| Endpointing | `...deepgram.endpointingMs` | `800` |
-| Interim results | `...deepgram.interimResults` | `true` |
+<Note>
+  The Alibaba plugin and the [Qwen plugin](/providers/qwen) both authenticate against DashScope and accept overlapping env vars. Use `alibaba/...` model ids to drive the dedicated Wan video surface; use `qwen/...` ids when you want Qwen's chat, embedding, or media-understanding surface.
+</Note>
 
-```
-{
-  plugins: {
-    entries: {
-      \"voice-call\": {
-        config: {
-          streaming: {
-            enabled: true,
-            provider: \"deepgram\",
-            providers: {
-              deepgram: {
-                apiKey: \"${DEEPGRAM_API_KEY}\",
-                model: \"nova-3\",
-                endpointingMs: 800,
-                language: \"en-US\",
-              },
-            },\n          },\n        },\n      },\n    },\n  },\n}
-```
+## Built-in Wan models
 
-Voice Call receives telephony audio as 8 kHz G.711 u-law. The Deepgram
-streaming provider defaults to `encoding: \"mulaw\"` and `sampleRate: 8000`, so
-Twilio media frames can be forwarded directly.
+| Model ref                  | Mode                      |
+| -------------------------- | ------------------------- |
+| `alibaba/wan2.6-t2v`       | Text-to-video (default)   |
+| `alibaba/wan2.6-i2v`       | Image-to-video            |
+| `alibaba/wan2.6-r2v`       | Reference-to-video        |
+| `alibaba/wan2.6-r2v-flash` | Reference-to-video (fast) |
+| `alibaba/wan2.7-r2v`       | Reference-to-video        |
 
-## [​](https://docs.openclaw.ai/providers/deepgram\\#notes)  Notes
+## Capabilities and limits
 
-Authentication
+The bundled provider mirrors DashScope's Wan video API caps. All three modes share the same per-request video count and duration cap; only the input shape differs.
 
-Authentication follows the standard provider auth order. `DEEPGRAM_API_KEY` is
-the simplest path.
+| Mode               | Max output videos | Max input images | Max input videos | Max duration | Supported controls                                        |
+| ------------------ | ----------------- | ---------------- | ---------------- | ------------ | --------------------------------------------------------- |
+| Text-to-video      | 1                 | n/a              | n/a              | 10 s         | `size`, `aspectRatio`, `resolution`, `audio`, `watermark` |
+| Image-to-video     | 1                 | 1                | n/a              | 10 s         | `size`, `aspectRatio`, `resolution`, `audio`, `watermark` |
+| Reference-to-video | 1                 | n/a              | 4                | 10 s         | `size`, `aspectRatio`, `resolution`, `audio`, `watermark` |
 
-Proxy and custom endpoints
+When a request omits `durationSeconds`, the provider sends DashScope's accepted default of **5 seconds**. Set `durationSeconds` explicitly on the [video generation tool](/tools/video-generation) to extend up to 10 s.
 
-Override endpoints or headers with `tools.media.audio.baseUrl` and
-`tools.media.audio.headers` when using a proxy.
+<Warning>
+  Reference image and video inputs must be remote `http(s)` URLs. Local file paths are not accepted by DashScope's reference modes; upload to object storage first or use the [media tool](/tools/media-overview) flow that already produces a public URL.
+</Warning>
 
-Output behavior
+## Advanced configuration
 
-Output follows the same audio rules as other providers (size caps, timeouts,
-transcript injection).
+<AccordionGroup>
+  <Accordion title="Override the DashScope base URL">
+    The provider defaults to the international DashScope endpoint. To target the China-region endpoint, set:
 
-## [​](https://docs.openclaw.ai/providers/deepgram\\#related)  Related
-
-[**Media tools** \\\\\n\\\\\nAudio, image, and video processing pipeline overview.](https://docs.openclaw.ai/tools/media-overview)
-
-[**Configuration** \\\\\n\\\\\nFull config reference including media tool settings.](https://docs.openclaw.ai/gateway/configuration)
-
-[**Troubleshooting** \\\\\n\\\\\nCommon issues and debugging steps.](https://docs.openclaw.ai/help/troubleshooting)
-
-[**FAQ** \\\\\n\\\\\nFrequently asked questions about OpenClaw setup.](https://docs.openclaw.ai/help/faq)
-
-[ComfyUI](https://docs.openclaw.ai/providers/comfy) [DeepSeek](https://docs.openclaw.ai/providers/deepseek)
-
-Ctrl+I
-
----
-
-## Chutes - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/chutes
-
-[Skip to main content](https://docs.openclaw.ai/providers/chutes#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-Chutes
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Getting started](https://docs.openclaw.ai/providers/chutes#getting-started)
-- [Discovery behavior](https://docs.openclaw.ai/providers/chutes#discovery-behavior)
-- [Default aliases](https://docs.openclaw.ai/providers/chutes#default-aliases)
-- [Built-in starter catalog](https://docs.openclaw.ai/providers/chutes#built-in-starter-catalog)
-- [Config example](https://docs.openclaw.ai/providers/chutes#config-example)
-- [Related](https://docs.openclaw.ai/providers/chutes#related)
-
-[Chutes](https://chutes.ai/) exposes open-source model catalogs through an
-OpenAI-compatible API. OpenClaw supports both browser OAuth and direct API-key
-auth for the bundled `chutes` provider.
-
-| Property | Value |
-| --- | --- |
-| Provider | `chutes` |
-| API | OpenAI-compatible |
-| Base URL | `https://llm.chutes.ai/v1` |
-| Auth | OAuth or API key (see below) |
-
-## [​](https://docs.openclaw.ai/providers/chutes\\#getting-started)  Getting started
-
-- OAuth
-
-- API key
-
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/chutes#)
-
-Run the OAuth onboarding flow
-
-```
-openclaw onboard --auth-choice chutes
-```
-
-OpenClaw launches the browser flow locally, or shows a URL + redirect-paste
-flow on remote/headless hosts. OAuth tokens auto-refresh through OpenClaw auth
-profiles.
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/chutes#)
-
-Verify the default model
-
-After onboarding, the default model is set to
-`chutes/zai-org/GLM-4.7-TEE` and the bundled Chutes catalog is
-registered.
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/chutes#)
-
-Get an API key
-
-Create a key at
-[chutes.ai/settings/api-keys](https://chutes.ai/settings/api-keys).
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/chutes#)
-
-Run the API key onboarding flow
-
-```
-openclaw onboard --auth-choice chutes-api-key
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/chutes#)
-
-Verify the default model
-
-After onboarding, the default model is set to
-`chutes/zai-org/GLM-4.7-TEE` and the bundled Chutes catalog is
-registered.
-
-Both auth paths register the bundled Chutes catalog and set the default model to
-`chutes/zai-org/GLM-4.7-TEE`. Runtime environment variables: `CHUTES_API_KEY`,
-`CHUTES_OAUTH_TOKEN`.
-
-## [​](https://docs.openclaw.ai/providers/chutes\\#discovery-behavior)  Discovery behavior
-
-When Chutes auth is available, OpenClaw queries the Chutes catalog with that
-credential and uses the discovered models. If discovery fails, OpenClaw falls
-back to a bundled static catalog so onboarding and startup still work.
-
-## [​](https://docs.openclaw.ai/providers/chutes\\#default-aliases)  Default aliases
-
-OpenClaw registers three convenience aliases for the bundled Chutes catalog:
-
-| Alias | Target model |
-| --- | --- |
-| `chutes-fast` | `chutes/zai-org/GLM-4.7-FP8` |
-| `chutes-pro` | `chutes/deepseek-ai/DeepSeek-V3.2-TEE` |
-| `chutes-vision` | `chutes/chutesai/Mistral-Small-3.2-24B-Instruct-2506` |
-
-## [​](https://docs.openclaw.ai/providers/chutes\\#built-in-starter-catalog)  Built-in starter catalog
-
-The bundled fallback catalog includes current Chutes refs:
-
-| Model ref |
-| --- |
-| `chutes/zai-org/GLM-4.7-TEE` |
-| `chutes/zai-org/GLM-5-TEE` |
-| `chutes/deepseek-ai/DeepSeek-V3.2-TEE` |
-| `chutes/deepseek-ai/DeepSeek-R1-0528-TEE` |
-| `chutes/moonshotai/Kimi-K2.5-TEE` |
-| `chutes/chutesai/Mistral-Small-3.2-24B-Instruct-2506` |
-| `chutes/Qwen/Qwen3-Coder-Next-TEE` |
-| `chutes/openai/gpt-oss-120b-TEE` |
-
-## [​](https://docs.openclaw.ai/providers/chutes\\#config-example)  Config example
-
-```
-{
-  agents: {
-    defaults: {
-      model: { primary: \"chutes/zai-org/GLM-4.7-TEE\" },
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
       models: {
-        \"chutes/zai-org/GLM-4.7-TEE\": { alias: \"Chutes GLM 4.7\" },
-        \"chutes/deepseek-ai/DeepSeek-V3.2-TEE\": { alias: \"Chutes DeepSeek V3.2\" },
+        providers: {
+          alibaba: {
+            baseUrl: "https://dashscope.aliyuncs.com",
+          },
+        },
       },
-    },
-  },
-}
-```
+    }
+    ```
 
-OAuth overrides
+    The provider strips trailing slashes before constructing AIGC task URLs.
+  </Accordion>
 
-You can customize the OAuth flow with optional environment variables:
+  <Accordion title="Auth env priority">
+    OpenClaw resolves the Alibaba API key from environment variables in this order, taking the first non-empty value:
 
-| Variable | Purpose |
-| --- | --- |
-| `CHUTES_CLIENT_ID` | Custom OAuth client ID |
-| `CHUTES_CLIENT_SECRET` | Custom OAuth client secret |
-| `CHUTES_OAUTH_REDIRECT_URI` | Custom redirect URI |
-| `CHUTES_OAUTH_SCOPES` | Custom OAuth scopes |
+    1. `MODELSTUDIO_API_KEY`
+    2. `DASHSCOPE_API_KEY`
+    3. `QWEN_API_KEY`
 
-See the [Chutes OAuth docs](https://chutes.ai/docs/sign-in-with-chutes/overview)
-for redirect-app requirements and help.
+    Configured `auth.profiles` entries (set via `openclaw models auth login`) override env-var resolution. See [Auth profiles in the models FAQ](/help/faq-models#what-is-an-auth-profile) for profile rotation, cooldown, and override mechanics.
+  </Accordion>
 
-Notes
+  <Accordion title="Relationship to the Qwen plugin">
+    Both bundled plugins talk to DashScope and accept overlapping API keys. Use:
 
-- API-key and OAuth discovery both use the same `chutes` provider id.
-- Chutes models are registered as `chutes/<model-id>`.
-- If discovery fails at startup, the bundled static catalog is used automatically.
+    * `alibaba/wan*.*` ids to drive the dedicated Wan video provider documented on this page.
+    * `qwen/*` ids for Qwen chat, embedding, and media understanding (see [Qwen](/providers/qwen)).
 
-## [​](https://docs.openclaw.ai/providers/chutes\\#related)  Related
+    Setting `MODELSTUDIO_API_KEY` once authenticates both plugins because the auth env var list intentionally overlaps; you do not need to onboard each plugin separately.
+  </Accordion>
+</AccordionGroup>
 
-[**Model selection** \\\\\n\\\\\nProvider rules, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)
+## Related
 
-[**Configuration reference** \\\\\n\\\\\nFull config schema including provider settings.](https://docs.openclaw.ai/gateway/configuration-reference)
+<CardGroup cols={2}>
+  <Card title="Video generation" href="/tools/video-generation" icon="video">
+    Shared video tool parameters and provider selection.
+  </Card>
 
-[**Chutes** \\\\\n\\\\\nChutes dashboard and API docs.](https://chutes.ai/)
+  <Card title="Qwen" href="/providers/qwen" icon="microchip">
+    Qwen chat, embedding, and media-understanding setup on the same DashScope auth.
+  </Card>
 
-[**Chutes API keys** \\\\\n\\\\\nCreate and manage Chutes API keys.](https://chutes.openclaw.ai/settings/api-keys)
+  <Card title="Configuration reference" href="/gateway/config-agents#agent-defaults" icon="gear">
+    Agent defaults and model configuration.
+  </Card>
 
-[Azure Speech](https://docs.openclaw.ai/providers/azure-speech) [Claude Max API proxy](https://docs.openclaw.ai/providers/claude-max-api-proxy)
+  <Card title="Models FAQ" href="/help/faq-models" icon="circle-question">
+    Auth profiles, switching models, and resolving "no profile" errors.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
 
-Ctrl+I
+# Anthropic
 
----
+Anthropic builds the **Claude** model family. OpenClaw supports two auth routes:
 
-## Fireworks - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/fireworks
+* **API key** — direct Anthropic API access with usage-based billing (`anthropic/*` models)
+* **Claude CLI** — reuse an existing Claude CLI login on the same host
 
-[Skip to main content](https://docs.openclaw.ai/providers/fireworks#content-area)
+<Warning>
+  Anthropic staff told us OpenClaw-style Claude CLI usage is allowed again, so
+  OpenClaw treats Claude CLI reuse and `claude -p` usage as sanctioned unless
+  Anthropic publishes a new policy.
 
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
+  For long-lived gateway hosts, Anthropic API keys are still the clearest and
+  most predictable production path.
 
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
+  Anthropic's current public docs:
 
-English
+  * [Claude Code CLI reference](https://code.claude.com/docs/en/cli-reference)
+  * [Claude Agent SDK overview](https://platform.claude.com/docs/en/agent-sdk/overview)
+  * [Using Claude Code with your Pro or Max plan](https://support.claude.com/en/articles/11145838-using-claude-code-with-your-pro-or-max-plan)
+  * [Using Claude Code with your Team or Enterprise plan](https://support.anthropic.com/en/articles/11845131-using-claude-code-with-your-team-or-enterprise-plan/)
+</Warning>
 
-Search...
+## Getting started
 
-Ctrl K
+<Tabs>
+  <Tab title="API key">
+    **Best for:** standard API access and usage-based billing.
 
-Search...
+    <Steps>
+      <Step title="Get your API key">
+        Create an API key in the [Anthropic Console](https://console.anthropic.com/).
+      </Step>
 
-Navigation
+      <Step title="Run onboarding">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw onboard
+        # choose: Anthropic API key
+        ```
 
-Providers
+        Or pass the key directly:
 
-Fireworks
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw onboard --anthropic-api-key "$ANTHROPIC_API_KEY"
+        ```
+      </Step>
 
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
+      <Step title="Verify the model is available">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw models list --provider anthropic
+        ```
+      </Step>
+    </Steps>
 
-On this page
+    ### Config example
 
-- [Getting started](https://docs.openclaw.ai/providers/fireworks#getting-started)
-- [Non-interactive example](https://docs.openclaw.ai/providers/fireworks#non-interactive-example)
-- [Built-in catalog](https://docs.openclaw.ai/providers/fireworks#built-in-catalog)
-- [Custom Fireworks model ids](https://docs.openclaw.ai/providers/fireworks#custom-fireworks-model-ids)
-- [Related](https://docs.openclaw.ai/providers/fireworks#related)
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      env: { ANTHROPIC_API_KEY: "sk-ant-..." },
+      agents: { defaults: { model: { primary: "anthropic/claude-opus-4-6" } } },
+    }
+    ```
+  </Tab>
 
-[Fireworks](https://fireworks.ai/) exposes open-weight and routed models through an OpenAI-compatible API. OpenClaw includes a bundled Fireworks provider plugin.
+  <Tab title="Claude CLI">
+    **Best for:** reusing an existing Claude CLI login without a separate API key.
 
-| Property | Value |
-| --- | --- |
-| Provider | `fireworks` |
-| Auth | `FIREWORKS_API_KEY` |
-| API | OpenAI-compatible chat/completions |
-| Base URL | `https://api.fireworks.ai/inference/v1` |
-| Default model | `fireworks/accounts/fireworks/routers/kimi-k2p5-turbo` |
+    <Steps>
+      <Step title="Ensure Claude CLI is installed and logged in">
+        Verify with:
 
-## [​](https://docs.openclaw.ai/providers/fireworks\\#getting-started) Getting started
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        claude --version
+        ```
+      </Step>
 
-1
+      <Step title="Run onboarding">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw onboard
+        # choose: Claude CLI
+        ```
 
-[Navigate to header](https://docs.openclaw.ai/providers/fireworks#)
+        OpenClaw detects and reuses the existing Claude CLI credentials.
+      </Step>
 
-Set up Fireworks auth through onboarding
+      <Step title="Verify the model is available">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw models list --provider anthropic
+        ```
+      </Step>
+    </Steps>
 
-```
-openclaw onboard --auth-choice fireworks-api-key
-```
+    <Note>
+      Setup and runtime details for the Claude CLI backend are in [CLI Backends](/gateway/cli-backends).
+    </Note>
 
-This stores your Fireworks key in OpenClaw config and sets the Fire Pass starter model as the default.
+    ### Config example
 
-2
+    Prefer the canonical Anthropic model ref plus a CLI runtime override:
 
-[Navigate to header](https://docs.openclaw.ai/providers/fireworks#)
-
-Verify the model is available
-
-```
-openclaw models list --provider fireworks
-```
-
-## [​](https://docs.openclaw.ai/providers/fireworks\\#non-interactive-example) Non-interactive example
-
-For scripted or CI setups, pass all values on the command line:
-
-```
-openclaw onboard --non-interactive \\
-  --mode local \\
-  --auth-choice fireworks-api-key \\
-  --fireworks-api-key \"$FIREWORKS_API_KEY\" \\
-  --skip-health \\
-  --accept-risk
-```
-
-## [​](https://docs.openclaw.ai/providers/fireworks\\#built-in-catalog) Built-in catalog
-
-| Model ref | Name | Input | Context | Max output | Notes |
-| --- | --- | --- | --- | --- | --- |
-| `fireworks/accounts/fireworks/models/kimi-k2p6` | Kimi K2.6 | text,image | 262,144 | 262,144 | Latest Kimi model on Fireworks. Thinking is disabled for Fireworks K2.6 requests; route through Moonshot directly if you need Kimi thinking output. |
-| `fireworks/accounts/fireworks/routers/kimi-k2p5-turbo` | Kimi K2.5 Turbo (Fire Pass) | text,image | 256,000 | 256,000 | Default bundled starter model on Fireworks |
-
-If Fireworks publishes a newer model such as a fresh Qwen or Gemma release, you can switch to it directly by using its Fireworks model id without waiting for a bundled catalog update.
-
-## [​](https://docs.openclaw.ai/providers/fireworks\\#custom-fireworks-model-ids) Custom Fireworks model ids
-
-OpenClaw accepts dynamic Fireworks model ids too. Use the exact model or router id shown by Fireworks and prefix it with `fireworks/`.
-
-```
-{
-  agents: {
-    defaults: {
-      model: {
-        primary: \"fireworks/accounts/fireworks/routers/kimi-k2p5-turbo\",
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          model: { primary: "anthropic/claude-opus-4-7" },
+          agentRuntime: { id: "claude-cli" },
+        },
       },
-    },
-  },
-}
-```
+    }
+    ```
 
-How model id prefixing works
+    Legacy `claude-cli/claude-opus-4-7` model refs still work for
+    compatibility, but new config should keep provider/model selection as
+    `anthropic/*` and put the execution backend in `agentRuntime.id`.
 
-Every Fireworks model ref in OpenClaw starts with `fireworks/` followed by the exact id or router path from the Fireworks platform. For example:
+    <Tip>
+      If you want the clearest billing path, use an Anthropic API key instead. OpenClaw also supports subscription-style options from [OpenAI Codex](/providers/openai), [Qwen Cloud](/providers/qwen), [MiniMax](/providers/minimax), and [Z.AI / GLM](/providers/glm).
+    </Tip>
+  </Tab>
+</Tabs>
 
-- Router model: `fireworks/accounts/fireworks/routers/kimi-k2p5-turbo`
-- Direct model: `fireworks/accounts/fireworks/models/<model-name>`
+## Thinking defaults (Claude 4.6)
 
-OpenClaw strips the `fireworks/` prefix when building the API request and sends the remaining path to the Fireworks endpoint.
+Claude 4.6 models default to `adaptive` thinking in OpenClaw when no explicit thinking level is set.
 
-Environment note
+Override per-message with `/think:<level>` or in model params:
 
-If the Gateway runs outside your interactive shell, make sure `FIREWORKS_API_KEY` is available to that process too.
-
-A key sitting only in `~/.profile` will not help a launchd/systemd daemon unless that environment is imported there as well. Set the key in `~/.openclaw/.env` or via `env.shellEnv` to ensure the gateway process can read it.
-
-## [​](https://docs.openclaw.ai/providers/fireworks\\#related) Related
-
-[**Model selection** \\\n\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)
-
-[**Troubleshooting** \\\n\\nGeneral troubleshooting and FAQ.](https://docs.openclaw.ai/help/troubleshooting)
-
-[Fal](https://docs.openclaw.ai/providers/fal) [GitHub Copilot](https://docs.openclaw.ai/providers/github-copilot)
-
-Ctrl+I
-
----
-
-## Qwen - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/qwen
-
-[Skip to main content](https://docs.openclaw.ai/providers/qwen#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-Qwen
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Getting started](https://docs.openclaw.ai/providers/qwen#getting-started)
-- [Plan types and endpoints](https://docs.openclaw.ai/providers/qwen#plan-types-and-endpoints)
-- [Built-in catalog](https://docs.openclaw.ai/providers/qwen#built-in-catalog)
-- [Thinking Controls](https://docs.openclaw.ai/providers/qwen#thinking-controls)
-- [Multimodal add-ons](https://docs.openclaw.ai/providers/qwen#multimodal-add-ons)
-- [Advanced configuration](https://docs.openclaw.ai/providers/qwen#advanced-configuration)
-- [Related](https://docs.openclaw.ai/providers/qwen#related)
-
-**Qwen OAuth has been removed.** The free-tier OAuth integration
-(`qwen-portal`) that used `portal.qwen.ai` endpoints is no longer available.
-See [Issue #49557](https://github.com/openclaw/openclaw/issues/49557) for
-background.
-
-OpenClaw now treats Qwen as a first-class bundled provider with canonical id
-`qwen`. The bundled provider targets the Qwen Cloud / Alibaba DashScope and
-Coding Plan endpoints and keeps legacy `modelstudio` ids working as a
-compatibility alias.
-
-- Provider: `qwen`
-- Preferred env var: `QWEN_API_KEY`
-- Also accepted for compatibility: `MODELSTUDIO_API_KEY`, `DASHSCOPE_API_KEY`
-- API style: OpenAI-compatible
-
-If you want `qwen3.6-plus`, prefer the **Standard (pay-as-you-go)** endpoint.
-Coding Plan support can lag behind the public catalog.
-
-## [​](https://docs.openclaw.ai/providers/qwen\\#getting-started)  Getting started
-
-Choose your plan type and follow the setup steps.
-
-- Coding Plan (subscription)
-
-- Standard (pay-as-you-go)
-
-
-**Best for:** subscription-based access through the Qwen Coding Plan.
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/qwen#)
-
-Get your API key
-
-Create or copy an API key from [home.qwencloud.com/api-keys](https://home.qwencloud.com/api-keys).
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/qwen#)
-
-Run onboarding
-
-For the **Global** endpoint:
-
-```
-openclaw onboard --auth-choice qwen-api-key
-```
-
-For the **China** endpoint:
-
-```
-openclaw onboard --auth-choice qwen-api-key-cn
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/qwen#)
-
-Set a default model
-
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   agents: {
     defaults: {
-      model: { primary: \"qwen/qwen3.5-plus\" },
-    },
-  },
-}
-```
-
-4
-
-[Navigate to header](https://docs.openclaw.ai/providers/qwen#)
-
-Verify the model is available
-
-```
-openclaw models list --provider qwen
-```
-
-Legacy `modelstudio-*` auth-choice ids and `modelstudio/...` model refs still
-work as compatibility aliases, but new setup flows should prefer the canonical
-`qwen-*` auth-choice ids and `qwen/...` model refs. If you define an exact
-custom `models.providers.modelstudio` entry with another `api` value, that
-custom provider owns `modelstudio/...` refs instead of the Qwen compatibility
-alias.
-
-**Best for:** pay-as-you-go access through the Standard Model Studio endpoint, including models like `qwen3.6-plus` that may not be available on the Coding Plan.
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/qwen#)
-
-Get your API key
-
-Create or copy an API key from [home.qwencloud.com/api-keys](https://home.qwencloud.com/api-keys).
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/qwen#)
-
-Run onboarding
-
-For the **Global** endpoint:
-
-```
-openclaw onboard --auth-choice qwen-standard-api-key
-```
-
-For the **China** endpoint:
-
-```
-openclaw onboard --auth-choice qwen-standard-api-key-cn
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/qwen#)
-
-Set a default model
-
-```
-{
-  agents: {
-    defaults: {
-      model: { primary: \"qwen/qwen3.5-plus\" },
-    },
-  },
-}
-```
-
-4
-
-[Navigate to header](https://docs.openclaw.ai/providers/qwen#)
-
-Verify the model is available
-
-```
-openclaw models list --provider qwen
-```
-
-Legacy `modelstudio-*` auth-choice ids and `modelstudio/...` model refs still
-work as compatibility aliases, but new setup flows should prefer the canonical
-`qwen-*` auth-choice ids and `qwen/...` model refs. If you define an exact
-custom `models.providers.modelstudio` entry with another `api` value, that
-custom provider owns `modelstudio/...` refs instead of the Qwen compatibility
-alias.
-
-## [​](https://docs.openclaw.ai/providers/qwen\\#plan-types-and-endpoints)  Plan types and endpoints
-
-| Plan | Region | Auth choice | Endpoint |
-| --- | --- | --- | --- |
-| Standard (pay-as-you-go) | China | `qwen-standard-api-key-cn` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Standard (pay-as-you-go) | Global | `qwen-standard-api-key` | `dashscope-intl.aliyuncs.com/compatible-mode/v1` |
-| Coding Plan (subscription) | China | `qwen-api-key-cn` | `coding.dashscope.aliyuncs.com/v1` |
-| Coding Plan (subscription) | Global | `qwen-api-key` | `coding-intl.dashscope.aliyuncs.com/v1` |
-
-The provider auto-selects the endpoint based on your auth choice. Canonical
-choices use the `qwen-*` family; `modelstudio-*` remains compatibility-only.
-You can override with a custom `baseUrl` in config.
-
-**Manage keys:** [home.qwencloud.com/api-keys](https://home.qwencloud.com/api-keys) \\|\n**Docs:** [docs.qwencloud.com](https://docs.qwencloud.com/developer-guides/getting-started/introduction)
-
-## [​](https://docs.openclaw.ai/providers/qwen\\#built-in-catalog)  Built-in catalog
-
-OpenClaw currently ships this bundled Qwen catalog. The configured catalog is
-endpoint-aware: Coding Plan configs omit models that are only known to work on
-the Standard endpoint.
-
-| Model ref | Input | Context | Notes |
-| --- | --- | --- | --- |
-| `qwen/qwen3.5-plus` | text, image | 1,000,000 | Default model |
-| `qwen/qwen3.6-plus` | text, image | 1,000,000 | Prefer Standard endpoints when you need this model |
-| `qwen/qwen3-max-2026-01-23` | text | 262,144 | Qwen Max line |
-| `qwen/qwen3-coder-next` | text | 262,144 | Coding |
-| `qwen/qwen3-coder-plus` | text | 1,000,000 | Coding |
-| `qwen/MiniMax-M2.5` | text | 1,000,000 | Reasoning enabled |
-| `qwen/glm-5` | text | 202,752 | GLM |
-| `qwen/glm-4.7` | text | 202,752 | GLM |
-| `qwen/kimi-k2.5` | text, image | 262,144 | Moonshot AI via Alibaba |
-
-Availability can still vary by endpoint and billing plan even when a model is
-present in the bundled catalog.
-
-## [​](https://docs.openclaw.ai/providers/qwen\\#thinking-controls)  Thinking Controls
-
-For reasoning-enabled Qwen Cloud models, the bundled provider maps OpenClaw
-thinking levels to DashScope’s top-level `enable_thinking` request flag. Disabled
-thinking sends `enable_thinking: false`; other thinking levels send
-`enable_thinking: true`.
-
-## [​](https://docs.openclaw.ai/providers/qwen\\#multimodal-add-ons)  Multimodal add-ons
-
-The `qwen` plugin also exposes multimodal capabilities on the **Standard**
-DashScope endpoints (not the Coding Plan endpoints):
-
-- **Video understanding** via `qwen-vl-max-latest`
-- **Wan video generation** via `wan2.6-t2v` (default), `wan2.6-i2v`, `wan2.6-r2v`, `wan2.6-r2v-flash`, `wan2.7-r2v`
-
-To use Qwen as the default video provider:
-
-```
-{
-  agents: {
-    defaults: {
-      videoGenerationModel: { primary: \"qwen/wan2.6-t2v\" },
-    },
-  },
-}
-```
-
-See [Video Generation](https://docs.openclaw.ai/tools/video-generation) for shared tool parameters, provider selection, and failover behavior.
-
-## [​](https://docs.openclaw.ai/providers/qwen\\#advanced-configuration)  Advanced configuration
-
-Image and video understanding
-
-The bundled Qwen plugin registers media understanding for images and video
-on the **Standard** DashScope endpoints (not the Coding Plan endpoints).
-
-| Property | Value |
-| --- | --- |
-| Model | `qwen-vl-max-latest` |
-| Supported input | Images, video |
-
-Media understanding is auto-resolved from the configured Qwen auth — no
-additional config is needed. Ensure you are using a Standard (pay-as-you-go)
-endpoint for media understanding support.
-
-Qwen 3.6 Plus availability
-
-`qwen3.6-plus` is available on the Standard (pay-as-you-go) Model Studio
-endpoints:
-
-- China: `dashscope.aliyuncs.com/compatible-mode/v1`
-- Global: `dashscope-intl.aliyuncs.com/compatible-mode/v1`
-
-If the Coding Plan endpoints return an “unsupported model” error for
-`qwen3.6-plus`, switch to Standard (pay-as-you-go) instead of the Coding Plan
-endpoint/key pair.
-
-Capability plan
-
-The `qwen` plugin is being positioned as the vendor home for the full Qwen
-Cloud surface, not just coding/text models.
-
-- **Text/chat models:** bundled now
-- **Tool calling, structured output, thinking:** inherited from the OpenAI-compatible transport
-- **Image generation:** planned at the provider-plugin layer
-- **Image/video understanding:** bundled now on the Standard endpoint
-- **Speech/audio:** planned at the provider-plugin layer
-- **Memory embeddings/reranking:** planned through the embedding adapter surface
-- **Video generation:** bundled now through the shared video-generation capability
-
-Video generation details
-
-For video generation, OpenClaw maps the configured Qwen region to the matching
-DashScope AIGC host before submitting the job:
-
-- Global/Intl: `https://dashscope-intl.aliyuncs.com`
-- China: `https://dashscope.aliyuncs.com`
-
-That means a normal `models.providers.qwen.baseUrl` pointing at either the
-Coding Plan or Standard Qwen hosts still keeps video generation on the correct
-regional DashScope video endpoint.Current bundled Qwen video-generation limits:
-
-- Up to **1** output video per request
-- Up to **1** input image
-- Up to **4** input videos
-- Up to **10 seconds** duration
-- Supports `size`, `aspectRatio`, `resolution`, `audio`, and `watermark`
-- Reference image/video mode currently requires **remote http(s) URLs**. Local
-file paths are rejected up front because the DashScope video endpoint does not
-accept uploaded local buffers for those references.
-
-Streaming usage compatibility
-
-Native Model Studio endpoints advertise streaming usage compatibility on the
-shared `openai-completions` transport. OpenClaw keys that off endpoint
-capabilities now, so DashScope-compatible custom provider ids targeting the
-same native hosts inherit the same streaming-usage behavior instead of
-requiring the built-in `qwen` provider id specifically.Native-streaming usage compatibility applies to both the Coding Plan hosts and
-the Standard DashScope-compatible hosts:
-
-- `https://coding.dashscope.aliyuncs.com/v1`
-- `https://coding-intl.dashscope.aliyuncs.com/v1`
-- `https://dashscope.aliyuncs.com/compatible-mode/v1`
-- `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`
-
-Multimodal endpoint regions
-
-Multimodal surfaces (video understanding and Wan video generation) use the
-**Standard** DashScope endpoints, not the Coding Plan endpoints:
-
-- Global/Intl Standard base URL: `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`
-- China Standard base URL: `https://dashscope.aliyuncs.com/compatible-mode/v1`
-
-Environment and daemon setup
-
-If the Gateway runs as a daemon (launchd/systemd), make sure `QWEN_API_KEY` is
-available to that process (for example, in `~/.openclaw/.env` or via
-`env.shellEnv`).
-
-## [​](https://docs.openclaw.ai/providers/qwen\\#related)  Related
-
-[**Model selection** \\\\\n\\\\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)
-
-[**Video generation** \\\\\n\\\\\nShared video tool parameters and provider selection.](https://docs.openclaw.ai/tools/video-generation)
-
-[**Alibaba (ModelStudio)** \\\\\n\\\\\nLegacy ModelStudio provider and migration notes.](https://docs.openclaw.ai/providers/alibaba)
-
-[**Troubleshooting** \\\\\n\\\\\nGeneral troubleshooting and FAQ.](https://docs.openclaw.ai/help/troubleshooting)
-
-[Qianfan](https://docs.openclaw.ai/providers/qianfan) [Runway](https://docs.openclaw.ai/providers/runway)
-
-Ctrl+I
-
----
-
-## Google (Gemini) - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/google
-
-[Skip to main content](https://docs.openclaw.ai/providers/google#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-Google (Gemini)
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Getting started](https://docs.openclaw.ai/providers/google#getting-started)
-- [Capabilities](https://docs.openclaw.ai/providers/google#capabilities)
-- [Image generation](https://docs.openclaw.ai/providers/google#image-generation)
-- [Video generation](https://docs.openclaw.ai/providers/google#video-generation)
-- [Music generation](https://docs.openclaw.ai/providers/google#music-generation)
-- [Text-to-speech](https://docs.openclaw.ai/providers/google#text-to-speech)
-- [Realtime voice](https://docs.openclaw.ai/providers/google#realtime-voice)
-- [Advanced configuration](https://docs.openclaw.ai/providers/google#advanced-configuration)
-- [Related](https://docs.openclaw.ai/providers/google#related)
-
-The Google plugin provides access to Gemini models through Google AI Studio, plus
-image generation, media understanding (image/audio/video), text-to-speech, and web search via
-Gemini Grounding.
-
-- Provider: `google`
-- Auth: `GEMINI_API_KEY` or `GOOGLE_API_KEY`
-- API: Google Gemini API
-- Runtime option: `agents.defaults.agentRuntime.id: \"google-gemini-cli\"`
-reuses Gemini CLI OAuth while keeping model refs canonical as `google/*`.
-
-## [​](https://docs.openclaw.ai/providers/google\\#getting-started)  Getting started
-
-Choose your preferred auth method and follow the setup steps.
-
-- API key
-
-- Gemini CLI (OAuth)
-
-
-**Best for:** standard Gemini API access through Google AI Studio.
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/google#)
-
-Run onboarding
-
-```
-openclaw onboard --auth-choice gemini-api-key
-```
-
-Or pass the key directly:
-
-```
-openclaw onboard --non-interactive \\\
-  --mode local \\\
-  --auth-choice gemini-api-key \\\
-  --gemini-api-key \"$GEMINI_API_KEY\"
-```
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/google#)
-
-Set a default model
-
-```
-{
-  agents: {
-    defaults: {
-      model: { primary: \"google/gemini-3.1-pro-preview\" },
-    },
-  },
-}
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/google#)
-
-Verify the model is available
-
-```
-openclaw models list --provider google
-```
-
-The environment variables `GEMINI_API_KEY` and `GOOGLE_API_KEY` are both accepted. Use whichever you already have configured.
-
-**Best for:** reusing an existing Gemini CLI login via PKCE OAuth instead of a separate API key.
-
-The `google-gemini-cli` provider is an unofficial integration. Some users
-report account restrictions when using OAuth this way. Use at your own risk.
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/google#)
-
-Install the Gemini CLI
-
-The local `gemini` command must be available on `PATH`.
-
-```
-# Homebrew
-brew install gemini-cli
-
-# or npm
-npm install -g @google/gemini-cli
-```
-
-OpenClaw supports both Homebrew installs and global npm installs, including
-common Windows/npm layouts.
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/google#)
-
-Log in via OAuth
-
-```
-openclaw models auth login --provider google-gemini-cli --set-default
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/google#)
-
-Verify the model is available
-
-```
-openclaw models list --provider google
-```
-
-- Default model: `google/gemini-3.1-pro-preview`
-- Runtime: `google-gemini-cli`
-- Alias: `gemini-cli`
-
-**Environment variables:**
-
-- `OPENCLAW_GEMINI_OAUTH_CLIENT_ID`
-- `OPENCLAW_GEMINI_OAUTH_CLIENT_SECRET`
-
-(Or the `GEMINI_CLI_*` variants.)
-
-If Gemini CLI OAuth requests fail after login, set `GOOGLE_CLOUD_PROJECT` or
-`GOOGLE_CLOUD_PROJECT_ID` on the gateway host and retry.
-
-If login fails before the browser flow starts, make sure the local `gemini`
-command is installed and on `PATH`.
-
-`google-gemini-cli/*` model refs are legacy compatibility aliases. New
-configs should use `google/*` model refs plus the `google-gemini-cli`
-runtime when they want local Gemini CLI execution.
-
-## [​](https://docs.openclaw.ai/providers/google\\#capabilities)  Capabilities
-
-| Capability | Supported |
-| --- | --- |
-| Chat completions | Yes |
-| Image generation | Yes |
-| Music generation | Yes |
-| Text-to-speech | Yes |
-| Realtime voice | Yes (Google Live API) |
-| Image understanding | Yes |
-| Audio transcription | Yes |
-| Video understanding | Yes |
-| Web search (Grounding) | Yes |
-| Thinking/reasoning | Yes (Gemini 2.5+ / Gemini 3+) |
-| Gemma 4 models | Yes |
-
-Gemini 3 models use `thinkingLevel` rather than `thinkingBudget`. OpenClaw maps
-Gemini 3, Gemini 3.1, and `gemini-*-latest` alias reasoning controls to
-`thinkingLevel` so default/low-latency runs do not send disabled
-`thinkingBudget` values.`/think adaptive` keeps Google’s dynamic thinking semantics instead of choosing
-a fixed OpenClaw level. Gemini 3 and Gemini 3.1 omit a fixed `thinkingLevel` so
-Google can choose the level; Gemini 2.5 sends Google’s dynamic sentinel
-`thinkingBudget: -1`.Gemma 4 models (for example `gemma-4-26b-a4b-it`) support thinking mode. OpenClaw
-rewrites `thinkingBudget` to a supported Google `thinkingLevel` for Gemma 4.
-Setting thinking to `off` preserves thinking disabled instead of mapping to
-`MINIMAL`.
-
-## [​](https://docs.openclaw.ai/providers/google\\#image-generation)  Image generation
-
-The bundled `google` image-generation provider defaults to
-`google/gemini-3.1-flash-image-preview`.
-
-- Also supports `google/gemini-3-pro-image-preview`
-- Generate: up to 4 images per request
-- Edit mode: enabled, up to 5 input images
-- Geometry controls: `size`, `aspectRatio`, and `resolution`
-
-To use Google as the default image provider:
-
-```
-{
-  agents: {
-    defaults: {
-      imageGenerationModel: {
-        primary: \"google/gemini-3.1-flash-image-preview\",
-      },
-    },
-  },
-}
-```
-
-See [Image Generation](https://docs.openclaw.ai/tools/image-generation) for shared tool parameters, provider selection, and failover behavior.
-
-## [​](https://docs.openclaw.ai/providers/google\\#video-generation)  Video generation
-
-The bundled `google` plugin also registers video generation through the shared
-`video_generate` tool.
-
-- Default video model: `google/veo-3.1-fast-generate-preview`
-- Modes: text-to-video, image-to-video, and single-video reference flows
-- Supports `aspectRatio`, `resolution`, and `audio`
-- Current duration clamp: **4 to 8 seconds**
-
-To use Google as the default video provider:
-
-```
-{
-  agents: {
-    defaults: {
-      videoGenerationModel: {
-        primary: \"google/veo-3.1-fast-generate-preview\",
-      },
-    },
-  },
-}
-```
-
-See [Video Generation](https://docs.openclaw.ai/tools/video-generation) for shared tool parameters, provider selection, and failover behavior.
-
-## [​](https://docs.openclaw.ai/providers/google\\#music-generation)  Music generation
-
-The bundled `google` plugin also registers music generation through the shared
-`music_generate` tool.
-
-- Default music model: `google/lyria-3-clip-preview`
-- Also supports `google/lyria-3-pro-preview`
-- Prompt controls: `lyrics` and `instrumental`
-- Output format: `mp3` by default, plus `wav` on `google/lyria-3-pro-preview`
-- Reference inputs: up to 10 images
-- Session-backed runs detach through the shared task/status flow, including `action: \"status\"`
-
-To use Google as the default music provider:
-
-```
-{
-  agents: {
-    defaults: {
-      musicGenerationModel: {
-        primary: \"google/lyria-3-clip-preview\",
-      },
-    },
-  },
-}
-```
-
-See [Music Generation](https://docs.openclaw.ai/tools/music-generation) for shared tool parameters, provider selection, and failover behavior.
-
-## [​](https://docs.openclaw.ai/providers/google\\#text-to-speech)  Text-to-speech
-
-The bundled `google` speech provider uses the Gemini API TTS path with
-`gemini-3.1-flash-tts-preview`.
-
-- Default voice: `Kore`
-- Auth: `messages.tts.providers.google.apiKey`, `models.providers.google.apiKey`, `GEMINI_API_KEY`, or `GOOGLE_API_KEY`
-- Output: WAV for regular TTS attachments, Opus for voice-note targets, PCM for Talk/telephony
-- Voice-note output: Google PCM is wrapped as WAV and transcoded to 48 kHz Opus with `ffmpeg`
-
-To use Google as the default TTS provider:
-
-```
-{
-  messages: {
-    tts: {
-      auto: \"always\",
-      provider: \"google\",
-      providers: {
-        google: {
-          model: \"gemini-3.1-flash-tts-preview\",
-          voiceName: \"Kore\",
-          audioProfile: \"Speak professionally with a calm tone.\",
+      models: {
+        "anthropic/claude-opus-4-6": {
+          params: { thinking: "adaptive" },
         },
       },
     },
@@ -1638,265 +299,1464 @@ To use Google as the default TTS provider:
 }
 ```
 
-Gemini API TTS uses natural-language prompting for style control. Set
-`audioProfile` to prepend a reusable style prompt before the spoken text. Set
-`speakerName` when your prompt text refers to a named speaker.Gemini API TTS also accepts expressive square-bracket audio tags in the text,\nsuch as `[whispers]` or `[laughs]`. To keep tags out of the visible chat reply\nwhile sending them to TTS, put them inside a `[[tts:text]]...[[/tts:text]]`\nblock:\n
-```
-Here is the clean reply text.
+<Note>
+  Related Anthropic docs:
 
-[[tts:text]][whispers] Here is the spoken version.[[/tts:text]]
-```
+  * [Adaptive thinking](https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking)
+  * [Extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
+</Note>
 
-A Google Cloud Console API key restricted to the Gemini API is valid for this\nprovider. This is not the separate Cloud Text-to-Speech API path.
+## Prompt caching
 
-## [​](https://docs.openclaw.ai/providers/google\\#realtime-voice)  Realtime voice
+OpenClaw supports Anthropic's prompt caching feature for API-key auth.
 
-The bundled `google` plugin registers a realtime voice provider backed by the\nGemini Live API for backend audio bridges such as Voice Call and Google Meet.
+| Value               | Cache duration | Description                            |
+| ------------------- | -------------- | -------------------------------------- |
+| `"short"` (default) | 5 minutes      | Applied automatically for API-key auth |
+| `"long"`            | 1 hour         | Extended cache                         |
+| `"none"`            | No caching     | Disable prompt caching                 |
 
-| Setting | Config path | Default |
-| --- | --- | --- |
-| Model | `plugins.entries.voice-call.config.realtime.providers.google.model` | `gemini-2.5-flash-native-audio-preview-12-2025` |
-| Voice | `...google.voice` | `Kore` |
-| Temperature | `...google.temperature` | (unset) |
-| VAD start sensitivity | `...google.startSensitivity` | (unset) |
-| VAD end sensitivity | `...google.endSensitivity` | (unset) |
-| Silence duration | `...google.silenceDurationMs` | (unset) |
-| Activity handling | `...google.activityHandling` | Google default, `start-of-activity-interrupts` |
-| Turn coverage | `...google.turnCoverage` | Google default, `only-activity` |
-| Disable auto VAD | `...google.automaticActivityDetectionDisabled` | `false` |
-| API key | `...google.apiKey` | Falls back to `models.providers.google.apiKey`, `GEMINI_API_KEY`, or `GOOGLE_API_KEY` |
-
-Example Voice Call realtime config:\n
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-  plugins: {
-    entries: {
-      \"voice-call\": {
-        enabled: true,
-        config: {
-          realtime: {
-            enabled: true,
-            provider: \"google\",
+  agents: {
+    defaults: {
+      models: {
+        "anthropic/claude-opus-4-6": {
+          params: { cacheRetention: "long" },
+        },
+      },
+    },
+  },
+}
+```
+
+<AccordionGroup>
+  <Accordion title="Per-agent cache overrides">
+    Use model-level params as your baseline, then override specific agents via `agents.list[].params`:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          model: { primary: "anthropic/claude-opus-4-6" },
+          models: {
+            "anthropic/claude-opus-4-6": {
+              params: { cacheRetention: "long" },
+            },
+          },
+        },
+        list: [
+          { id: "research", default: true },
+          { id: "alerts", params: { cacheRetention: "none" } },
+        ],
+      },
+    }
+    ```
+
+    Config merge order:
+
+    1. `agents.defaults.models["provider/model"].params`
+    2. `agents.list[].params` (matching `id`, overrides by key)
+
+    This lets one agent keep a long-lived cache while another agent on the same model disables caching for bursty/low-reuse traffic.
+  </Accordion>
+
+  <Accordion title="Bedrock Claude notes">
+    * Anthropic Claude models on Bedrock (`amazon-bedrock/*anthropic.claude*`) accept `cacheRetention` pass-through when configured.
+    * Non-Anthropic Bedrock models are forced to `cacheRetention: "none"` at runtime.
+    * API-key smart defaults also seed `cacheRetention: "short"` for Claude-on-Bedrock refs when no explicit value is set.
+  </Accordion>
+</AccordionGroup>
+
+## Advanced configuration
+
+<AccordionGroup>
+  <Accordion title="Fast mode">
+    OpenClaw's shared `/fast` toggle supports direct Anthropic traffic (API-key and OAuth to `api.anthropic.com`).
+
+    | Command     | Maps to                         |
+    | ----------- | ------------------------------- |
+    | `/fast on`  | `service_tier: "auto"`          |
+    | `/fast off` | `service_tier: "standard_only"` |
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          models: {
+            "anthropic/claude-sonnet-4-6": {
+              params: { fastMode: true },
+            },
+          },
+        },
+      },
+    }
+    ```
+
+    <Note>
+      * Only injected for direct `api.anthropic.com` requests. Proxy routes leave `service_tier` untouched.
+      * Explicit `serviceTier` or `service_tier` params override `/fast` when both are set.
+      * On accounts without Priority Tier capacity, `service_tier: "auto"` may resolve to `standard`.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Media understanding (image and PDF)">
+    The bundled Anthropic plugin registers image and PDF understanding. OpenClaw
+    auto-resolves media capabilities from the configured Anthropic auth — no
+    additional config is needed.
+
+    | Property        | Value                 |
+    | --------------- | --------------------- |
+    | Default model   | `claude-opus-4-6`     |
+    | Supported input | Images, PDF documents |
+
+    When an image or PDF is attached to a conversation, OpenClaw automatically
+    routes it through the Anthropic media understanding provider.
+  </Accordion>
+
+  <Accordion title="1M context window (beta)">
+    Anthropic's 1M context window is beta-gated. Enable it per model:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          models: {
+            "anthropic/claude-opus-4-6": {
+              params: { context1m: true },
+            },
+          },
+        },
+      },
+    }
+    ```
+
+    OpenClaw maps this to `anthropic-beta: context-1m-2025-08-07` on requests.
+
+    `params.context1m: true` also applies to the Claude CLI backend
+    (`claude-cli/*`) for eligible Opus and Sonnet models, expanding the runtime
+    context window for those CLI sessions to match the direct-API behavior.
+
+    <Warning>
+      Requires long-context access on your Anthropic credential. Legacy token auth (`sk-ant-oat-*`) is rejected for 1M context requests — OpenClaw logs a warning and falls back to the standard context window.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Claude Opus 4.7 1M context">
+    `anthropic/claude-opus-4.7` and its `claude-cli` variant have a 1M context
+    window by default — no `params.context1m: true` needed.
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="401 errors / token suddenly invalid">
+    Anthropic token auth expires and can be revoked. For new setups, use an Anthropic API key instead.
+  </Accordion>
+
+  <Accordion title="No API key found for provider &#x22;anthropic&#x22;">
+    Anthropic auth is **per agent** — new agents do not inherit the main agent's keys. Re-run onboarding for that agent (or configure an API key on the gateway host), then verify with `openclaw models status`.
+  </Accordion>
+
+  <Accordion title="No credentials found for profile &#x22;anthropic:default&#x22;">
+    Run `openclaw models status` to see which auth profile is active. Re-run onboarding, or configure an API key for that profile path.
+  </Accordion>
+
+  <Accordion title="No available auth profile (all in cooldown)">
+    Check `openclaw models status --json` for `auth.unusableProfiles`. Anthropic rate-limit cooldowns can be model-scoped, so a sibling Anthropic model may still be usable. Add another Anthropic profile or wait for cooldown.
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+  More help: [Troubleshooting](/help/troubleshooting) and [FAQ](/help/faq).
+</Note>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Model selection" href="/concepts/model-providers" icon="layers">
+    Choosing providers, model refs, and failover behavior.
+  </Card>
+
+  <Card title="CLI backends" href="/gateway/cli-backends" icon="terminal">
+    Claude CLI backend setup and runtime details.
+  </Card>
+
+  <Card title="Prompt caching" href="/reference/prompt-caching" icon="database">
+    How prompt caching works across providers.
+  </Card>
+
+  <Card title="OAuth and auth" href="/gateway/authentication" icon="key">
+    Auth details and credential reuse rules.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Amazon Bedrock
+
+OpenClaw can use **Amazon Bedrock** models via pi-ai's **Bedrock Converse**
+streaming provider. Bedrock auth uses the **AWS SDK default credential chain**,
+not an API key.
+
+| Property | Value                                                       |
+| -------- | ----------------------------------------------------------- |
+| Provider | `amazon-bedrock`                                            |
+| API      | `bedrock-converse-stream`                                   |
+| Auth     | AWS credentials (env vars, shared config, or instance role) |
+| Region   | `AWS_REGION` or `AWS_DEFAULT_REGION` (default: `us-east-1`) |
+
+## Getting started
+
+Choose your preferred auth method and follow the setup steps.
+
+<Tabs>
+  <Tab title="Access keys / env vars">
+    **Best for:** developer machines, CI, or hosts where you manage AWS credentials directly.
+
+    <Steps>
+      <Step title="Set AWS credentials on the gateway host">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        export AWS_ACCESS_KEY_ID="AKIA..."
+        export AWS_SECRET_ACCESS_KEY="..."
+        export AWS_REGION="us-east-1"
+        # Optional:
+        export AWS_SESSION_TOKEN="..."
+        export AWS_PROFILE="your-profile"
+        # Optional (Bedrock API key/bearer token):
+        export AWS_BEARER_TOKEN_BEDROCK="..."
+        ```
+      </Step>
+
+      <Step title="Add a Bedrock provider and model to your config">
+        No `apiKey` is required. Configure the provider with `auth: "aws-sdk"`:
+
+        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        {
+          models: {
             providers: {
-              google: {
-                model: \"gemini-2.5-flash-native-audio-preview-12-2025\",
-                voice: \"Kore\",
-                activityHandling: \"start-of-activity-interrupts\",
-                turnCoverage: \"only-activity\",
+              "amazon-bedrock": {
+                baseUrl: "https://bedrock-runtime.us-east-1.amazonaws.com",
+                api: "bedrock-converse-stream",
+                auth: "aws-sdk",
+                models: [
+                  {
+                    id: "us.anthropic.claude-opus-4-6-v1:0",
+                    name: "Claude Opus 4.6 (Bedrock)",
+                    reasoning: true,
+                    input: ["text", "image"],
+                    cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+                    contextWindow: 200000,
+                    maxTokens: 8192,
+                  },
+                ],
+              },
+            },
+          },
+          agents: {
+            defaults: {
+              model: { primary: "amazon-bedrock/us.anthropic.claude-opus-4-6-v1:0" },
+            },
+          },
+        }
+        ```
+      </Step>
+
+      <Step title="Verify models are available">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw models list
+        ```
+      </Step>
+    </Steps>
+
+    <Tip>
+      With env-marker auth (`AWS_ACCESS_KEY_ID`, `AWS_PROFILE`, or `AWS_BEARER_TOKEN_BEDROCK`), OpenClaw auto-enables the implicit Bedrock provider for model discovery without extra config.
+    </Tip>
+  </Tab>
+
+  <Tab title="EC2 instance roles (IMDS)">
+    **Best for:** EC2 instances with an IAM role attached, using the instance metadata service for authentication.
+
+    <Steps>
+      <Step title="Enable discovery explicitly">
+        When using IMDS, OpenClaw cannot detect AWS auth from env markers alone, so you must opt in:
+
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw config set plugins.entries.amazon-bedrock.config.discovery.enabled true
+        openclaw config set plugins.entries.amazon-bedrock.config.discovery.region us-east-1
+        ```
+      </Step>
+
+      <Step title="Optionally add an env marker for auto mode">
+        If you also want the env-marker auto-detection path to work (for example, for `openclaw status` surfaces):
+
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        export AWS_PROFILE=default
+        export AWS_REGION=us-east-1
+        ```
+
+        You do **not** need a fake API key.
+      </Step>
+
+      <Step title="Verify models are discovered">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw models list
+        ```
+      </Step>
+    </Steps>
+
+    <Warning>
+      The IAM role attached to your EC2 instance must have the following permissions:
+
+      * `bedrock:InvokeModel`
+      * `bedrock:InvokeModelWithResponseStream`
+      * `bedrock:ListFoundationModels` (for automatic discovery)
+      * `bedrock:ListInferenceProfiles` (for inference profile discovery)
+
+      Or attach the managed policy `AmazonBedrockFullAccess`.
+    </Warning>
+
+    <Note>
+      You only need `AWS_PROFILE=default` if you specifically want an env marker for auto mode or status surfaces. The actual Bedrock runtime auth path uses the AWS SDK default chain, so IMDS instance-role auth works even without env markers.
+    </Note>
+  </Tab>
+</Tabs>
+
+## Automatic model discovery
+
+OpenClaw can automatically discover Bedrock models that support **streaming**
+and **text output**. Discovery uses `bedrock:ListFoundationModels` and
+`bedrock:ListInferenceProfiles`, and results are cached (default: 1 hour).
+
+How the implicit provider is enabled:
+
+* If `plugins.entries.amazon-bedrock.config.discovery.enabled` is `true`,
+  OpenClaw will try discovery even when no AWS env marker is present.
+* If `plugins.entries.amazon-bedrock.config.discovery.enabled` is unset,
+  OpenClaw only auto-adds the
+  implicit Bedrock provider when it sees one of these AWS auth markers:
+  `AWS_BEARER_TOKEN_BEDROCK`, `AWS_ACCESS_KEY_ID` +
+  `AWS_SECRET_ACCESS_KEY`, or `AWS_PROFILE`.
+* The actual Bedrock runtime auth path still uses the AWS SDK default chain, so
+  shared config, SSO, and IMDS instance-role auth can work even when discovery
+  needed `enabled: true` to opt in.
+
+<Note>
+  For explicit `models.providers["amazon-bedrock"]` entries, OpenClaw can still resolve Bedrock env-marker auth early from AWS env markers such as `AWS_BEARER_TOKEN_BEDROCK` without forcing full runtime auth loading. The actual model-call auth path still uses the AWS SDK default chain.
+</Note>
+
+<AccordionGroup>
+  <Accordion title="Discovery config options">
+    Config options live under `plugins.entries.amazon-bedrock.config.discovery`:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      plugins: {
+        entries: {
+          "amazon-bedrock": {
+            config: {
+              discovery: {
+                enabled: true,
+                region: "us-east-1",
+                providerFilter: ["anthropic", "amazon"],
+                refreshInterval: 3600,
+                defaultContextWindow: 32000,
+                defaultMaxTokens: 4096,
               },
             },
           },
         },
-      },\n    },\n  },\n}
+      },
+    }
+    ```
+
+    | Option                 | Default                                           | Description                                                                                                                               |
+    | ---------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+    | `enabled`              | auto                                              | In auto mode, OpenClaw only enables the implicit Bedrock provider when it sees a supported AWS env marker. Set `true` to force discovery. |
+    | `region`               | `AWS_REGION` / `AWS_DEFAULT_REGION` / `us-east-1` | AWS region used for discovery API calls.                                                                                                  |
+    | `providerFilter`       | (all)                                             | Matches Bedrock provider names (for example `anthropic`, `amazon`).                                                                       |
+    | `refreshInterval`      | `3600`                                            | Cache duration in seconds. Set to `0` to disable caching.                                                                                 |
+    | `defaultContextWindow` | `32000`                                           | Context window used for discovered models (override if you know your model limits).                                                       |
+    | `defaultMaxTokens`     | `4096`                                            | Max output tokens used for discovered models (override if you know your model limits).                                                    |
+  </Accordion>
+</AccordionGroup>
+
+## Quick setup (AWS path)
+
+This walkthrough creates an IAM role, attaches Bedrock permissions, associates
+the instance profile, and enables OpenClaw discovery on the EC2 host.
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+# 1. Create IAM role and instance profile
+aws iam create-role --role-name EC2-Bedrock-Access \
+  --assume-role-policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Allow",
+      "Principal": {"Service": "ec2.amazonaws.com"},
+      "Action": "sts:AssumeRole"
+    }]
+  }'
+
+aws iam attach-role-policy --role-name EC2-Bedrock-Access \
+  --policy-arn arn:aws:iam::aws:policy/AmazonBedrockFullAccess
+
+aws iam create-instance-profile --instance-profile-name EC2-Bedrock-Access
+aws iam add-role-to-instance-profile \
+  --instance-profile-name EC2-Bedrock-Access \
+  --role-name EC2-Bedrock-Access
+
+# 2. Attach to your EC2 instance
+aws ec2 associate-iam-instance-profile \
+  --instance-id i-xxxxx \
+  --iam-instance-profile Name=EC2-Bedrock-Access
+
+# 3. On the EC2 instance, enable discovery explicitly
+openclaw config set plugins.entries.amazon-bedrock.config.discovery.enabled true
+openclaw config set plugins.entries.amazon-bedrock.config.discovery.region us-east-1
+
+# 4. Optional: add an env marker if you want auto mode without explicit enable
+echo 'export AWS_PROFILE=default' >> ~/.bashrc
+echo 'export AWS_REGION=us-east-1' >> ~/.bashrc
+source ~/.bashrc
+
+# 5. Verify models are discovered
+openclaw models list
 ```
 
-Google Live API uses bidirectional audio and function calling over a WebSocket.\nOpenClaw adapts telephony/Meet bridge audio to Gemini’s PCM Live API stream and\nkeeps tool calls on the shared realtime voice contract. Leave `temperature`\nunset unless you need sampling changes; OpenClaw omits non-positive values\nbecause Google Live can return transcripts without audio for `temperature: 0`.\nGemini API transcription is enabled without `languageCodes`; the current Google\nSDK rejects language-code hints on this API path.\n
-Control UI Talk supports Google Live browser sessions with constrained one-use\ntokens. Backend-only realtime voice providers can also run through the generic\nGateway relay transport, which keeps provider credentials on the Gateway.\n
-For maintainer live verification, run\n`OPENAI_API_KEY=... GEMINI_API_KEY=... node --import tsx scripts/dev/realtime-talk-live-smoke.ts`.\nThe Google leg mints the same constrained Live API token shape used by Control\nUI Talk, opens the browser WebSocket endpoint, sends the initial setup payload,\nand waits for `setupComplete`.
+## Advanced configuration
 
-## [​](https://docs.openclaw.ai/providers/google\\#advanced-configuration)  Advanced configuration
+<AccordionGroup>
+  <Accordion title="Inference profiles">
+    OpenClaw discovers **regional and global inference profiles** alongside
+    foundation models. When a profile maps to a known foundation model, the
+    profile inherits that model's capabilities (context window, max tokens,
+    reasoning, vision) and the correct Bedrock request region is injected
+    automatically. This means cross-region Claude profiles work without manual
+    provider overrides.
 
-Direct Gemini cache reuse
+    Inference profile IDs look like `us.anthropic.claude-opus-4-6-v1:0` (regional)
+    or `anthropic.claude-opus-4-6-v1:0` (global). If the backing model is already
+    in the discovery results, the profile inherits its full capability set;
+    otherwise safe defaults apply.
 
-For direct Gemini API runs (`api: \"google-generative-ai\"`), OpenClaw\npasses a configured `cachedContent` handle through to Gemini requests.\n
-- Configure per-model or global params with either\n`cachedContent` or legacy `cached_content`\n- If both are present, `cachedContent` wins\n- Example value: `cachedContents/prebuilt-context`\n- Gemini cache-hit usage is normalized into OpenClaw `cacheRead` from\nupstream `cachedContentTokenCount`\n
+    No extra configuration is needed. As long as discovery is enabled and the IAM
+    principal has `bedrock:ListInferenceProfiles`, profiles appear alongside
+    foundation models in `openclaw models list`.
+  </Accordion>
+
+  <Accordion title="Claude Opus 4.7 temperature">
+    Bedrock rejects the `temperature` parameter for Claude Opus 4.7. OpenClaw
+    omits `temperature` automatically for any Opus 4.7 Bedrock ref, including
+    foundation model ids, named inference profiles, application inference
+    profiles whose underlying model resolves to Opus 4.7 via
+    `bedrock:GetInferenceProfile`, and dotted `opus-4.7` variants with
+    optional region prefixes (`us.`, `eu.`, `ap.`, `apac.`, `au.`, `jp.`,
+    `global.`). No config knob is required, and the omission applies to both
+    the request options object and the `inferenceConfig` payload field.
+  </Accordion>
+
+  <Accordion title="Guardrails">
+    You can apply [Amazon Bedrock Guardrails](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html)
+    to all Bedrock model invocations by adding a `guardrail` object to the
+    `amazon-bedrock` plugin config. Guardrails let you enforce content filtering,
+    topic denial, word filters, sensitive information filters, and contextual
+    grounding checks.
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      plugins: {
+        entries: {
+          "amazon-bedrock": {
+            config: {
+              guardrail: {
+                guardrailIdentifier: "abc123", // guardrail ID or full ARN
+                guardrailVersion: "1", // version number or "DRAFT"
+                streamProcessingMode: "sync", // optional: "sync" or "async"
+                trace: "enabled", // optional: "enabled", "disabled", or "enabled_full"
+              },
+            },
+          },
+        },
+      },
+    }
+    ```
+
+    | Option                 | Required | Description                                                                                                |
+    | ---------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+    | `guardrailIdentifier`  | Yes      | Guardrail ID (e.g. `abc123`) or full ARN (e.g. `arn:aws:bedrock:us-east-1:123456789012:guardrail/abc123`). |
+    | `guardrailVersion`     | Yes      | Published version number, or `"DRAFT"` for the working draft.                                              |
+    | `streamProcessingMode` | No       | `"sync"` or `"async"` for guardrail evaluation during streaming. If omitted, Bedrock uses its default.     |
+    | `trace`                | No       | `"enabled"` or `"enabled_full"` for debugging; omit or set `"disabled"` for production.                    |
+
+    <Warning>
+      The IAM principal used by the gateway must have the `bedrock:ApplyGuardrail` permission in addition to the standard invoke permissions.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Embeddings for memory search">
+    Bedrock can also serve as the embedding provider for
+    [memory search](/concepts/memory-search). This is configured separately from the
+    inference provider -- set `agents.defaults.memorySearch.provider` to `"bedrock"`:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          memorySearch: {
+            provider: "bedrock",
+            model: "amazon.titan-embed-text-v2:0", // default
+          },
+        },
+      },
+    }
+    ```
+
+    Bedrock embeddings use the same AWS SDK credential chain as inference (instance
+    roles, SSO, access keys, shared config, and web identity). No API key is
+    needed. When `provider` is `"auto"`, Bedrock is auto-detected if that
+    credential chain resolves successfully.
+
+    Supported embedding models include Amazon Titan Embed (v1, v2), Amazon Nova
+    Embed, Cohere Embed (v3, v4), and TwelveLabs Marengo. See
+    [Memory configuration reference -- Bedrock](/reference/memory-config#bedrock-embedding-config)
+    for the full model list and dimension options.
+  </Accordion>
+
+  <Accordion title="Notes and caveats">
+    * Bedrock requires **model access** enabled in your AWS account/region.
+    * Automatic discovery needs the `bedrock:ListFoundationModels` and
+      `bedrock:ListInferenceProfiles` permissions.
+    * If you rely on auto mode, set one of the supported AWS auth env markers on the
+      gateway host. If you prefer IMDS/shared-config auth without env markers, set
+      `plugins.entries.amazon-bedrock.config.discovery.enabled: true`.
+    * OpenClaw surfaces the credential source in this order: `AWS_BEARER_TOKEN_BEDROCK`,
+      then `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`, then `AWS_PROFILE`, then the
+      default AWS SDK chain.
+    * Reasoning support depends on the model; check the Bedrock model card for
+      current capabilities.
+    * If you prefer a managed key flow, you can also place an OpenAI-compatible
+      proxy in front of Bedrock and configure it as an OpenAI provider instead.
+  </Accordion>
+</AccordionGroup>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Model selection" href="/concepts/model-providers" icon="layers">
+    Choosing providers, model refs, and failover behavior.
+  </Card>
+
+  <Card title="Memory search" href="/concepts/memory-search" icon="magnifying-glass">
+    Bedrock embeddings for memory search configuration.
+  </Card>
+
+  <Card title="Memory config reference" href="/reference/memory-config#bedrock-embedding-config" icon="database">
+    Full Bedrock embedding model list and dimension options.
+  </Card>
+
+  <Card title="Troubleshooting" href="/help/troubleshooting" icon="wrench">
+    General troubleshooting and FAQ.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Cerebras
+
+[Cerebras](https://www.cerebras.ai) provides high-speed OpenAI-compatible inference on custom inference hardware. OpenClaw includes a bundled Cerebras provider plugin with a static four-model catalog.
+
+| Property        | Value                                    |
+| --------------- | ---------------------------------------- |
+| Provider id     | `cerebras`                               |
+| Plugin          | bundled, `enabledByDefault: true`        |
+| Auth env var    | `CEREBRAS_API_KEY`                       |
+| Onboarding flag | `--auth-choice cerebras-api-key`         |
+| Direct CLI flag | `--cerebras-api-key <key>`               |
+| API             | OpenAI-compatible (`openai-completions`) |
+| Base URL        | `https://api.cerebras.ai/v1`             |
+| Default model   | `cerebras/zai-glm-4.7`                   |
+
+## Getting started
+
+<Steps>
+  <Step title="Get an API key">
+    Create an API key in the [Cerebras Cloud Console](https://cloud.cerebras.ai).
+  </Step>
+
+  <Step title="Run onboarding">
+    <CodeGroup>
+      ```bash Onboarding theme={"theme":{"light":"min-light","dark":"min-dark"}}
+      openclaw onboard --auth-choice cerebras-api-key
+      ```
+
+      ```bash Direct flag theme={"theme":{"light":"min-light","dark":"min-dark"}}
+      openclaw onboard --non-interactive \
+        --auth-choice cerebras-api-key \
+        --cerebras-api-key "$CEREBRAS_API_KEY"
+      ```
+
+      ```bash Env only theme={"theme":{"light":"min-light","dark":"min-dark"}}
+      export CEREBRAS_API_KEY=csk-...
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Verify models are available">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw models list --provider cerebras
+    ```
+
+    The list should include all four bundled models. If `CEREBRAS_API_KEY` is unresolved, `openclaw models status --json` reports the missing credential under `auth.unusableProfiles`.
+  </Step>
+</Steps>
+
+## Non-interactive setup
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw onboard --non-interactive \
+  --mode local \
+  --auth-choice cerebras-api-key \
+  --cerebras-api-key "$CEREBRAS_API_KEY"
 ```
+
+## Built-in catalog
+
+OpenClaw ships a static Cerebras catalog that mirrors the public OpenAI-compatible endpoint. All four models share a 128k context and 8,192 max-output tokens.
+
+| Model ref                                 | Name                 | Reasoning | Notes                                  |
+| ----------------------------------------- | -------------------- | --------- | -------------------------------------- |
+| `cerebras/zai-glm-4.7`                    | Z.ai GLM 4.7         | yes       | Default model; preview reasoning model |
+| `cerebras/gpt-oss-120b`                   | GPT OSS 120B         | yes       | Production reasoning model             |
+| `cerebras/qwen-3-235b-a22b-instruct-2507` | Qwen 3 235B Instruct | no        | Preview non-reasoning model            |
+| `cerebras/llama3.1-8b`                    | Llama 3.1 8B         | no        | Production speed-focused model         |
+
+<Warning>
+  Cerebras marks `zai-glm-4.7` and `qwen-3-235b-a22b-instruct-2507` as preview models, and `llama3.1-8b` plus `qwen-3-235b-a22b-instruct-2507` are documented for deprecation on May 27, 2026. Check Cerebras' supported-models page before relying on them for production workloads.
+</Warning>
+
+## Manual config
+
+The bundled plugin usually means you only need the API key. Use explicit `models.providers.cerebras` config when you want to override model metadata or run in `mode: "merge"` against the static catalog:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  env: { CEREBRAS_API_KEY: "csk-..." },
+  agents: {
+    defaults: {
+      model: { primary: "cerebras/zai-glm-4.7" },
+    },
+  },
+  models: {
+    mode: "merge",
+    providers: {
+      cerebras: {
+        baseUrl: "https://api.cerebras.ai/v1",
+        apiKey: "${CEREBRAS_API_KEY}",
+        api: "openai-completions",
+        models: [
+          { id: "zai-glm-4.7", name: "Z.ai GLM 4.7" },
+          { id: "gpt-oss-120b", name: "GPT OSS 120B" },
+        ],
+      },
+    },
+  },
+}
+```
+
+<Note>
+  If the Gateway runs as a daemon (launchd, systemd, Docker), make sure `CEREBRAS_API_KEY` is available to that process — for example in `~/.openclaw/.env` or through `env.shellEnv`. A key sitting only in `~/.profile` will not help a managed service unless the env is imported separately.
+</Note>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Model providers" href="/concepts/model-providers" icon="layers">
+    Choosing providers, model refs, and failover behavior.
+  </Card>
+
+  <Card title="Thinking modes" href="/tools/thinking" icon="brain">
+    Reasoning effort levels for the two reasoning-capable Cerebras models.
+  </Card>
+
+  <Card title="Configuration reference" href="/gateway/config-agents#agent-defaults" icon="gear">
+    Agent defaults and model configuration.
+  </Card>
+
+  <Card title="Models FAQ" href="/help/faq-models" icon="circle-question">
+    Auth profiles, switching models, and resolving "no profile" errors.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# DeepSeek
+
+[DeepSeek](https://www.deepseek.com) provides powerful AI models with an OpenAI-compatible API.
+
+| Property | Value                      |
+| -------- | -------------------------- |
+| Provider | `deepseek`                 |
+| Auth     | `DEEPSEEK_API_KEY`         |
+| API      | OpenAI-compatible          |
+| Base URL | `https://api.deepseek.com` |
+
+## Getting started
+
+<Steps>
+  <Step title="Get your API key">
+    Create an API key at [platform.deepseek.com](https://platform.deepseek.com/api_keys).
+  </Step>
+
+  <Step title="Run onboarding">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw onboard --auth-choice deepseek-api-key
+    ```
+
+    This will prompt for your API key and set `deepseek/deepseek-v4-flash` as the default model.
+  </Step>
+
+  <Step title="Verify models are available">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw models list --provider deepseek
+    ```
+
+    To inspect the bundled static catalog without requiring a running Gateway,
+    use:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw models list --all --provider deepseek
+    ```
+  </Step>
+</Steps>
+
+<AccordionGroup>
+  <Accordion title="Non-interactive setup">
+    For scripted or headless installations, pass all flags directly:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw onboard --non-interactive \
+      --mode local \
+      --auth-choice deepseek-api-key \
+      --deepseek-api-key "$DEEPSEEK_API_KEY" \
+      --skip-health \
+      --accept-risk
+    ```
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+  If the Gateway runs as a daemon (launchd/systemd), make sure `DEEPSEEK_API_KEY`
+  is available to that process (for example, in `~/.openclaw/.env` or via
+  `env.shellEnv`).
+</Warning>
+
+## Built-in catalog
+
+| Model ref                    | Name              | Input | Context   | Max output | Notes                                      |
+| ---------------------------- | ----------------- | ----- | --------- | ---------- | ------------------------------------------ |
+| `deepseek/deepseek-v4-flash` | DeepSeek V4 Flash | text  | 1,000,000 | 384,000    | Default model; V4 thinking-capable surface |
+| `deepseek/deepseek-v4-pro`   | DeepSeek V4 Pro   | text  | 1,000,000 | 384,000    | V4 thinking-capable surface                |
+| `deepseek/deepseek-chat`     | DeepSeek Chat     | text  | 131,072   | 8,192      | DeepSeek V3.2 non-thinking surface         |
+| `deepseek/deepseek-reasoner` | DeepSeek Reasoner | text  | 131,072   | 65,536     | Reasoning-enabled V3.2 surface             |
+
+<Tip>
+  V4 models support DeepSeek's `thinking` control. OpenClaw also replays
+  DeepSeek `reasoning_content` on follow-up turns so thinking sessions with tool
+  calls can continue.
+  Use `/think xhigh` or `/think max` with DeepSeek V4 models to request DeepSeek's
+  maximum `reasoning_effort`.
+</Tip>
+
+## Thinking and tools
+
+DeepSeek V4 thinking sessions have a stricter replay contract than most
+OpenAI-compatible providers: after a thinking-enabled turn uses tools, DeepSeek
+expects replayed assistant messages from that turn to include
+`reasoning_content` on follow-up requests. OpenClaw handles this inside the
+DeepSeek plugin, so normal multi-turn tool use works with
+`deepseek/deepseek-v4-flash` and `deepseek/deepseek-v4-pro`.
+
+If you switch an existing session from another OpenAI-compatible provider to a
+DeepSeek V4 model, older assistant tool-call turns may not have native
+DeepSeek `reasoning_content`. OpenClaw fills that missing field on replayed
+assistant messages for DeepSeek V4 thinking requests so the provider can accept
+the history without requiring `/new`.
+
+When thinking is disabled in OpenClaw (including the UI **None** selection),
+OpenClaw sends DeepSeek `thinking: { type: "disabled" }` and strips replayed
+`reasoning_content` from the outgoing history. This keeps disabled-thinking
+sessions on the non-thinking DeepSeek path.
+
+Use `deepseek/deepseek-v4-flash` for the default fast path. Use
+`deepseek/deepseek-v4-pro` when you want the stronger V4 model and can accept
+higher cost or latency.
+
+## Live testing
+
+The direct live model suite includes DeepSeek V4 in the modern model set. To
+run only the DeepSeek V4 direct-model checks:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+OPENCLAW_LIVE_PROVIDERS=deepseek \
+OPENCLAW_LIVE_MODELS="deepseek/deepseek-v4-flash,deepseek/deepseek-v4-pro" \
+pnpm test:live src/agents/models.profiles.live.test.ts
+```
+
+That live check verifies both V4 models can complete and that thinking/tool
+follow-up turns preserve the replay payload DeepSeek requires.
+
+## Config example
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  env: { DEEPSEEK_API_KEY: "sk-..." },
+  agents: {
+    defaults: {
+      model: { primary: "deepseek/deepseek-v4-flash" },
+    },
+  },
+}
+```
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Model selection" href="/concepts/model-providers" icon="layers">
+    Choosing providers, model refs, and failover behavior.
+  </Card>
+
+  <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
+    Full config reference for agents, models, and providers.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# ElevenLabs
+
+OpenClaw uses ElevenLabs for text-to-speech, batch speech-to-text with Scribe
+v2, and streaming STT with Scribe v2 Realtime.
+
+| Capability               | OpenClaw surface                                                     | Default                  |
+| ------------------------ | -------------------------------------------------------------------- | ------------------------ |
+| Text-to-speech           | `messages.tts` / `talk`                                              | `eleven_multilingual_v2` |
+| Batch speech-to-text     | `tools.media.audio`                                                  | `scribe_v2`              |
+| Streaming speech-to-text | Voice Call streaming or Google Meet `realtime.transcriptionProvider` | `scribe_v2_realtime`     |
+
+## Authentication
+
+Set `ELEVENLABS_API_KEY` in the environment. `XI_API_KEY` is also accepted for
+compatibility with existing ElevenLabs tooling.
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+export ELEVENLABS_API_KEY="..."
+```
+
+## Text-to-speech
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  messages: {
+    tts: {
+      providers: {
+        elevenlabs: {
+          apiKey: "${ELEVENLABS_API_KEY}",
+          voiceId: "pMsXgVXv3BLzUgSXRplE",
+          modelId: "eleven_multilingual_v2",
+        },
+      },
+    },
+  },
+}
+```
+
+Set `modelId` to `eleven_v3` to use ElevenLabs v3 TTS. OpenClaw keeps
+`eleven_multilingual_v2` as the default for existing installs.
+
+## Speech-to-text
+
+Use Scribe v2 for inbound audio attachments and short recorded voice segments:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  tools: {
+    media: {
+      audio: {
+        enabled: true,
+        models: [{ provider: "elevenlabs", model: "scribe_v2" }],
+      },
+    },
+  },
+}
+```
+
+OpenClaw sends multipart audio to ElevenLabs `/v1/speech-to-text` with
+`model_id: "scribe_v2"`. Language hints map to `language_code` when present.
+
+## Streaming STT
+
+The bundled `elevenlabs` plugin registers Scribe v2 Realtime for Voice Call and
+Google Meet agent-mode streaming transcription.
+
+| Setting         | Config path                                                               | Default                                           |
+| --------------- | ------------------------------------------------------------------------- | ------------------------------------------------- |
+| API key         | `plugins.entries.voice-call.config.streaming.providers.elevenlabs.apiKey` | Falls back to `ELEVENLABS_API_KEY` / `XI_API_KEY` |
+| Model           | `...elevenlabs.modelId`                                                   | `scribe_v2_realtime`                              |
+| Audio format    | `...elevenlabs.audioFormat`                                               | `ulaw_8000`                                       |
+| Sample rate     | `...elevenlabs.sampleRate`                                                | `8000`                                            |
+| Commit strategy | `...elevenlabs.commitStrategy`                                            | `vad`                                             |
+| Language        | `...elevenlabs.languageCode`                                              | (unset)                                           |
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  plugins: {
+    entries: {
+      "voice-call": {
+        config: {
+          streaming: {
+            enabled: true,
+            provider: "elevenlabs",
+            providers: {
+              elevenlabs: {
+                apiKey: "${ELEVENLABS_API_KEY}",
+                audioFormat: "ulaw_8000",
+                commitStrategy: "vad",
+                languageCode: "en",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+<Note>
+  Voice Call receives Twilio media as 8 kHz G.711 u-law. The ElevenLabs realtime
+  provider defaults to `ulaw_8000`, so telephony frames can be forwarded without
+  transcoding.
+</Note>
+
+For Google Meet agent mode, set
+`plugins.entries.google-meet.config.realtime.transcriptionProvider` to
+`"elevenlabs"` and configure the same provider block under
+`plugins.entries.google-meet.config.realtime.providers.elevenlabs`.
+
+## Related
+
+* [Text-to-speech](/tools/tts)
+* [Google Meet](/plugins/google-meet)
+* [Model selection](/concepts/model-providers)
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# GitHub Copilot
+
+GitHub Copilot is GitHub's AI coding assistant. It provides access to Copilot
+models for your GitHub account and plan. OpenClaw can use Copilot as a model
+provider in two different ways.
+
+## Two ways to use Copilot in OpenClaw
+
+<Tabs>
+  <Tab title="Built-in provider (github-copilot)">
+    Use the native device-login flow to obtain a GitHub token, then exchange it for
+    Copilot API tokens when OpenClaw runs. This is the **default** and simplest path
+    because it does not require VS Code.
+
+    <Steps>
+      <Step title="Run the login command">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw models auth login-github-copilot
+        ```
+
+        You will be prompted to visit a URL and enter a one-time code. Keep the
+        terminal open until it completes.
+      </Step>
+
+      <Step title="Set a default model">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw models set github-copilot/claude-opus-4.7
+        ```
+
+        Or in config:
+
+        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        {
+          agents: {
+            defaults: { model: { primary: "github-copilot/claude-opus-4.7" } },
+          },
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Copilot Proxy plugin (copilot-proxy)">
+    Use the **Copilot Proxy** VS Code extension as a local bridge. OpenClaw talks to
+    the proxy's `/v1` endpoint and uses the model list you configure there.
+
+    <Note>
+      Choose this when you already run Copilot Proxy in VS Code or need to route
+      through it. You must enable the plugin and keep the VS Code extension running.
+    </Note>
+  </Tab>
+</Tabs>
+
+## Optional flags
+
+| Flag            | Description                                         |
+| --------------- | --------------------------------------------------- |
+| `--yes`         | Skip the confirmation prompt                        |
+| `--set-default` | Also apply the provider's recommended default model |
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+# Skip confirmation
+openclaw models auth login-github-copilot --yes
+
+# Login and set the default model in one step
+openclaw models auth login --provider github-copilot --method device --set-default
+```
+
+## Non-interactive onboarding
+
+If you already have a GitHub OAuth access token for Copilot, import it during
+headless setup with `openclaw onboard --non-interactive`:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw onboard --non-interactive --accept-risk \
+  --auth-choice github-copilot \
+  --github-copilot-token "$COPILOT_GITHUB_TOKEN" \
+  --skip-channels --skip-health
+```
+
+You can also omit `--auth-choice`; passing `--github-copilot-token` infers the
+GitHub Copilot provider auth choice. If the flag is omitted, onboarding falls
+back to `COPILOT_GITHUB_TOKEN`, `GH_TOKEN`, then `GITHUB_TOKEN`. Use
+`--secret-input-mode ref` with `COPILOT_GITHUB_TOKEN` set to store an env-backed
+`tokenRef` instead of plaintext in `auth-profiles.json`.
+
+<AccordionGroup>
+  <Accordion title="Interactive TTY required">
+    The device-login flow requires an interactive TTY. Run it directly in a
+    terminal, not in a non-interactive script or CI pipeline.
+  </Accordion>
+
+  <Accordion title="Model availability depends on your plan">
+    Copilot model availability depends on your GitHub plan. If a model is
+    rejected, try another ID (for example `github-copilot/gpt-4.1`).
+  </Accordion>
+
+  <Accordion title="Transport selection">
+    Claude model IDs use the Anthropic Messages transport automatically. GPT,
+    o-series, and Gemini models keep the OpenAI Responses transport. OpenClaw
+    selects the correct transport based on the model ref.
+  </Accordion>
+
+  <Accordion title="Request compatibility">
+    OpenClaw sends Copilot IDE-style request headers on Copilot transports,
+    including built-in compaction, tool-result, and image follow-up turns. It
+    does not enable provider-level Responses continuation for Copilot unless
+    that behavior has been verified against Copilot's API.
+  </Accordion>
+
+  <Accordion title="Environment variable resolution order">
+    OpenClaw resolves Copilot auth from environment variables in the following
+    priority order:
+
+    | Priority | Variable               | Notes                              |
+    | -------- | ---------------------- | ---------------------------------- |
+    | 1        | `COPILOT_GITHUB_TOKEN` | Highest priority, Copilot-specific |
+    | 2        | `GH_TOKEN`             | GitHub CLI token (fallback)        |
+    | 3        | `GITHUB_TOKEN`         | Standard GitHub token (lowest)     |
+
+    When multiple variables are set, OpenClaw uses the highest-priority one.
+    The device-login flow (`openclaw models auth login-github-copilot`) stores
+    its token in the auth profile store and takes precedence over all environment
+    variables.
+  </Accordion>
+
+  <Accordion title="Token storage">
+    The login stores a GitHub token in the auth profile store and exchanges it
+    for a Copilot API token when OpenClaw runs. You do not need to manage the
+    token manually.
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+  The device-login command requires an interactive TTY. Use non-interactive
+  onboarding when you need headless setup.
+</Warning>
+
+## Memory search embeddings
+
+GitHub Copilot can also serve as an embedding provider for
+[memory search](/concepts/memory-search). If you have a Copilot subscription and
+have logged in, OpenClaw can use it for embeddings without a separate API key.
+
+### Auto-detection
+
+When `memorySearch.provider` is `"auto"` (the default), GitHub Copilot is tried
+at priority 15 -- after local embeddings but before OpenAI and other paid
+providers. If a GitHub token is available, OpenClaw discovers available
+embedding models from the Copilot API and picks the best one automatically.
+
+### Explicit config
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   agents: {
     defaults: {
-      models: {
-        \"google/gemini-2.5-pro\": {
-          params: {
-            cachedContent: \"cachedContents/prebuilt-context\",
-          },\n        },\n      },\n    },\n  },\n}
+      memorySearch: {
+        provider: "github-copilot",
+        // Optional: override the auto-discovered model
+        model: "text-embedding-3-small",
+      },
+    },
+  },
+}
 ```
 
-Gemini CLI JSON usage notes
+### How it works
 
-When using the `google-gemini-cli` OAuth provider, OpenClaw normalizes\nthe CLI JSON output as follows:\n
-- Reply text comes from the CLI JSON `response` field.\n- Usage falls back to `stats` when the CLI leaves `usage` empty.\n- `stats.cached` is normalized into OpenClaw `cacheRead`.\n- If `stats.input` is missing, OpenClaw derives input tokens from\n`stats.input_tokens - stats.cached`.
+1. OpenClaw resolves your GitHub token (from env vars or auth profile).
+2. Exchanges it for a short-lived Copilot API token.
+3. Queries the Copilot `/models` endpoint to discover available embedding models.
+4. Picks the best model (prefers `text-embedding-3-small`).
+5. Sends embedding requests to the Copilot `/embeddings` endpoint.
 
-Environment and daemon setup
+Model availability depends on your GitHub plan. If no embedding models are
+available, OpenClaw skips Copilot and tries the next provider.
 
-If the Gateway runs as a daemon (launchd/systemd), make sure `GEMINI_API_KEY`\nis available to that process (for example, in `~/.openclaw/.env` or via\n`env.shellEnv`).
+## Related
 
-## [​](https://docs.openclaw.ai/providers/google\\#related)  Related
+<CardGroup cols={2}>
+  <Card title="Model selection" href="/concepts/model-providers" icon="layers">
+    Choosing providers, model refs, and failover behavior.
+  </Card>
 
-[**Model selection** \\\\\n\\\\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)\n
-[**Image generation** \\\\\n\\\\\nShared image tool parameters and provider selection.](https://docs.openclaw.ai/tools/image-generation)\n
-[**Video generation** \\\\\n\\\\\nShared video tool parameters and provider selection.](https://docs.openclaw.ai/tools/video-generation)\n
-[**Music generation** \\\\\n\\\\\nShared music tool parameters and provider selection.](https://docs.openclaw.ai/tools/music-generation)\n
-[GLM (Zhipu)](https://docs.openclaw.ai/providers/glm) [Gradium](https://openclaw.ai/providers/gradium)\n
-Ctrl+I
+  <Card title="OAuth and auth" href="/gateway/authentication" icon="key">
+    Auth details and credential reuse rules.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
 
----
+# Groq
 
-## LiteLLM - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/litellm
+[Groq](https://groq.com) provides ultra-fast inference on open-weight models (Llama, Gemma, Kimi, Qwen, GPT OSS, and more) using custom LPU hardware. OpenClaw includes a bundled Groq plugin that registers both an OpenAI-compatible chat provider and an audio media-understanding provider.
 
-[Skip to main content](https://docs.openclaw.ai/providers/litellm#content-area)
+| Property               | Value                                    |
+| ---------------------- | ---------------------------------------- |
+| Provider id            | `groq`                                   |
+| Plugin                 | bundled, `enabledByDefault: true`        |
+| Auth env var           | `GROQ_API_KEY`                           |
+| Onboarding flag        | `--auth-choice groq-api-key`             |
+| API                    | OpenAI-compatible (`openai-completions`) |
+| Base URL               | `https://api.groq.com/openai/v1`         |
+| Audio transcription    | `whisper-large-v3-turbo` (default)       |
+| Suggested chat default | `groq/llama-3.3-70b-versatile`           |
 
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
+## Getting started
 
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
+<Steps>
+  <Step title="Get an API key">
+    Create an API key at [console.groq.com/keys](https://console.groq.com/keys).
+  </Step>
 
-English
+  <Step title="Set the API key">
+    <CodeGroup>
+      ```bash Onboarding theme={"theme":{"light":"min-light","dark":"min-dark"}}
+      openclaw onboard --auth-choice groq-api-key
+      ```
 
-Search...
+      ```bash Env only theme={"theme":{"light":"min-light","dark":"min-dark"}}
+      export GROQ_API_KEY=gsk_...
+      ```
+    </CodeGroup>
+  </Step>
 
-Ctrl K
+  <Step title="Set a default model">
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          model: { primary: "groq/llama-3.3-70b-versatile" },
+        },
+      },
+    }
+    ```
+  </Step>
 
-Search...
+  <Step title="Verify the catalog is reachable">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw models list --provider groq
+    ```
+  </Step>
+</Steps>
 
-Navigation
+### Config file example
 
-Providers
-
-LiteLLM
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Quick start](https://docs.openclaw.ai/providers/litellm#quick-start)
-- [Configuration](https://docs.openclaw.ai/providers/litellm#configuration)
-- [Environment variables](https://docs.openclaw.ai/providers/litellm#environment-variables)
-- [Config file](https://docs.openclaw.ai/providers/litellm#config-file)
-- [Advanced configuration](https://docs.openclaw.ai/providers/litellm#advanced-configuration)
-- [Image generation](https://docs.openclaw.ai/providers/litellm#image-generation)
-- [Related](https://docs.openclaw.ai/providers/litellm#related)
-
-[LiteLLM](https://litellm.ai/) is an open-source LLM gateway that provides a unified API to 100+ model providers. Route OpenClaw through LiteLLM to get centralized cost tracking, logging, and the flexibility to switch backends without changing your OpenClaw config.
-
-**Why use LiteLLM with OpenClaw?**
-
-- **Cost tracking** — See exactly what OpenClaw spends across all models
-- **Model routing** — Switch between Claude, GPT-4, Gemini, Bedrock without config changes
-- **Virtual keys** — Create keys with spend limits for OpenClaw
-- **Logging** — Full request/response logs for debugging
-- **Fallbacks** — Automatic failover if your primary provider is down
-
-## [​](https://docs.openclaw.ai/providers/litellm\\#quick-start)  Quick start
-
-- Onboarding (recommended)
-
-- Manual setup
-
-
-**Best for:** fastest path to a working LiteLLM setup.
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/litellm#)
-
-Run onboarding
-
-```
-openclaw onboard --auth-choice litellm-api-key
-```
-
-For non-interactive setup against a remote proxy, pass the proxy URL explicitly:
-
-```
-openclaw onboard --non-interactive --auth-choice litellm-api-key --litellm-api-key \"$LITELLM_API_KEY\" --custom-base-url \"https://litellm.example/v1\"
-```
-
-**Best for:** full control over installation and config.
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/litellm#)
-
-Start LiteLLM Proxy
-
-```
-pip install 'litellm[proxy]'
-litellm --model claude-opus-4-6
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  env: { GROQ_API_KEY: "gsk_..." },
+  agents: {
+    defaults: {
+      model: { primary: "groq/llama-3.3-70b-versatile" },
+    },
+  },
+}
 ```
 
-2
+## Built-in catalog
 
-[Navigate to header](https://docs.openclaw.ai/providers/litellm#)
+OpenClaw ships a manifest-backed Groq catalog with both reasoning and non-reasoning entries. Run `openclaw models list --provider groq` to see the bundled rows for your installed version, or check [console.groq.com/docs/models](https://console.groq.com/docs/models) for Groq's authoritative list.
 
-Point OpenClaw to LiteLLM
+| Model ref                                            | Name                          | Reasoning | Input        | Context |
+| ---------------------------------------------------- | ----------------------------- | --------- | ------------ | ------- |
+| `groq/llama-3.3-70b-versatile`                       | Llama 3.3 70B Versatile       | no        | text         | 131,072 |
+| `groq/llama-3.1-8b-instant`                          | Llama 3.1 8B Instant          | no        | text         | 131,072 |
+| `groq/meta-llama/llama-4-maverick-17b-128e-instruct` | Llama 4 Maverick 17B          | no        | text + image | 131,072 |
+| `groq/meta-llama/llama-4-scout-17b-16e-instruct`     | Llama 4 Scout 17B             | no        | text + image | 131,072 |
+| `groq/llama3-70b-8192`                               | Llama 3 70B                   | no        | text         | 8,192   |
+| `groq/llama3-8b-8192`                                | Llama 3 8B                    | no        | text         | 8,192   |
+| `groq/gemma2-9b-it`                                  | Gemma 2 9B                    | no        | text         | 8,192   |
+| `groq/mistral-saba-24b`                              | Mistral Saba 24B              | no        | text         | 32,768  |
+| `groq/moonshotai/kimi-k2-instruct`                   | Kimi K2 Instruct              | no        | text         | 131,072 |
+| `groq/moonshotai/kimi-k2-instruct-0905`              | Kimi K2 Instruct 0905         | no        | text         | 262,144 |
+| `groq/openai/gpt-oss-120b`                           | GPT OSS 120B                  | yes       | text         | 131,072 |
+| `groq/openai/gpt-oss-20b`                            | GPT OSS 20B                   | yes       | text         | 131,072 |
+| `groq/openai/gpt-oss-safeguard-20b`                  | Safety GPT OSS 20B            | yes       | text         | 131,072 |
+| `groq/qwen-qwq-32b`                                  | Qwen QwQ 32B                  | yes       | text         | 131,072 |
+| `groq/qwen/qwen3-32b`                                | Qwen3 32B                     | yes       | text         | 131,072 |
+| `groq/deepseek-r1-distill-llama-70b`                 | DeepSeek R1 Distill Llama 70B | yes       | text         | 131,072 |
+| `groq/groq/compound`                                 | Compound                      | yes       | text         | 131,072 |
+| `groq/groq/compound-mini`                            | Compound Mini                 | yes       | text         | 131,072 |
 
+<Tip>
+  The catalog evolves with each OpenClaw release. `openclaw models list --provider groq` shows the rows known to your installed version; cross-check with [console.groq.com/docs/models](https://console.groq.com/docs/models) for newly-added or deprecated models.
+</Tip>
+
+## Reasoning models
+
+OpenClaw maps its shared `/think` levels to Groq's model-specific `reasoning_effort` values:
+
+* For `qwen/qwen3-32b`, disabled thinking sends `none` and enabled thinking sends `default`.
+* For Groq GPT OSS reasoning models (`openai/gpt-oss-*`), OpenClaw sends `low`, `medium`, or `high` based on `/think` level. Disabled thinking omits `reasoning_effort` because those models do not support a disabled value.
+* DeepSeek R1 Distill, Qwen QwQ, and Compound use Groq's native reasoning surface; `/think` controls visibility but the model always reasons.
+
+See [Thinking modes](/tools/thinking) for the shared `/think` levels and how OpenClaw translates them per provider.
+
+## Audio transcription
+
+Groq's bundled plugin also registers an **audio media-understanding provider** so voice messages can be transcribed through the shared `tools.media.audio` surface.
+
+| Property           | Value                                     |
+| ------------------ | ----------------------------------------- |
+| Shared config path | `tools.media.audio`                       |
+| Default base URL   | `https://api.groq.com/openai/v1`          |
+| Default model      | `whisper-large-v3-turbo`                  |
+| Auto priority      | 20                                        |
+| API endpoint       | OpenAI-compatible `/audio/transcriptions` |
+
+To make Groq the default audio backend:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  tools: {
+    media: {
+      audio: {
+        models: [{ provider: "groq" }],
+      },
+    },
+  },
+}
 ```
-export LITELLM_API_KEY=\"your-litellm-key\"
 
-openclaw
+<AccordionGroup>
+  <Accordion title="Environment availability for the daemon">
+    If the Gateway runs as a managed service (launchd, systemd, Docker), `GROQ_API_KEY` must be visible to that process — not just to your interactive shell.
+
+    <Warning>
+      A key sitting only in `~/.profile` will not help a launchd or systemd daemon unless that environment is imported there too. Set the key in `~/.openclaw/.env` or via `env.shellEnv` to make it readable from the gateway process.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Custom Groq model ids">
+    OpenClaw accepts any Groq model id at runtime. Use the exact id shown by Groq and prefix it with `groq/`. The bundled catalog covers the common cases; uncatalogued ids fall through to the default OpenAI-compatible template.
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          model: { primary: "groq/<your-model-id>" },
+        },
+      },
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Model providers" href="/concepts/model-providers" icon="layers">
+    Choosing providers, model refs, and failover behavior.
+  </Card>
+
+  <Card title="Thinking modes" href="/tools/thinking" icon="brain">
+    Reasoning effort levels and provider-policy interaction.
+  </Card>
+
+  <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
+    Full config schema including provider and audio settings.
+  </Card>
+
+  <Card title="Groq Console" href="https://console.groq.com" icon="arrow-up-right-from-square">
+    Groq dashboard, API docs, and pricing.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# LiteLLM
+
+[LiteLLM](https://litellm.ai) is an open-source LLM gateway that provides a unified API to 100+ model providers. Route OpenClaw through LiteLLM to get centralized cost tracking, logging, and the flexibility to switch backends without changing your OpenClaw config.
+
+<Tip>
+  **Why use LiteLLM with OpenClaw?**
+
+  * **Cost tracking** — See exactly what OpenClaw spends across all models
+  * **Model routing** — Switch between Claude, GPT-4, Gemini, Bedrock without config changes
+  * **Virtual keys** — Create keys with spend limits for OpenClaw
+  * **Logging** — Full request/response logs for debugging
+  * **Fallbacks** — Automatic failover if your primary provider is down
+</Tip>
+
+## Quick start
+
+<Tabs>
+  <Tab title="Onboarding (recommended)">
+    **Best for:** fastest path to a working LiteLLM setup.
+
+    <Steps>
+      <Step title="Run onboarding">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw onboard --auth-choice litellm-api-key
+        ```
+
+        For non-interactive setup against a remote proxy, pass the proxy URL explicitly:
+
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw onboard --non-interactive --auth-choice litellm-api-key --litellm-api-key "$LITELLM_API_KEY" --custom-base-url "https://litellm.example/v1"
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Manual setup">
+    **Best for:** full control over installation and config.
+
+    <Steps>
+      <Step title="Start LiteLLM Proxy">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        pip install 'litellm[proxy]'
+        litellm --model claude-opus-4-6
+        ```
+      </Step>
+
+      <Step title="Point OpenClaw to LiteLLM">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        export LITELLM_API_KEY="your-litellm-key"
+
+        openclaw
+        ```
+
+        That's it. OpenClaw now routes through LiteLLM.
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Configuration
+
+### Environment variables
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+export LITELLM_API_KEY="sk-litellm-key"
 ```
 
-That’s it. OpenClaw now routes through LiteLLM.
+### Config file
 
-## [​](https://docs.openclaw.ai/providers/litellm\\#configuration)  Configuration
-
-### [​](https://docs.openclaw.ai/providers/litellm\\#environment-variables)  Environment variables
-
-```
-export LITELLM_API_KEY=\"sk-litellm-key\"
-```
-
-### [​](https://docs.openclaw.ai/providers/litellm\\#config-file)  Config file
-
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   models: {
     providers: {
       litellm: {
-        baseUrl: \"http://localhost:4000\",
-        apiKey: \"${LITELLM_API_KEY}\",
-        api: \"openai-completions\",
-        models: [\\
-          {\\
-            id: \"claude-opus-4-6\",\\
-            name: \"Claude Opus 4.6\",\\
-            reasoning: true,\\
-            input: [\"text\", \"image\"],\\
-            contextWindow: 200000,\\
-            maxTokens: 64000,\\
-          },\\
-          {\\
-            id: \"gpt-4o\",\\
-            name: \"GPT-4o\",\\
-            reasoning: false,\\
-            input: [\"text\", \"image\"],\\
-            contextWindow: 128000,\\
-            maxTokens: 8192,\\
-          },\\
+        baseUrl: "http://localhost:4000",
+        apiKey: "${LITELLM_API_KEY}",
+        api: "openai-completions",
+        models: [
+          {
+            id: "claude-opus-4-6",
+            name: "Claude Opus 4.6",
+            reasoning: true,
+            input: ["text", "image"],
+            contextWindow: 200000,
+            maxTokens: 64000,
+          },
+          {
+            id: "gpt-4o",
+            name: "GPT-4o",
+            reasoning: false,
+            input: ["text", "image"],
+            contextWindow: 128000,
+            maxTokens: 8192,
+          },
         ],
       },
     },
   },
   agents: {
     defaults: {
-      model: { primary: \"litellm/claude-opus-4-6\" },
+      model: { primary: "litellm/claude-opus-4-6" },
     },
   },
 }
 ```
 
-## [​](https://docs.openclaw.ai/providers/litellm\\#advanced-configuration)  Advanced configuration
+## Advanced configuration
 
-### [​](https://docs.openclaw.ai/providers/litellm\\#image-generation)  Image generation
+### Image generation
 
 LiteLLM can also back the `image_generate` tool through OpenAI-compatible
 `/images/generations` and `/images/edits` routes. Configure a LiteLLM image
 model under `agents.defaults.imageGenerationModel`:
 
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   models: {
     providers: {
       litellm: {
-        baseUrl: \"http://localhost:4000\",
-        apiKey: \"${LITELLM_API_KEY}\",
+        baseUrl: "http://localhost:4000",
+        apiKey: "${LITELLM_API_KEY}",
       },
     },
   },
   agents: {
     defaults: {
       imageGenerationModel: {
-        primary: \"litellm/gpt-image-2\",
+        primary: "litellm/gpt-image-2",
         timeoutMs: 180_000,
       },
     },
@@ -1909,1539 +1769,210 @@ private-network override. For a LAN-hosted proxy, set
 `models.providers.litellm.request.allowPrivateNetwork: true` because the API key
 will be sent to the configured proxy host.
 
-Virtual keys
-
-Create a dedicated key for OpenClaw with spend limits:
-
-```
-curl -X POST \"http://localhost:4000/key/generate\" \\\
-  -H \"Authorization: Bearer $LITELLM_MASTER_KEY\" \\\
-  -H \"Content-Type: application/json\" \\\
-  -d '{
-    \"key_alias\": \"openclaw\",
-    \"max_budget\": 50.00,
-    \"budget_duration\": \"monthly\"
-  }'
-```
-
-Use the generated key as `LITELLM_API_KEY`.
-
-Model routing
-
-LiteLLM can route model requests to different backends. Configure in your LiteLLM `config.yaml`:
-
-```
-model_list:
-  - model_name: claude-opus-4-6
-    litellm_params:
-      model: claude-opus-4-6
-      api_key: os.environ/ANTHROPIC_API_KEY
-
-  - model_name: gpt-4o
-    litellm_params:
-      model: gpt-4o
-      api_key: os.environ/OPENAI_API_KEY
-```
-
-OpenClaw keeps requesting `claude-opus-4-6` — LiteLLM handles the routing.
-
-Viewing usage
-
-Check LiteLLM’s dashboard or API:
-
-```
-# Key info
-curl \"http://localhost:4000/key/info\" \\\
-  -H \"Authorization: Bearer sk-litellm-key\"
-
-# Spend logs
-curl \"http://localhost:4000/spend/logs\" \\\
-  -H \"Authorization: Bearer $LITELLM_MASTER_KEY\"
-```
-
-Proxy behavior notes
-
-- LiteLLM runs on `http://localhost:4000` by default
-- OpenClaw connects through LiteLLM’s proxy-style OpenAI-compatible `/v1`
-endpoint
-- Native OpenAI-only request shaping does not apply through LiteLLM:
-no `service_tier`, no Responses `store`, no prompt-cache hints, and no
-OpenAI reasoning-compat payload shaping
-- Hidden OpenClaw attribution headers (`originator`, `version`, `User-Agent`)
-are not injected on custom LiteLLM base URLs
-
-For general provider configuration and failover behavior, see [Model Providers](https://docs.openclaw.ai/concepts/model-providers).
-
-## [​](https://docs.openclaw.ai/providers/litellm\\#related)  Related
-
-[**LiteLLM Docs** \\\\\n\\\\\nOfficial LiteLLM documentation and API reference.](https://docs.litellm.ai/)
-
-[**Model selection** \\\\\n\\\\\nOverview of all providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)
-
-[**Configuration** \\\\\n\\\\\nFull config reference.](https://docs.openclaw.ai/gateway/configuration)
-
-[**Model selection** \\\\\n\\\\\nHow to choose and configure models.](https://docs.openclaw.ai/concepts/models)
-
-[Kilocode](https://docs.openclaw.ai/providers/kilocode) [LM Studio](https://docs.openclaw.ai/providers/lmstudio)
-
-Ctrl+I
-
----
-
-## GLM (Zhipu) - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/glm
-
-[Skip to main content](https://docs.openclaw.ai/providers/glm#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-GLM (Zhipu)
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [GLM models](https://docs.openclaw.ai/providers/glm#glm-models)
-- [Getting started](https://docs.openclaw.ai/providers/glm#getting-started)
-- [Config example](https://docs.openclaw.ai/providers/glm#config-example)
-- [Built-in catalog](https://docs.openclaw.ai/providers/glm#built-in-catalog)
-- [Advanced configuration](https://docs.openclaw.ai/providers/glm#advanced-configuration)
-- [Related](https://docs.openclaw.ai/providers/glm#related)
-
-# [​](https://docs.openclaw.ai/providers/glm\\#glm-models)  GLM models
-
-GLM is a **model family** (not a company) available through the Z.AI platform. In OpenClaw, GLM
-models are accessed via the `zai` provider and model IDs like `zai/glm-5`.
-
-## [​](https://docs.openclaw.ai/providers/glm\\#getting-started)  Getting started
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/glm#)
-
-Choose an auth route and run onboarding
-
-Pick the onboarding choice that matches your Z.AI plan and region:
-
-| Auth choice | Best for |
-| --- | --- |
-| `zai-api-key` | Generic API-key setup with endpoint auto-detection |
-| `zai-coding-global` | Coding Plan users (global) |
-| `zai-coding-cn` | Coding Plan users (China region) |
-| `zai-global` | General API (global) |
-| `zai-cn` | General API (China region) |
-
-```
-# Example: generic auto-detect
-openclaw onboard --auth-choice zai-api-key
-
-# Example: Coding Plan global
-openclaw onboard --auth-choice zai-coding-global
-```
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/glm#)
-
-Set GLM as the default model
-
-```
-openclaw config set agents.defaults.model.primary \"zai/glm-5.1\"
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/glm#)
-
-Verify models are available
-
-```
-openclaw models list --provider zai
-```
-
-## [​](https://docs.openclaw.ai/providers/glm\\#config-example)  Config example
-
-```
-{
-  env: { ZAI_API_KEY: \"sk-...\" },
-  agents: { defaults: { model: { primary: \"zai/glm-5.1\" } } },
-}
-```
-
-`zai-api-key` lets OpenClaw detect the matching Z.AI endpoint from the key and
-apply the correct base URL automatically. Use the explicit regional choices when
-you want to force a specific Coding Plan or general API surface.
-
-## [​](https://docs.openclaw.ai/providers/glm\\#built-in-catalog)  Built-in catalog
-
-OpenClaw currently seeds the bundled `zai` provider with these GLM refs:
-
-| Model | Model |
-| --- | --- |
-| `glm-5.1` | `glm-4.7` |
-| `glm-5` | `glm-4.7-flash` |
-| `glm-5-turbo` | `glm-4.7-flashx` |
-| `glm-5v-turbo` | `glm-4.6` |
-| `glm-4.5` | `glm-4.6v` |
-| `glm-4.5-air` |  |
-| `glm-4.5-flash` |  |
-| `glm-4.5v` |  |
-
-The default bundled model ref is `zai/glm-5.1`. GLM versions and availability
-can change; check Z.AI’s docs for the latest.
-
-## [​](https://docs.openclaw.ai/providers/glm\\#advanced-configuration)  Advanced configuration
-
-Endpoint auto-detection
-
-When you use the `zai-api-key` auth choice, OpenClaw inspects the key format
-to determine the correct Z.AI base URL. Explicit regional choices
-(`zai-coding-global`, `zai-coding-cn`, `zai-global`, `zai-cn`) override
-auto-detection and pin the endpoint directly.
-
-Provider details
-
-GLM models are served by the `zai` runtime provider. For full provider
-configuration, regional endpoints, and additional capabilities, see
-[Z.AI provider docs](https://docs.openclaw.ai/providers/zai).
-
-## [​](https://docs.openclaw.ai/providers/glm\\#related)  Related
-
-[**Z.AI provider** \\\\\n\\\\\nFull Z.AI provider configuration and regional endpoints.](https://docs.openclaw.ai/providers/zai)\n
-[**Model selection** \\\\\n\\\\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)\n
-[GitHub Copilot](https://docs.openclaw.ai/providers/github-copilot) [Google (Gemini)](https://docs.openclaw.ai/providers/google)
-
-Ctrl+I
-
----
-
-## Moonshot AI - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/moonshot
-
-[Skip to main content](https://docs.openclaw.ai/providers/moonshot#content-area)\n\n[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)\n\n![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)\n\nEnglish\n\nSearch...\n\nCtrl K\n\nSearch...\n\nNavigation\n\nProviders\n\nMoonshot AI\n\n[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)\n\nOn this page\n\n- [Built-in model catalog](https://docs.openclaw.ai/providers/moonshot#built-in-model-catalog)\n- [Getting started](https://docs.openclaw.ai/providers/moonshot#getting-started)\n- [Config example](https://docs.openclaw.ai/providers/moonshot#config-example)\n- [Kimi web search](https://docs.openclaw.ai/providers/moonshot#kimi-web-search)\n- [Advanced configuration](https://docs.openclaw.ai/providers/moonshot#advanced-configuration)\n- [Related](https://docs.openclaw.ai/providers/moonshot#related)\n\nMoonshot provides the Kimi API with OpenAI-compatible endpoints. Configure the\nprovider and set the default model to `moonshot/kimi-k2.6`, or use\nKimi Coding with `kimi/kimi-code`.\n\nMoonshot and Kimi Coding are **separate providers**. Keys are not interchangeable, endpoints differ, and model refs differ (`moonshot/...` vs `kimi/...`).\n\n## [​](https://docs.openclaw.ai/providers/moonshot\\#built-in-model-catalog)  Built-in model catalog\n\n| Model ref | Name | Reasoning | Input | Context | Max output |\n| --- | --- | --- | --- | --- | --- |\n| `moonshot/kimi-k2.6` | Kimi K2.6 | No | text, image | 262,144 | 262,144 |\n| `moonshot/kimi-k2.5` | Kimi K2.5 | No | text, image | 262,144 | 262,144 |\n| `moonshot/kimi-k2-thinking` | Kimi K2 Thinking | Yes | text | 262,144 | 262,144 |\n| `moonshot/kimi-k2-thinking-turbo` | Kimi K2 Thinking Turbo | Yes | text | 262,144 | 262,144 |\n| `moonshot/kimi-k2-turbo` | Kimi K2 Turbo | No | text | 256,000 | 16,384 |\n\nBundled cost estimates for current Moonshot-hosted K2 models use Moonshot’s\npublished pay-as-you-go rates: Kimi K2.6 is 0.16/MTokcachehit,0.16/MTok cache hit,\n0.16/MTokcachehit,0.95/MTok input, and 4.00/MTokoutput;KimiK2.5is4.00/MTok output; Kimi K2.5 is 4.00/MTokoutput;KimiK2.5is0.10/MTok cache hit,\n0.60/MTokinput,and0.60/MTok input, and 0.60/MTokinput,and3.00/MTok output. Other legacy catalog entries keep\nzero-cost placeholders unless you override them in config.\n\n## [​](https://docs.openclaw.ai/providers/moonshot\\#getting-started)  Getting started\n\nChoose your provider and follow the setup steps.\n\n- Moonshot API\n\n- Kimi Coding\n\n\n**Best for:** Kimi K2 models via the Moonshot Open Platform.\n\n1\n\n[Navigate to header](https://openclaw.ai/providers/moonshot#)\n\nChoose your endpoint region\n\n| Auth choice | Endpoint | Region |\n| --- | --- | --- |\n| `moonshot-api-key` | `https://api.moonshot.ai/v1` | International |\n| `moonshot-api-key-cn` | `https://api.moonshot.cn/v1` | China |\n\n2\n\n[Navigate to header](https://openclaw.ai/providers/moonshot#)\n\nRun onboarding\n\n```\nopenclaw onboard --auth-choice moonshot-api-key\n```\n\nOr for the China endpoint:\n\n```\nopenclaw onboard --auth-choice moonshot-api-key-cn\n```\n\n3\n\n[Navigate to header](https://openclaw.ai/providers/moonshot#)\n\nSet a default model\n\n```\n{\n  agents: {\n    defaults: {\n      model: { primary: \"moonshot/kimi-k2.6\" },\n    },\n  },\n}\n```\n\n4\n\n[Navigate to header](https://openclaw.ai/providers/moonshot#)\n\nVerify models are available\n\n```\nopenclaw models list --provider moonshot\n```\n\n5\n\n[Navigate to header](https://openclaw.ai/providers/moonshot#)\n\nRun a live smoke test\n\nUse an isolated state dir when you want to verify model access and cost\ntracking without touching your normal sessions:\n\n```\nOPENCLAW_CONFIG_PATH=/tmp/openclaw-kimi/openclaw.json \\\nOPENCLAW_STATE_DIR=/tmp/openclaw-kimi \\\nopenclaw agent --local \\\n  --session-id live-kimi-cost \\\n  --message \'Reply exactly: KIMI_LIVE_OK\' \\\n  --thinking off \\\n  --json\n```\n\nThe JSON response should report `provider: \"moonshot\"` and\n`model: \"kimi-k2.6\"`. The assistant transcript entry stores normalized\ntoken usage plus estimated cost under `usage.cost` when Moonshot returns\nusage metadata.\n\n### [​](https://docs.openclaw.ai/providers/moonshot\\#config-example)  Config example\n\n```\n{\n  env: { MOONSHOT_API_KEY: \"sk-...\" },\n  agents: {\n    defaults: {\n      model: { primary: \"moonshot/kimi-k2.6\" },\n      models: {\n        // moonshot-kimi-k2-aliases:start\n        \"moonshot/kimi-k2.6\": { alias: \"Kimi K2.6\" },\n        \"moonshot/kimi-k2.5\": { alias: \"Kimi K2.5\" },\n        \"moonshot/kimi-k2-thinking\": { alias: \"Kimi K2 Thinking\" },\n        \"moonshot/kimi-k2-thinking-turbo\": { alias: \"Kimi K2 Thinking Turbo\" },\n        \"moonshot/kimi-k2-turbo\": { alias: \"Kimi K2 Turbo\" },\n        // moonshot-kimi-k2-aliases:end\n      },\n    },\n  },\n  models: {\n    mode: \"merge\",\n    providers: {\n      moonshot: {\n        baseUrl: \"https://api.moonshot.ai/v1\",\n        apiKey: \"${MOONSHOT_API_KEY}\",\n        api: \"openai-completions\",\n        models: [\\\n          // moonshot-kimi-k2-models:start\\\n          {\\\n            id: \"kimi-k2.6\",\\\n            name: \"Kimi K2.6\",\\\n            reasoning: false,\\\n            input: [\"text\", \"image\"],\\\n            cost: { input: 0.95, output: 4, cacheRead: 0.16, cacheWrite: 0 },\\\n            contextWindow: 262144,\\\n            maxTokens: 262144,\\\n          },\\\n          {\\\n            id: \"kimi-k2.5\",\\\n            name: \"Kimi K2.5\",\\\n            reasoning: false,\\\n            input: [\"text\", \"image\"],\\\n            cost: { input: 0.6, output: 3, cacheRead: 0.1, cacheWrite: 0 },\\\n            contextWindow: 262144,\\\n            maxTokens: 262144,\\\n          },\\\n          {\\\n            id: \"kimi-k2-thinking\",\\\n            name: \"Kimi K2 Thinking\",\\\n            reasoning: true,\\\n            input: [\"text\"],\\\n            cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },\\\n            contextWindow: 262144,\\\n            maxTokens: 262144,\\\n          },\\\n          {\\\n            id: \"kimi-k2-thinking-turbo\",\\\n            name: \"Kimi K2 Thinking Turbo\",\\\n            reasoning: true,\\\n            input: [\"text\"],\\\n            cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },\\\n            contextWindow: 262144,\\\n            maxTokens: 262144,\\\n          },\\\n          {\\\n            id: \"kimi-k2-turbo\",\\\n            name: \"Kimi K2 Turbo\",\\\n            reasoning: false,\\\n            input: [\"text\"],\\\n            cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },\\\n            contextWindow: 256000,\\\n            maxTokens: 16384,\\\n          },\\\n          // moonshot-kimi-k2-models:end\\\n        ],\n      },\n    },\n  },\n}\n```\n\n**Best for:** code-focused tasks via the Kimi Coding endpoint.\n\nKimi Coding uses a different API key and provider prefix (`kimi/...`) than Moonshot (`moonshot/...`). Legacy model ref `kimi/k2p5` remains accepted as a compatibility id.\n\n1\n\n[Navigate to header](https://openclaw.ai/providers/moonshot#)\n\nRun onboarding\n\n```\nopenclaw onboard --auth-choice kimi-code-api-key\n```\n\n2\n\n[Navigate to header](https://openclaw.ai/providers/moonshot#)\n\nSet a default model\n\n```\n{\n  agents: {\n    defaults: {\n      model: { primary: \"kimi/kimi-code\" },\n    },\n  },\n}\n```\n\n3\n\n[Navigate to header](https://openclaw.ai/providers/moonshot#)\n\nVerify the model is available\n\n```\nopenclaw models list --provider kimi\n```\n\n### [​](https://docs.openclaw.ai/providers/moonshot\\#config-example-2)  Config example\n\n```\n{\n  env: { KIMI_API_KEY: \"sk-...\" },\n  agents: {\n    defaults: {\n      model: { primary: \"kimi/kimi-code\" },\n      models: {\n        \"kimi/kimi-code\": { alias: \"Kimi\" },\n      },\n    },\n  },\n}\n```\n\n## [​](https://docs.openclaw.ai/providers/moonshot\\#kimi-web-search)  Kimi web search\n\nOpenClaw also ships **Kimi** as a `web_search` provider, backed by Moonshot web\nsearch.\n\n1\n\n[Navigate to header](https://openclaw.ai/providers/moonshot#)\n\nRun interactive web search setup\n\n```\nopenclaw configure --section web\n```\n\nChoose **Kimi** in the web-search section to store\n`plugins.entries.moonshot.config.webSearch.*`.\n\n2\n\n[Navigate to header](https://openclaw.ai/providers/moonshot#)\n\nConfigure the web search region and model\n\nInteractive setup prompts for:\n\n| Setting | Options |\n| --- | --- |\n| API region | `https://api.moonshot.ai/v1` (international) or `https://api.moonshot.cn/v1` (China) |\n| Web search model | Defaults to `kimi-k2.6` |\n\nConfig lives under `plugins.entries.moonshot.config.webSearch`:\n\n```\n{\n  plugins: {\n    entries: {\n      moonshot: {\n        config: {\n          webSearch: {\n            apiKey: \"sk-...\", // or use KIMI_API_KEY / MOONSHOT_API_KEY\n            baseUrl: \"https://api.moonshot.ai/v1\",\n            model: \"kimi-k2.6\",\n          },\n        },\n      },\n    },\n  },\n  tools: {\n    web: {\n      search: {\n        provider: \"kimi\",\n      },\n    },\n  },\n}\n```\n\n## [​](https://docs.openclaw.ai/providers/moonshot\\#advanced-configuration)  Advanced configuration\n\nNative thinking mode\n\nMoonshot Kimi supports binary native thinking:\n\n- `thinking: { type: \"enabled\" }`\n- `thinking: { type: \"disabled\" }`\n\nConfigure it per model via `agents.defaults.models.<provider/model>.params`:\n\n```\n{\n  agents: {\n    defaults: {\n      models: {\n        \"moonshot/kimi-k2.6\": {\n          params: {\n            thinking: { type: \"disabled\" },\n          },\n        },\n      },\n    },\n  },\n}\n```\n\nOpenClaw also maps runtime `/think` levels for Moonshot:\n\n| `/think` level | Moonshot behavior |\n| --- | --- |\n| `/think off` | `thinking.type=disabled` |\n| Any non-off level | `thinking.type=enabled` |\n\nWhen Moonshot thinking is enabled, `tool_choice` must be `auto` or `none`. OpenClaw normalizes incompatible `tool_choice` values to `auto` for compatibility.\n\nKimi K2.6 also accepts an optional `thinking.keep` field that controls\nmulti-turn retention of `reasoning_content`. Set it to `\"all\"` to keep full\nreasoning across turns; omit it (or leave it `null`) to use the server\ndefault strategy. OpenClaw only forwards `thinking.keep` for\n`moonshot/kimi-k2.6` and strips it from other models.\n\n```\n{\n  agents: {\n    defaults: {\n      models: {\n        \"moonshot/kimi-k2.6\": {\n          params: {\n            thinking: { type: \"enabled\", keep: \"all\" },\n          },\n        },\n      },\n    },\n  },\n}\n```\n\nTool call id sanitization\n\nMoonshot Kimi serves tool\\_call ids shaped like `functions.<name>:<index>`. OpenClaw preserves them unchanged so multi-turn tool calls keep working.To force strict sanitization on a custom OpenAI-compatible provider, set `sanitizeToolCallIds: true`:\n\n```\n{\n  models: {\n    providers: {\n      \"my-kimi-proxy\": {\n        api: \"openai-completions\",\n        sanitizeToolCallIds: true,\n      },\n    },\n  },\n}\n```\n\nStreaming usage compatibility\n\nNative Moonshot endpoints (`https://api.moonshot.ai/v1` and\n`https://api.moonshot.cn/v1`) advertise streaming usage compatibility on the\nshared `openai-completions` transport. OpenClaw keys that off endpoint\ncapabilities, so compatible custom provider ids targeting the same native\nMoonshot hosts inherit the same streaming-usage behavior.With the bundled K2.6 pricing, streamed usage that includes input, output,\nand cache-read tokens is also converted into local estimated USD cost for\n`/status`, `/usage full`, `/usage cost`, and transcript-backed session\naccounting.\n\nEndpoint and model ref reference\n\n| Provider | Model ref prefix | Endpoint | Auth env var |\n| --- | --- | --- | --- |\n| Moonshot | `moonshot/` | `https://api.moonshot.ai/v1` | `MOONSHOT_API_KEY` |\n| Moonshot CN | `moonshot/` | `https://api.moonshot.cn/v1` | `MOONSHOT_API_KEY` |\n| Kimi Coding | `kimi/` | Kimi Coding endpoint | `KIMI_API_KEY` |\n| Web search | N/A | Same as Moonshot API region | `KIMI_API_KEY` or `MOONSHOT_API_KEY` |\n\n- Kimi web search uses `KIMI_API_KEY` or `MOONSHOT_API_KEY`, and defaults to `https://api.moonshot.ai/v1` with model `kimi-k2.6`.\n- Override pricing and context metadata in `models.providers` if needed.\n- If Moonshot publishes different context limits for a model, adjust `contextWindow` accordingly.\n\n## [​](https://docs.openclaw.ai/providers/moonshot\\#related)  Related\n\n[**Model selection** \\\\\n\\\\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)\n\n[**Web search** \\\\\n\\\\\nConfiguring web search providers including Kimi.](https://docs.openclaw.ai/tools/web)\n\n[**Configuration reference** \\\\\n\\\\\nFull config schema for providers, models, and plugins.](https://docs.openclaw.ai/gateway/configuration-reference)\n\n[**Moonshot Open Platform** \\\\\n\\\\\nMoonshot API key management and documentation.](https://platform.moonshot.ai/)\n\n[Mistral](https://docs.openclaw.ai/providers/mistral) [NVIDIA](https://docs.openclaw.ai/providers/nvidia)\n\nCtrl+I
-
----
-
-## SenseAudio - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/senseaudio
-
-[Skip to main content](https://docs.openclaw.ai/providers/senseaudio#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-SenseAudio
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [SenseAudio](https://docs.openclaw.ai/providers/senseaudio#senseaudio)
-- [Getting Started](https://docs.openclaw.ai/providers/senseaudio#getting-started)
-- [Options](https://docs.openclaw.ai/providers/senseaudio#options)
-
-# [​](https://docs.openclaw.ai/providers/senseaudio\#senseaudio)  SenseAudio
-
-SenseAudio can transcribe inbound audio/voice-note attachments through
-OpenClaw’s shared `tools.media.audio` pipeline. OpenClaw posts multipart audio
-to the OpenAI-compatible transcription endpoint and injects the returned text
-as `{{Transcript}}` plus an `[Audio]` block.
-
-| Detail | Value |
-| --- | --- |
-| Website | [senseaudio.cn](https://senseaudio.cn/) |
-| Docs | [senseaudio.cn/docs](https://senseaudio.cn/docs) |
-| Auth | `SENSEAUDIO_API_KEY` |
-| Default model | `senseaudio-asr-pro-1.5-260319` |
-| Default URL | `https://api.senseaudio.cn/v1` |
-
-## [​](https://docs.openclaw.ai/providers/senseaudio\#getting-started)  Getting Started
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/senseaudio#)
-
-Set your API key
-
-```
-export SENSEAUDIO_API_KEY=\"...\"
-```
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/senseaudio#)
-
-Enable the audio provider
-
-```
-{
-  tools: {
-    media: {
-      audio: {
-        enabled: true,
-        models: [{ provider: \"senseaudio\", model: \"senseaudio-asr-pro-1.5-260319\" }],
-      },
-    },
-  },
-}
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/senseaudio#)
-
-Send a voice note
-
-Send an audio message through any connected channel. OpenClaw uploads the
-audio to SenseAudio and uses the transcript in the reply pipeline.
-
-## [​](https://docs.openclaw.ai/providers/senseaudio\#options)  Options
-
-| Option | Path | Description |
-| --- | --- | --- |
-| `model` | `tools.media.audio.models[].model` | SenseAudio ASR model id |
-| `language` | `tools.media.audio.models[].language` | Optional language hint |
-| `prompt` | `tools.media.audio.prompt` | Optional transcription prompt |
-| `baseUrl` | `tools.media.audio.baseUrl` or model | Override the OpenAI-compatible base |
-| `headers` | `tools.media.audio.request.headers` | Extra request headers |
-
-SenseAudio is batch STT only in OpenClaw. Voice Call realtime transcription
-continues to use providers with streaming STT support.
-
-Ctrl+I
-
----
-
-## OpenCode Go - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/opencode-go
-
-[Skip to main content](https://docs.openclaw.ai/providers/opencode-go#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-OpenCode Go
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Built-in catalog](https://docs.openclaw.ai/providers/opencode-go#built-in-catalog)
-- [Getting started](https://docs.openclaw.ai/providers/opencode-go#getting-started)
-- [Config example](https://docs.openclaw.ai/providers/opencode-go#config-example)
-- [Advanced configuration](https://docs.openclaw.ai/providers/opencode-go#advanced-configuration)
-- [Related](https://docs.openclaw.ai/providers/opencode-go#related)
-
-OpenCode Go is the Go catalog within [OpenCode](https://docs.openclaw.ai/providers/opencode).
-It uses the same `OPENCODE_API_KEY` as the Zen catalog, but keeps the runtime
-provider id `opencode-go` so upstream per-model routing stays correct.
-
-| Property | Value |
-| --- | --- |
-| Runtime provider | `opencode-go` |
-| Auth | `OPENCODE_API_KEY` |
-| Parent setup | [OpenCode](https://docs.openclaw.ai/providers/opencode) |
-
-## [​](https://docs.openclaw.ai/providers/opencode-go\\#built-in-catalog)  Built-in catalog
-
-OpenClaw sources most Go catalog rows from the bundled pi model registry and
-supplements current upstream rows while the registry catches up. Run
-`openclaw models list --provider opencode-go` for the current model list.The provider includes:
-
-| Model ref | Name |
-| --- | --- |
-| `opencode-go/glm-5` | GLM-5 |
-| `opencode-go/glm-5.1` | GLM-5.1 |
-| `opencode-go/kimi-k2.5` | Kimi K2.5 |
-| `opencode-go/kimi-k2.6` | Kimi K2.6 (3x limits) |
-| `opencode-go/deepseek-v4-pro` | DeepSeek V4 Pro |
-| `opencode-go/deepseek-v4-flash` | DeepSeek V4 Flash |
-| `opencode-go/mimo-v2-omni` | MiMo V2 Omni |
-| `opencode-go/mimo-v2-pro` | MiMo V2 Pro |
-| `opencode-go/minimax-m2.5` | MiniMax M2.5 |
-| `opencode-go/minimax-m2.7` | MiniMax M2.7 |
-| `opencode-go/qwen3.5-plus` | Qwen3.5 Plus |
-| `opencode-go/qwen3.6-plus` | Qwen3.6 Plus |
-
-## [​](https://docs.openclaw.ai/providers/opencode-go\\#getting-started)  Getting started
-
-- Interactive
-
-- Non-interactive
-
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/opencode-go#)
-
-Run onboarding
-
-```
-openclaw onboard --auth-choice opencode-go
-```
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/opencode-go#)
-
-Set a Go model as default
-
-```
-openclaw config set agents.defaults.model.primary \"opencode-go/kimi-k2.6\"
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/opencode-go#)
-
-Verify models are available
-
-```
-openclaw models list --provider opencode-go
-```
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/opencode-go#)
-
-Pass the key directly
-
-```
-openclaw onboard --opencode-go-api-key \"$OPENCODE_API_KEY\"
-```
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/opencode-go#)
-
-Verify models are available
-
-```
-openclaw models list --provider opencode-go
-```
-
-## [​](https://docs.openclaw.ai/providers/opencode-go\\#config-example)  Config example
-
-```
-{
-  env: { OPENCODE_API_KEY: \"YOUR_API_KEY_HERE\" }, // pragma: allowlist secret
-  agents: { defaults: { model: { primary: \"opencode-go/kimi-k2.6\" } } },
-}
-```
-
-## [​](https://docs.openclaw.ai/providers/opencode-go\\#advanced-configuration)  Advanced configuration
-
-Routing behavior
-
-OpenClaw handles per-model routing automatically when the model ref uses
-`opencode-go/...`. No additional provider config is required.
-
-Runtime ref convention
-
-Runtime refs stay explicit: `opencode/...` for Zen, `opencode-go/...` for Go.
-This keeps upstream per-model routing correct across both catalogs.
-
-Shared credentials
-
-The same `OPENCODE_API_KEY` is used by both the Zen and Go catalogs. Entering
-the key during setup stores credentials for both runtime providers.
-
-See [OpenCode](https://docs.openclaw.ai/providers/opencode) for the shared onboarding overview and the full
-Zen + Go catalog reference.
-
-## [​](https://docs.openclaw.ai/providers/opencode-go\\#related)  Related
-
-[**OpenCode (parent)** \\\\\n\\\\\nShared onboarding, catalog overview, and advanced notes.](https://docs.openclaw.ai/providers/opencode)
-
-[**Model selection** \\\\\n\\\\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)
-
-[OpenCode](https://docs.openclaw.ai/providers/opencode) [OpenRouter](https://docs.openclaw.ai/providers/openrouter)
-
-Ctrl+I
-
----
-
-## Tencent Cloud (TokenHub) - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/tencent
-
-[Skip to main content](https://docs.openclaw.ai/providers/tencent#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-Tencent Cloud (TokenHub)
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Tencent Cloud TokenHub](https://docs.openclaw.ai/providers/tencent#tencent-cloud-tokenhub)
-- [Quick start](https://docs.openclaw.ai/providers/tencent#quick-start)
-- [Non-interactive setup](https://docs.openclaw.ai/providers/tencent#non-interactive-setup)
-- [Built-in catalog](https://docs.openclaw.ai/providers/tencent#built-in-catalog)
-- [Endpoint override](https://docs.openclaw.ai/providers/tencent#endpoint-override)
-- [Notes](https://docs.openclaw.ai/providers/tencent#notes)
-- [Environment note](https://docs.openclaw.ai/providers/tencent#environment-note)
-- [Related documentation](https://docs.openclaw.ai/providers/tencent#related-documentation)
-
-# [​](https://docs.openclaw.ai/providers/tencent\\#tencent-cloud-tokenhub)  Tencent Cloud TokenHub
-
-Tencent Cloud ships as a **bundled provider plugin** in OpenClaw. It gives access to Tencent Hy3 preview through the TokenHub endpoint (`tencent-tokenhub`).The provider uses an OpenAI-compatible API.
-
-| Property | Value |
-| --- | --- |
-| Provider | `tencent-tokenhub` |
-| Default model | `tencent-tokenhub/hy3-preview` |
-| Auth | `TOKENHUB_API_KEY` |
-| API | OpenAI-compatible chat completions |
-| Base URL | `https://tokenhub.tencentmaas.com/v1` |
-| Global URL | `https://tokenhub-intl.tencentmaas.com/v1` |
-
-## [​](https://docs.openclaw.ai/providers/tencent\\#quick-start)  Quick start
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/tencent#)
-
-Create a TokenHub API key
-
-Create an API key in Tencent Cloud TokenHub. If you choose a limited access scope for the key, include **Hy3 preview** in the allowed models.
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/tencent#)
-
-Run onboarding
-
-```
-openclaw onboard --auth-choice tokenhub-api-key
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/tencent#)
-
-Verify the model
-
-```
-openclaw models list --provider tencent-tokenhub
-```
-
-## [​](https://docs.openclaw.ai/providers/tencent\\#non-interactive-setup)  Non-interactive setup
-
-```
-openclaw onboard --non-interactive \\\
-  --mode local \\\
-  --auth-choice tokenhub-api-key \\\
-  --tokenhub-api-key \"$TOKENHUB_API_KEY\" \\\
-  --skip-health \\\
-  --accept-risk
-```
-
-## [​](https://docs.openclaw.ai/providers/tencent\\#built-in-catalog)  Built-in catalog
-
-| Model ref | Name | Input | Context | Max output | Notes |
-| --- | --- | --- | --- | --- | --- |
-| `tencent-tokenhub/hy3-preview` | Hy3 preview (TokenHub) | text | 256,000 | 64,000 | Default; reasoning-enabled |
-
-Hy3 preview is Tencent Hunyuan’s large MoE language model for reasoning, long-context instruction following, code, and agent workflows. Tencent’s OpenAI-compatible examples use `hy3-preview` as the model id and support standard chat-completions tool calling plus `reasoning_effort`.
-
-The model id is `hy3-preview`. Do not confuse it with Tencent’s `HY-3D-*` models, which are 3D generation APIs and are not the OpenClaw chat model configured by this provider.
-
-## [​](https://docs.openclaw.ai/providers/tencent\\#endpoint-override)  Endpoint override
-
-OpenClaw defaults to Tencent Cloud’s `https://tokenhub.tencentmaas.com/v1` endpoint. Tencent also documents an international TokenHub endpoint:
-
-```
-openclaw config set models.providers.tencent-tokenhub.baseUrl \"https://tokenhub-intl.tencentmaas.com/v1\"
-```
-
-Only override the endpoint when your TokenHub account or region requires it.
-
-## [​](https://docs.openclaw.ai/providers/tencent\\#notes)  Notes
-
-- TokenHub model refs use `tencent-tokenhub/<modelId>`.
-- The bundled catalog currently includes `hy3-preview`.
-- The plugin marks Hy3 preview as reasoning-capable and streaming-usage capable.
-- The plugin ships with tiered Hy3 pricing metadata, so cost estimates are populated without manual pricing overrides.
-- Override pricing, context, or endpoint metadata in `models.providers` only when needed.
-
-## [​](https://docs.openclaw.ai/providers/tencent\\#environment-note)  Environment note
-
-If the Gateway runs as a daemon (launchd/systemd), make sure `TOKENHUB_API_KEY`
-is available to that process (for example, in `~/.openclaw/.env` or via
-`env.shellEnv`).
-
-## [​](https://docs.openclaw.ai/providers/tencent\\#related-documentation)  Related documentation
-
-- [OpenClaw Configuration](https://docs.openclaw.ai/gateway/configuration)
-- [Model Providers](https://docs.openclaw.ai/concepts/model-providers)
-- [Tencent TokenHub product page](https://cloud.tencent.com/product/tokenhub)
-- [Tencent TokenHub text generation](https://cloud.tencent.com/document/product/1823/130079)
-- [Tencent TokenHub Cline setup for Hy3 preview](https://cloud.tencent.com/document/product/1823/130932)
-- [Tencent Hy3 preview model card](https://huggingface.co/tencent/Hy3-preview)
-
-[Synthetic](https://docs.openclaw.ai/providers/synthetic) [Together AI](https://docs.openclaw.ai/providers/together)
-
-Ctrl+I
-
----
-
-## Vydra - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/vydra
-
-[Skip to main content](https://docs.openclaw.ai/providers/vydra#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-Vydra
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Setup](https://docs.openclaw.ai/providers/vydra#setup)
-- [Capabilities](https://docs.openclaw.ai/providers/vydra#capabilities)
-- [Related](https://docs.openclaw.ai/providers/vydra#related)
-
-The bundled Vydra plugin adds:
-
-- Image generation via `vydra/grok-imagine`
-- Video generation via `vydra/veo3` and `vydra/kling`
-- Speech synthesis via Vydra’s ElevenLabs-backed TTS route
-
-OpenClaw uses the same `VYDRA_API_KEY` for all three capabilities.
-
-Use `https://www.vydra.ai/api/v1` as the base URL.Vydra’s apex host (`https://vydra.ai/api/v1`) currently redirects to `www`. Some HTTP clients drop `Authorization` on that cross-host redirect, which turns a valid API key into a misleading auth failure. The bundled plugin uses the `www` base URL directly to avoid that.
-
-## [​](https://docs.openclaw.ai/providers/vydra\\#setup)  Setup
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/vydra#)
-
-Run interactive onboarding
-
-```
-openclaw onboard --auth-choice vydra-api-key
-```
-
-Or set the env var directly:
-
-```
-export VYDRA_API_KEY=\"vydra_live_...\"
-```
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/vydra#)
-
-Choose a default capability
-
-Pick one or more of the capabilities below (image, video, or speech) and apply the matching configuration.
-
-## [​](https://docs.openclaw.ai/providers/vydra\\#capabilities)  Capabilities
-
-Image generation
-
-Default image model:
-
-- `vydra/grok-imagine`
-
-Set it as the default image provider:
-
-```
-{
-  agents: {
-    defaults: {
-      imageGenerationModel: {
-        primary: \"vydra/grok-imagine\",
-      },
-    },
-  },
-}
-```
-
-Current bundled support is text-to-image only. Vydra’s hosted edit routes expect remote image URLs, and OpenClaw does not add a Vydra-specific upload bridge in the bundled plugin yet.
-
-See [Image Generation](https://docs.openclaw.ai/tools/image-generation) for shared tool parameters, provider selection, and failover behavior.
-
-Video generation
-
-Registered video models:
-
-- `vydra/veo3` for text-to-video
-- `vydra/kling` for image-to-video
-
-Set Vydra as the default video provider:
-
-```
-{
-  agents: {
-    defaults: {
-      videoGenerationModel: {
-        primary: \"vydra/veo3\",
-      },
-    },
-  },
-}
-```
-
-Notes:
-
-- `vydra/veo3` is bundled as text-to-video only.
-- `vydra/kling` currently requires a remote image URL reference. Local file uploads are rejected up front.
-- Vydra’s current `kling` HTTP route has been inconsistent about whether it requires `image_url` or `video_url`; the bundled provider maps the same remote image URL into both fields.
-- The bundled plugin stays conservative and does not forward undocumented style knobs such as aspect ratio, resolution, watermark, or generated audio.
-
-See [Video Generation](https://docs.openclaw.ai/tools/video-generation) for shared tool parameters, provider selection, and failover behavior.
-
-Video live tests
-
-Provider-specific live coverage:
-
-```
-OPENCLAW_LIVE_TEST=1 \\\
-OPENCLAW_LIVE_VYDRA_VIDEO=1 \\\
-pnpm test:live -- extensions/vydra/vydra.live.test.ts
-```
-
-The bundled Vydra live file now covers:
-
-- `vydra/veo3` text-to-video
-- `vydra/kling` image-to-video using a remote image URL
-
-Override the remote image fixture when needed:
-
-```
-export OPENCLAW_LIVE_VYDRA_KLING_IMAGE_URL=\"https://example.com/reference.png\"
-```
-
-Speech synthesis
-
-Set Vydra as the speech provider:
-
-```
-{
-  messages: {
-    tts: {
-      provider: \"vydra\",
-      providers: {
-        vydra: {
-          apiKey: \"${VYDRA_API_KEY}\",
-          voiceId: \"21m00Tcm4TlvDq8ikWAM\",
-        },
-      },
-    },
-  },
-}
-```
-
-Defaults:
-
-- Model: `elevenlabs/tts`
-- Voice id: `21m00Tcm4TlvDq8ikWAM`
-
-The bundled plugin currently exposes one known-good default voice and returns MP3 audio files.
-
-## [​](https://docs.openclaw.ai/providers/vydra\\#related)  Related
-
-[**Provider directory** \\\\\n\\\\\nBrowse all available providers.](https://docs.openclaw.ai/providers/index)
-
-[**Image generation** \\\\\n\\\\\nShared image tool parameters and provider selection.](https://docs.openclaw.ai/tools/image-generation)
-
-[**Video generation** \\\\\n\\\\\nShared video tool parameters and provider selection.](https://docs.openclaw.ai/tools/video-generation)
-
-[**Configuration reference** \\\\\n\\\\\nAgent defaults and model configuration.](https://docs.openclaw.ai/gateway/config-agents#agent-defaults)
-
-[Volcengine (Doubao)](https://docs.openclaw.ai/providers/volcengine) [xAI](https://docs.openclaw.ai/providers/xai)
-
-Ctrl+I
-
----
-
-## Cloudflare AI gateway - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/cloudflare-ai-gateway
-
-[Skip to main content](https://docs.openclaw.ai/providers/cloudflare-ai-gateway#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-⌘K
-
-Search...
-
-Navigation
-
-Providers
-
-Cloudflare AI gateway
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Getting started](https://docs.openclaw.ai/providers/cloudflare-ai-gateway#getting-started)
-- [Non-interactive example](https://docs.openclaw.ai/providers/cloudflare-ai-gateway#non-interactive-example)
-- [Advanced configuration](https://docs.openclaw.ai/providers/cloudflare-ai-gateway#advanced-configuration)
-- [Related](https://docs.openclaw.ai/providers/cloudflare-ai-gateway#related)
-
-Cloudflare AI Gateway sits in front of provider APIs and lets you add analytics, caching, and controls. For Anthropic, OpenClaw uses the Anthropic Messages API through your Gateway endpoint.
-
-| Property | Value |
-| --- | --- |
-| Provider | `cloudflare-ai-gateway` |
-| Base URL | `https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/anthropic` |
-| Default model | `cloudflare-ai-gateway/claude-sonnet-4-6` |
-| API key | `CLOUDFLARE_AI_GATEWAY_API_KEY` (your provider API key for requests through the Gateway) |
-
-For Anthropic models routed through Cloudflare AI Gateway, use your **Anthropic API key** as the provider key.
-
-When thinking is enabled for Anthropic Messages models, OpenClaw strips trailing
-assistant prefill turns before sending the payload through Cloudflare AI Gateway.
-Anthropic rejects response prefilling with extended thinking, while ordinary
-non-thinking prefill remains available.
-
-## [​](https://docs.openclaw.ai/providers/cloudflare-ai-gateway\\#getting-started)  Getting started
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/cloudflare-ai-gateway#)
-
-Set the provider API key and Gateway details
-
-Run onboarding and choose the Cloudflare AI Gateway auth option:
-
-```
-openclaw onboard --auth-choice cloudflare-ai-gateway-api-key
-```
-
-This prompts for your account ID, gateway ID, and API key.
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/cloudflare-ai-gateway#)
-
-Set a default model
-
-Add the model to your OpenClaw config:
-
-```
-{
-  agents: {
-    defaults: {
-      model: { primary: \"cloudflare-ai-gateway/claude-sonnet-4-6\" },
-    },
-  },
-}
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/cloudflare-ai-gateway#)
-
-Verify the model is available
-
-```
-openclaw models list --provider cloudflare-ai-gateway
-```
-
-## [​](https://docs.openclaw.ai/providers/cloudflare-ai-gateway\\#non-interactive-example)  Non-interactive example
-
-For scripted or CI setups, pass all values on the command line:
-
-```
-openclaw onboard --non-interactive \\\
-  --mode local \\\
-  --auth-choice cloudflare-ai-gateway-api-key \\\
-  --cloudflare-ai-gateway-account-id \"your-account-id\" \\\
-  --cloudflare-ai-gateway-gateway-id \"your-gateway-id\" \\\
-  --cloudflare-ai-gateway-api-key \"$CLOUDFLARE_AI_GATEWAY_API_KEY\"
-```
-
-## [​](https://docs.openclaw.ai/providers/cloudflare-ai-gateway\\#advanced-configuration)  Advanced configuration
-
-Authenticated gateways
-
-If you enabled Gateway authentication in Cloudflare, add the `cf-aig-authorization` header. This is **in addition to** your provider API key.
-
-```
-{
-  models: {
-    providers: {
-      \"cloudflare-ai-gateway\": {
-        headers: {
-          \"cf-aig-authorization\": \"Bearer <cloudflare-ai-gateway-token>\",
-        },
-      },
-    },
-  },
-}
-```
-
-The `cf-aig-authorization` header authenticates with the Cloudflare Gateway itself, while the provider API key (for example, your Anthropic key) authenticates with the upstream provider.
-
-Environment note
-
-If the Gateway runs as a daemon (launchd/systemd), make sure `CLOUDFLARE_AI_GATEWAY_API_KEY` is available to that process.
-
-A key sitting only in `~/.profile` will not help a launchd/systemd daemon unless that environment is imported there as well. Set the key in `~/.openclaw/.env` or via `env.shellEnv` to ensure the gateway process can read it.
-
-## [​](https://docs.openclaw.ai/providers/cloudflare-ai-gateway\\#related)  Related
-
-## Model selection
-
-Choosing providers, model refs, and failover behavior.
-
-## Troubleshooting
-
-General troubleshooting and FAQ.
-
-[Claude Max API proxy](https://docs.openclaw.ai/providers/claude-max-api-proxy) [ComfyUI](https://docs.openclaw.ai/providers/comfy)
-
-⌘I
-
----
-
-## ComfyUI - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/comfy
-
-[Skip to main content](https://docs.openclaw.ai/providers/comfy#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-ComfyUI
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [What it supports](https://docs.openclaw.ai/providers/comfy#what-it-supports)
-- [Getting started](https://docs.openclaw.ai/providers/comfy#getting-started)
-- [Configuration](https://docs.openclaw.ai/providers/comfy#configuration)
-- [Shared keys](https://docs.openclaw.ai/providers/comfy#shared-keys)
-- [Per-capability keys](https://docs.openclaw.ai/providers/comfy#per-capability-keys)
-- [Workflow details](https://docs.openclaw.ai/providers/comfy#workflow-details)
-- [Related](https://docs.openclaw.ai/providers/comfy#related)
-
-OpenClaw ships a bundled `comfy` plugin for workflow-driven ComfyUI runs. The plugin is entirely workflow-driven, so OpenClaw does not try to map generic `size`, `aspectRatio`, `resolution`, `durationSeconds`, or TTS-style controls onto your graph.
-
-| Property | Detail |
-| --- | --- |
-| Provider | `comfy` |
-| Models | `comfy/workflow` |
-| Shared surfaces | `image_generate`, `video_generate`, `music_generate` |
-| Auth | None for local ComfyUI; `COMFY_API_KEY` or `COMFY_CLOUD_API_KEY` for Comfy Cloud |
-| API | ComfyUI `/prompt` / `/history` / `/view` and Comfy Cloud `/api/*` |
-
-## [​](https://docs.openclaw.ai/providers/comfy\\#what-it-supports)  What it supports
-
-- Image generation from a workflow JSON
-- Image editing with 1 uploaded reference image
-- Video generation from a workflow JSON
-- Video generation with 1 uploaded reference image
-- Music or audio generation through the shared `music_generate` tool
-- Output download from a configured node or all matching output nodes
-
-## [​](https://docs.openclaw.ai/providers/comfy\\#getting-started)  Getting started
-
-Choose between running ComfyUI on your own machine or using Comfy Cloud.
-
-- Local
-
-- Comfy Cloud
-
-
-**Best for:** running your own ComfyUI instance on your machine or LAN.
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/comfy#)
-
-Start ComfyUI locally
-
-Make sure your local ComfyUI instance is running (defaults to `http://127.0.0.1:8188`).
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/comfy#)
-
-Prepare your workflow JSON
-
-Export or create a ComfyUI workflow JSON file. Note the node IDs for the prompt input node and the output node you want OpenClaw to read from.
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/comfy#)
-
-Configure the provider
-
-Set `mode: \"local\"` and point at your workflow file. Here is a minimal image example:
-
-```
-{
-  plugins: {
-    entries: {
-      comfy: {
-        config: {
-          mode: \"local\",
-          baseUrl: \"http://127.0.0.1:8188\",
-          image: {
-            workflowPath: \"./workflows/flux-api.json\",
-            promptNodeId: \"6\",
-            outputNodeId: \"9\",
-          },
-        },
-      },
-    },
-  },
-}
-```
-
-4
-
-[Navigate to header](https://docs.openclaw.ai/providers/comfy#)
-
-Set the default model
-
-Point OpenClaw at the `comfy/workflow` model for the capability you configured:
-
-```
-{
-  agents: {
-    defaults: {
-      imageGenerationModel: {
-        primary: \"comfy/workflow\",
-      },
-    },
-  },
-}
-```
-
-5
-
-[Navigate to header](https://docs.openclaw.ai/providers/comfy#)
-
-Verify
-
-```
-openclaw models list --provider comfy
-```
-
-**Best for:** running workflows on Comfy Cloud without managing local GPU resources.
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/comfy#)
-
-Get an API key
-
-Sign up at [comfy.org](https://comfy.org/) and generate an API key from your account dashboard.
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/comfy#)
-
-Set the API key
-
-Provide your key through one of these methods:
-
-```
-# Environment variable (preferred)
-export COMFY_API_KEY=\"your-key\"
-
-# Alternative environment variable
-export COMFY_CLOUD_API_KEY=\"your-key\"
-
-# Or inline in config
-openclaw config set plugins.entries.comfy.config.apiKey \"your-key\"
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/comfy#)
-
-Prepare your workflow JSON
-
-Export or create a ComfyUI workflow JSON file. Note the node IDs for the prompt input node and the output node.
-
-4
-
-[Navigate to header](https://docs.openclaw.ai/providers/comfy#)
-
-Configure the provider
-
-Set `mode: \"cloud\"` and point at your workflow file:
-
-```
-{
-  plugins: {
-    entries: {
-      comfy: {
-        config: {
-          mode: \"cloud\",
-          image: {
-            workflowPath: \"./workflows/flux-api.json\",
-            promptNodeId: \"6\",
-            outputNodeId: \"9\",
-          },
-        },
-      },
-    },
-  },
-}
-```
-
-Cloud mode defaults `baseUrl` to `https://cloud.comfy.org`. You only need to set `baseUrl` if you use a custom cloud endpoint.
-
-5
-
-[Navigate to header](https://docs.openclaw.ai/providers/comfy#)
-
-Set the default model
-
-```
-{
-  agents: {
-    defaults: {
-      imageGenerationModel: {
-        primary: \"comfy/workflow\",
-      },
-    },
-  },
-}
-```
-
-6
-
-[Navigate to header](https://docs.openclaw.ai/providers/comfy#)
-
-Verify
-
-```
-openclaw models list --provider comfy
-```
-
-## [​](https://docs.openclaw.ai/providers/comfy\\#configuration)  Configuration
-
-Comfy supports shared top-level connection settings plus per-capability workflow sections (`image`, `video`, `music`):
-
-```
-{
-  plugins: {
-    entries: {
-      comfy: {
-        config: {
-          mode: \"local\",
-          baseUrl: \"http://127.0.0.1:8188\",
-          image: {
-            workflowPath: \"./workflows/flux-api.json\",
-            promptNodeId: \"6\",
-            outputNodeId: \"9\",
-          },
-          video: {
-            workflowPath: \"./workflows/video-api.json\",
-            promptNodeId: \"12\",
-            outputNodeId: \"21\",
-          },
-          music: {
-            workflowPath: \"./workflows/music-api.json\",
-            promptNodeId: \"3\",
-            outputNodeId: \"18\",
-          },
-        },
-      },
-    },
-  },
-}
-```
-
-### [​](https://docs.openclaw.ai/providers/comfy\\#shared-keys)  Shared keys
-
-| Key | Type | Description |
-| --- | --- | --- |
-| `mode` | `\"local\"` or `\"cloud\"` | Connection mode. |
-| `baseUrl` | string | Defaults to `http://127.0.0.1:8188` for local or `https://cloud.comfy.org` for cloud. |
-| `apiKey` | string | Optional inline key, alternative to `COMFY_API_KEY` / `COMFY_CLOUD_API_KEY` env vars. |
-| `allowPrivateNetwork` | boolean | Allow a private/LAN `baseUrl` in cloud mode. |
-
-### [​](https://docs.openclaw.ai/providers/comfy\\#per-capability-keys)  Per-capability keys
-
-These keys apply inside the `image`, `video`, or `music` sections:
-
-| Key | Required | Default | Description |
-| --- | --- | --- | --- |
-| `workflow` or `workflowPath` | Yes | — | Path to the ComfyUI workflow JSON file. |
-| `promptNodeId` | Yes | — | Node ID that receives the text prompt. |
-| `promptInputName` | No | `\"text\"` | Input name on the prompt node. |
-| `outputNodeId` | No | — | Node ID to read output from. If omitted, all matching output nodes are used. |
-| `pollIntervalMs` | No | — | Polling interval in milliseconds for job completion. |
-| `timeoutMs` | No | — | Timeout in milliseconds for the workflow run. |
-
-The `image` and `video` sections also support:
-
-| Key | Required | Default | Description |
-| --- | --- | --- | --- |
-| `inputImageNodeId` | Yes (when passing a reference image) | — | Node ID that receives the uploaded reference image. |
-| `inputImageInputName` | No | `\"image\"` | Input name on the image node. |
-
-## [​](https://docs.openclaw.ai/providers/comfy\\#workflow-details)  Workflow details
-
-Image workflows
-
-Set the default image model to `comfy/workflow`:
-
-```
-{
-  agents: {
-    defaults: {
-      imageGenerationModel: {
-        primary: \"comfy/workflow\",
-      },
-    },
-  },
-}
-```
-
-**Reference-image editing example:**To enable image editing with an uploaded reference image, add `inputImageNodeId` to your image config:
-
-```
-{
-  plugins: {
-    entries: {
-      comfy: {
-        config: {
-          image: {
-            workflowPath: \"./workflows/edit-api.json\",
-            promptNodeId: \"6\",
-            inputImageNodeId: \"7\",
-            inputImageInputName: \"image\",
-            outputNodeId: \"9\",
-          },
-        },
-      },
-    },
-  },
-}
-```
-
-Video workflows
-
-Set the default video model to `comfy/workflow`:
-
-```
-{
-  agents: {
-    defaults: {
-      videoGenerationModel: {
-        primary: \"comfy/workflow\",
-      },
-    },
-  },
-}
-```
-
-Comfy video workflows support text-to-video and image-to-video through the configured graph.
-
-OpenClaw does not pass input videos into Comfy workflows. Only text prompts and single reference images are supported as inputs.
-
-Music workflows
-
-The bundled plugin registers a music-generation provider for workflow-defined audio or music outputs, surfaced through the shared `music_generate` tool:
-
-```
-/tool music_generate prompt=\"Warm ambient synth loop with soft tape texture\"
-```
-
-Use the `music` config section to point at your audio workflow JSON and output node.
-
-Backward compatibility
-
-Existing top-level image config (without the nested `image` section) still works:
-
-```
-{
-  plugins: {
-    entries: {
-      comfy: {
-        config: {
-          workflowPath: \"./workflows/flux-api.json\",
-          promptNodeId: \"6\",
-          outputNodeId: \"9\",
-        },
-      },
-    },
-  },
-}
-```
-
-OpenClaw treats that legacy shape as the image workflow config. You do not need to migrate immediately, but the nested `image` / `video` / `music` sections are recommended for new setups.
-
-If you only use image generation, the legacy flat config and the new nested `image` section are functionally equivalent.
-
-Live tests
-
-Opt-in live coverage exists for the bundled plugin:
-
-```
-OPENCLAW_LIVE_TEST=1 COMFY_LIVE_TEST=1 pnpm test:live -- extensions/comfy/comfy.live.test.ts
-```
-
-The live test skips individual image, video, or music cases unless the matching Comfy workflow section is configured.
-
-## [​](https://docs.openclaw.ai/providers/comfy\\#related)  Related
-
-[**Image Generation** \\\\\n\\\\\nImage generation tool configuration and usage.](https://docs.openclaw.ai/tools/image-generation)
-
-[**Video Generation** \\\\\n\\\\\nVideo generation tool configuration and usage.](https://docs.openclaw.ai/tools/video-generation)
-
-[**Music Generation** \\\\\n\\\\\nMusic and audio generation tool setup.](https://docs.openclaw.ai/tools/music-generation)
-
-[**Provider Directory** \\\\\n\\\\\nOverview of all providers and model refs.](https://docs.openclaw.ai/providers/index)
-
-[**Configuration reference** \\\\\n\\\\\nFull config reference including agent defaults.](https://docs.openclaw.ai/gateway/config-agents#agent-defaults)
-
-[Cloudflare AI gateway](https://docs.openclaw.ai/providers/cloudflare-ai-gateway) [Deepgram](https://docs.openclaw.ai/providers/deepgram)
-
-Ctrl+I
-
----
-
-## Mistral - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/mistral
-
-[Skip to main content](https://docs.openclaw.ai/providers/mistral#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-Mistral
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Getting started](https://docs.openclaw.ai/providers/mistral#getting-started)
-- [Built-in LLM catalog](https://docs.openclaw.ai/providers/mistral#built-in-llm-catalog)
-- [Audio transcription (Voxtral)](https://docs.openclaw.ai/providers/mistral#audio-transcription-voxtral)
-- [Voice Call streaming STT](https://docs.openclaw.ai/providers/mistral#voice-call-streaming-stt)
-- [Advanced configuration](https://docs.openclaw.ai/providers/mistral#advanced-configuration)
-- [Related](https://docs.openclaw.ai/providers/mistral#related)
-
-OpenClaw supports Mistral for both text/image model routing (`mistral/...`) and
-audio transcription via Voxtral in media understanding.
-Mistral can also be used for memory embeddings (`memorySearch.provider = \"mistral\"`).
-
-- Provider: `mistral`
-- Auth: `MISTRAL_API_KEY`
-- API: Mistral Chat Completions (`https://api.mistral.ai/v1`)
-
-## [​](https://docs.openclaw.ai/providers/mistral\\#getting-started)  Getting started
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/mistral#)
-
-Get your API key
-
-Create an API key in the [Mistral Console](https://console.mistral.ai/).
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/mistral#)
-
-Run onboarding
-
-```
-openclaw onboard --auth-choice mistral-api-key
-```
-
-Or pass the key directly:
-
-```
-openclaw onboard --mistral-api-key \"$MISTRAL_API_KEY\"
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/mistral#)
-
-Set a default model
-
-```
-{
-  env: { MISTRAL_API_KEY: \"sk-...\" },
-  agents: { defaults: { model: { primary: \"mistral/mistral-large-latest\" } } },
-}
-```
-
-4
-
-[Navigate to header](https://docs.openclaw.ai/providers/mistral#)
-
-Verify the model is available
-
-```
-openclaw models list --provider mistral
-```
-
-## [​](https://docs.openclaw.ai/providers/mistral\\#built-in-llm-catalog)  Built-in LLM catalog
+<AccordionGroup>
+  <Accordion title="Virtual keys">
+    Create a dedicated key for OpenClaw with spend limits:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    curl -X POST "http://localhost:4000/key/generate" \
+      -H "Authorization: Bearer $LITELLM_MASTER_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "key_alias": "openclaw",
+        "max_budget": 50.00,
+        "budget_duration": "monthly"
+      }'
+    ```
+
+    Use the generated key as `LITELLM_API_KEY`.
+  </Accordion>
+
+  <Accordion title="Model routing">
+    LiteLLM can route model requests to different backends. Configure in your LiteLLM `config.yaml`:
+
+    ```yaml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    model_list:
+      - model_name: claude-opus-4-6
+        litellm_params:
+          model: claude-opus-4-6
+          api_key: os.environ/ANTHROPIC_API_KEY
+
+      - model_name: gpt-4o
+        litellm_params:
+          model: gpt-4o
+          api_key: os.environ/OPENAI_API_KEY
+    ```
+
+    OpenClaw keeps requesting `claude-opus-4-6` — LiteLLM handles the routing.
+  </Accordion>
+
+  <Accordion title="Viewing usage">
+    Check LiteLLM's dashboard or API:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    # Key info
+    curl "http://localhost:4000/key/info" \
+      -H "Authorization: Bearer sk-litellm-key"
+
+    # Spend logs
+    curl "http://localhost:4000/spend/logs" \
+      -H "Authorization: Bearer $LITELLM_MASTER_KEY"
+    ```
+  </Accordion>
+
+  <Accordion title="Proxy behavior notes">
+    * LiteLLM runs on `http://localhost:4000` by default
+    * OpenClaw connects through LiteLLM's proxy-style OpenAI-compatible `/v1`
+      endpoint
+    * Native OpenAI-only request shaping does not apply through LiteLLM:
+      no `service_tier`, no Responses `store`, no prompt-cache hints, and no
+      OpenAI reasoning-compat payload shaping
+    * Hidden OpenClaw attribution headers (`originator`, `version`, `User-Agent`)
+      are not injected on custom LiteLLM base URLs
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+  For general provider configuration and failover behavior, see [Model Providers](/concepts/model-providers).
+</Note>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="LiteLLM Docs" href="https://docs.litellm.ai" icon="book">
+    Official LiteLLM documentation and API reference.
+  </Card>
+
+  <Card title="Model selection" href="/concepts/model-providers" icon="layers">
+    Overview of all providers, model refs, and failover behavior.
+  </Card>
+
+  <Card title="Configuration" href="/gateway/configuration" icon="gear">
+    Full config reference.
+  </Card>
+
+  <Card title="Model selection" href="/concepts/models" icon="brain">
+    How to choose and configure models.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Mistral
+
+OpenClaw includes a bundled Mistral plugin that registers four contracts: chat completions, media understanding (Voxtral batch transcription), realtime STT for Voice Call (Voxtral Realtime), and memory embeddings (`mistral-embed`).
+
+| Property         | Value                                       |
+| ---------------- | ------------------------------------------- |
+| Provider id      | `mistral`                                   |
+| Plugin           | bundled, `enabledByDefault: true`           |
+| Auth env var     | `MISTRAL_API_KEY`                           |
+| Onboarding flag  | `--auth-choice mistral-api-key`             |
+| Direct CLI flag  | `--mistral-api-key <key>`                   |
+| API              | OpenAI-compatible (`openai-completions`)    |
+| Base URL         | `https://api.mistral.ai/v1`                 |
+| Default model    | `mistral/mistral-large-latest`              |
+| Embedding model  | `mistral-embed`                             |
+| Voxtral batch    | `voxtral-mini-latest` (audio transcription) |
+| Voxtral realtime | `voxtral-mini-transcribe-realtime-2602`     |
+
+## Getting started
+
+<Steps>
+  <Step title="Get your API key">
+    Create an API key in the [Mistral Console](https://console.mistral.ai/).
+  </Step>
+
+  <Step title="Run onboarding">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw onboard --auth-choice mistral-api-key
+    ```
+
+    Or pass the key directly:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw onboard --mistral-api-key "$MISTRAL_API_KEY"
+    ```
+  </Step>
+
+  <Step title="Set a default model">
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      env: { MISTRAL_API_KEY: "sk-..." },
+      agents: { defaults: { model: { primary: "mistral/mistral-large-latest" } } },
+    }
+    ```
+  </Step>
+
+  <Step title="Verify the model is available">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw models list --provider mistral
+    ```
+  </Step>
+</Steps>
+
+## Built-in LLM catalog
 
 OpenClaw currently ships this bundled Mistral catalog:
 
-| Model ref | Input | Context | Max output | Notes |
-| --- | --- | --- | --- |
-| `mistral/mistral-large-latest` | text, image | 262,144 | 16,384 | Default model |
-| `mistral/mistral-medium-2508` | text, image | 262,144 | 8,192 | Mistral Medium 3.1 |
-| `mistral/mistral-small-latest` | text, image | 128,000 | 16,384 | Mistral Small 4; adjustable reasoning via API `reasoning_effort` |
-| `mistral/pixtral-large-latest` | text, image | 128,000 | 32,768 | Pixtral |
-| `mistral/codestral-latest` | text | 256,000 | 4,096 | Coding |
-| `mistral/devstral-medium-latest` | text | 262,144 | 32,768 | Devstral 2 |
-| `mistral/magistral-small` | text | 128,000 | 40,000 | Reasoning-enabled |
+| Model ref                        | Input       | Context | Max output | Notes                                                            |
+| -------------------------------- | ----------- | ------- | ---------- | ---------------------------------------------------------------- |
+| `mistral/mistral-large-latest`   | text, image | 262,144 | 16,384     | Default model                                                    |
+| `mistral/mistral-medium-2508`    | text, image | 262,144 | 8,192      | Mistral Medium 3.1                                               |
+| `mistral/mistral-small-latest`   | text, image | 128,000 | 16,384     | Mistral Small 4; adjustable reasoning via API `reasoning_effort` |
+| `mistral/pixtral-large-latest`   | text, image | 128,000 | 32,768     | Pixtral                                                          |
+| `mistral/codestral-latest`       | text        | 256,000 | 4,096      | Coding                                                           |
+| `mistral/devstral-medium-latest` | text        | 262,144 | 32,768     | Devstral 2                                                       |
+| `mistral/magistral-small`        | text        | 128,000 | 40,000     | Reasoning-enabled                                                |
 
-## [​](https://docs.openclaw.ai/providers/mistral\\#audio-transcription-voxtral)  Audio transcription (Voxtral)
+## Audio transcription (Voxtral)
 
 Use Voxtral for batch audio transcription through the media understanding
 pipeline.
 
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   tools: {
     media: {
       audio: {
         enabled: true,
-        models: [{ provider: \"mistral\", model: \"voxtral-mini-latest\" }],
+        models: [{ provider: "mistral", model: "voxtral-mini-latest" }],
       },
     },
   },
 }
 ```
 
-The media transcription path uses `/v1/audio/transcriptions`. The default audio model for Mistral is `voxtral-mini-latest`.
+<Tip>
+  The media transcription path uses `/v1/audio/transcriptions`. The default audio model for Mistral is `voxtral-mini-latest`.
+</Tip>
 
-## [​](https://docs.openclaw.ai/providers/mistral\\#voice-call-streaming-stt)  Voice Call streaming STT
+## Voice Call streaming STT
 
 The bundled `mistral` plugin registers Voxtral Realtime as a Voice Call
 streaming STT provider.
 
-| Setting | Config path | Default |
-| --- | --- | --- |
-| API key | `plugins.entries.voice-call.config.streaming.providers.mistral.apiKey` | Falls back to `MISTRAL_API_KEY` |
-| Model | `...mistral.model` | `voxtral-mini-transcribe-realtime-2602` |
-| Encoding | `...mistral.encoding` | `pcm_mulaw` |
-| Sample rate | `...mistral.sampleRate` | `8000` |
-| Target delay | `...mistral.targetStreamingDelayMs` | `800` |
+| Setting      | Config path                                                            | Default                                 |
+| ------------ | ---------------------------------------------------------------------- | --------------------------------------- |
+| API key      | `plugins.entries.voice-call.config.streaming.providers.mistral.apiKey` | Falls back to `MISTRAL_API_KEY`         |
+| Model        | `...mistral.model`                                                     | `voxtral-mini-transcribe-realtime-2602` |
+| Encoding     | `...mistral.encoding`                                                  | `pcm_mulaw`                             |
+| Sample rate  | `...mistral.sampleRate`                                                | `8000`                                  |
+| Target delay | `...mistral.targetStreamingDelayMs`                                    | `800`                                   |
 
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   plugins: {
     entries: {
-      \"voice-call\": {
+      "voice-call": {
         config: {
           streaming: {
             enabled: true,
-            provider: \"mistral\",
+            provider: "mistral",
             providers: {
               mistral: {
-                apiKey: \"${MISTRAL_API_KEY}\",
+                apiKey: "${MISTRAL_API_KEY}",
                 targetStreamingDelayMs: 800,
               },
             },
@@ -3453,1449 +1984,1867 @@ streaming STT provider.
 }
 ```
 
-OpenClaw defaults Mistral realtime STT to `pcm_mulaw` at 8 kHz so Voice Call
-can forward Twilio media frames directly. Use `encoding: \"pcm_s16le\"` and a
-matching `sampleRate` only if your upstream stream is already raw PCM.
+<Note>
+  OpenClaw defaults Mistral realtime STT to `pcm_mulaw` at 8 kHz so Voice Call
+  can forward Twilio media frames directly. Use `encoding: "pcm_s16le"` and a
+  matching `sampleRate` only if your upstream stream is already raw PCM.
+</Note>
 
-## [​](https://docs.openclaw.ai/providers/mistral\\#advanced-configuration)  Advanced configuration
+## Advanced configuration
 
-Adjustable reasoning (mistral-small-latest)
+<AccordionGroup>
+  <Accordion title="Adjustable reasoning (mistral-small-latest)">
+    `mistral/mistral-small-latest` maps to Mistral Small 4 and supports [adjustable reasoning](https://docs.mistral.ai/capabilities/reasoning/adjustable) on the Chat Completions API via `reasoning_effort` (`none` minimizes extra thinking in the output; `high` surfaces full thinking traces before the final answer).
 
-`mistral/mistral-small-latest` maps to Mistral Small 4 and supports [adjustable reasoning](https://docs.mistral.ai/capabilities/reasoning/adjustable) on the Chat Completions API via `reasoning_effort` (`none` minimizes extra thinking in the output; `high` surfaces full thinking traces before the final answer).OpenClaw maps the session **thinking** level to Mistral’s API:
+    OpenClaw maps the session **thinking** level to Mistral's API:
 
-| OpenClaw thinking level | Mistral `reasoning_effort` |
-| --- | --- |
-| **off** / **minimal** | `none` |
-| **low** / **medium** / **high** / **xhigh** / **adaptive** / **max** | `high` |
+    | OpenClaw thinking level                                              | Mistral `reasoning_effort` |
+    | -------------------------------------------------------------------- | -------------------------- |
+    | **off** / **minimal**                                                | `none`                     |
+    | **low** / **medium** / **high** / **xhigh** / **adaptive** / **max** | `high`                     |
 
-Other bundled Mistral catalog models do not use this parameter. Keep using `magistral-*` models when you want Mistral’s native reasoning-first behavior.
+    <Note>
+      Other bundled Mistral catalog models do not use this parameter. Keep using `magistral-*` models when you want Mistral's native reasoning-first behavior.
+    </Note>
+  </Accordion>
 
-Memory embeddings
+  <Accordion title="Memory embeddings">
+    Mistral can serve memory embeddings via `/v1/embeddings` (default model: `mistral-embed`).
 
-Mistral can serve memory embeddings via `/v1/embeddings` (default model: `mistral-embed`).
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      memorySearch: { provider: "mistral" },
+    }
+    ```
+  </Accordion>
 
-```
+  <Accordion title="Auth and base URL">
+    * Mistral auth uses `MISTRAL_API_KEY` (Bearer header).
+    * Provider base URL defaults to `https://api.mistral.ai/v1` and accepts the standard OpenAI-compatible chat-completions request shape.
+    * Onboarding default model is `mistral/mistral-large-latest`.
+    * Override the base URL under `models.providers.mistral.baseUrl` only when Mistral explicitly publishes a regional endpoint you need.
+  </Accordion>
+</AccordionGroup>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Model selection" href="/concepts/model-providers" icon="layers">
+    Choosing providers, model refs, and failover behavior.
+  </Card>
+
+  <Card title="Media understanding" href="/nodes/media-understanding" icon="microphone">
+    Audio transcription setup and provider selection.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Model provider quickstart
+
+OpenClaw can use many LLM providers. Pick one, authenticate, then set the default
+model as `provider/model`.
+
+## Quick start (two steps)
+
+1. Authenticate with the provider (usually via `openclaw onboard`).
+2. Set the default model:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-  memorySearch: { provider: \"mistral\" },
+  agents: { defaults: { model: { primary: "anthropic/claude-opus-4-6" } } },
 }
 ```
 
-Auth and base URL
-
-- Mistral auth uses `MISTRAL_API_KEY`.
-- Provider base URL defaults to `https://api.mistral.ai/v1`.
-- Onboarding default model is `mistral/mistral-large-latest`.
-- Z.AI uses Bearer auth with your API key.
-
-## [​](https://docs.openclaw.ai/providers/mistral\\#related)  Related
-
-[**Model selection** \\\\\n\\\\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)
-
-[**Media understanding** \\\\\n\\\\\nAudio transcription setup and provider selection.](https://docs.openclaw.ai/nodes/media-understanding)
-
-[MiniMax](https://docs.openclaw.ai/providers/minimax) [Moonshot AI](https://docs.openclaw.ai/providers/moonshot)
-
-Ctrl+I
-
----
-
-## Amazon Bedrock - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/bedrock
-
-[Skip to main content](https://docs.openclaw.ai/providers/bedrock#content-area)\n\n[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)\n\n![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)\n\nEnglish\n\nSearch...\n\nCtrl K\n\nSearch...\n\nNavigation\n\nProviders\n\nAmazon Bedrock\n\n[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)\n\nOn this page\n\n- [Getting started](https://docs.openclaw.ai/providers/bedrock#getting-started)\n- [Automatic model discovery](https://docs.openclaw.ai/providers/bedrock#automatic-model-discovery)\n- [Quick setup (AWS path)](https://docs.openclaw.ai/providers/bedrock#quick-setup-aws-path)\n- [Advanced configuration](https://docs.openclaw.ai/providers/bedrock#advanced-configuration)\n- [Related](https://docs.openclaw.ai/providers/bedrock#related)\n\nOpenClaw can use **Amazon Bedrock** models via pi-ai’s **Bedrock Converse**\nstreaming provider. Bedrock auth uses the **AWS SDK default credential chain**,\nnot an API key.\n\n| Property | Value |\n| --- | --- |\n| Provider | `amazon-bedrock` |\n| API | `bedrock-converse-stream` |\n| Auth | AWS credentials (env vars, shared config, or instance role) |\n| Region | `AWS_REGION` or `AWS_DEFAULT_REGION` (default: `us-east-1`) |\n\n## [​](https://docs.openclaw.ai/providers/bedrock\\#getting-started)  Getting started\n\nChoose your preferred auth method and follow the setup steps.\n\n- Access keys / env vars\n\n- EC2 instance roles (IMDS)\n\n\n**Best for:** developer machines, CI, or hosts where you manage AWS credentials directly.\n\n1\n\n[Navigate to header](https://docs.openclaw.ai/providers/bedrock#)\n\nSet AWS credentials on the gateway host\n\n```\nexport AWS_ACCESS_KEY_ID=\"AKIA...\"\nexport AWS_SECRET_ACCESS_KEY=\"...\"\nexport AWS_REGION=\"us-east-1\"\n# Optional:\nexport AWS_SESSION_TOKEN=\"...\"\nexport AWS_PROFILE=\"your-profile\"\n# Optional (Bedrock API key/bearer token):\nexport AWS_BEARER_TOKEN_BEDROCK=\"...\"\n```\n\n2\n\n[Navigate to header](https://docs.openclaw.ai/providers/bedrock#)\n\nAdd a Bedrock provider and model to your config\n\nNo `apiKey` is required. Configure the provider with `auth: \"aws-sdk\"`:\n\n```\n{\n  models: {\n    providers: {\n      \"amazon-bedrock\": {\n        baseUrl: \"https://bedrock-runtime.us-east-1.amazonaws.com\",\n        api: \"bedrock-converse-stream\",\n        auth: \"aws-sdk\",\n        models: [\\\n          {\\\n            id: \"us.anthropic.claude-opus-4-6-v1:0\",\\\n            name: \"Claude Opus 4.6 (Bedrock)\",\\\n            reasoning: true,\\\n            input: [\"text\", \"image\"],\\\n            cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },\\\n            contextWindow: 200000,\\\n            maxTokens: 8192,\\\n          },\\\n        ],\n      },\n    },\n  },\n  agents: {\n    defaults: {\n      model: { primary: \"amazon-bedrock/us.anthropic.claude-opus-4-6-v1:0\" },\n    },\n  },\n}\n```\n\n3\n\n[Navigate to header](https://docs.openclaw.ai/providers/bedrock#)\n\nVerify models are available\n\n```\nopenclaw models list\n```\n\nWith env-marker auth (`AWS_ACCESS_KEY_ID`, `AWS_PROFILE`, or `AWS_BEARER_TOKEN_BEDROCK`), OpenClaw auto-enables the implicit Bedrock provider for model discovery without extra config.\n\n**Best for:** EC2 instances with an IAM role attached, using the instance metadata service for authentication.\n\n1\n\n[Navigate to header](https://docs.openclaw.ai/providers/bedrock#)\n\nEnable discovery explicitly\n\nWhen using IMDS, OpenClaw cannot detect AWS auth from env markers alone, so you must opt in:\n\n```\nopenclaw config set plugins.entries.amazon-bedrock.config.discovery.enabled true\nopenclaw config set plugins.entries.amazon-bedrock.config.discovery.region us-east-1\n```\n\n2\n\n[Navigate to header](https://docs.openclaw.ai/providers/bedrock#)\n\nOptionally add an env marker for auto mode\n\nIf you also want the env-marker auto-detection path to work (for example, for `openclaw status` surfaces):\n\n```\nexport AWS_PROFILE=default\nexport AWS_REGION=us-east-1\n```\n\nYou do **not** need a fake API key.\n\n3\n\n[Navigate to header](https://docs.openclaw.ai/providers/bedrock#)\n\nVerify models are discovered\n\n```\nopenclaw models list\n```\n\nThe IAM role attached to your EC2 instance must have the following permissions:\n\n- `bedrock:InvokeModel`\n- `bedrock:InvokeModelWithResponseStream`\n- `bedrock:ListFoundationModels` (for automatic discovery)\n- `bedrock:ListInferenceProfiles` (for inference profile discovery)\n\nOr attach the managed policy `AmazonBedrockFullAccess`.\n\nYou only need `AWS_PROFILE=default` if you specifically want an env marker for auto mode or status surfaces. The actual Bedrock runtime auth path uses the AWS SDK default chain, so IMDS instance-role auth works even without env markers.\n\n## [​](https://docs.openclaw.ai/providers/bedrock\\#automatic-model-discovery)  Automatic model discovery\n\nOpenClaw can automatically discover Bedrock models that support **streaming**\nand **text output**. Discovery uses `bedrock:ListFoundationModels` and\n`bedrock:ListInferenceProfiles`, and results are cached (default: 1 hour).How the implicit provider is enabled:\n\n- If `plugins.entries.amazon-bedrock.config.discovery.enabled` is `true`,\nOpenClaw will try discovery even when no AWS env marker is present.\n- If `plugins.entries.amazon-bedrock.config.discovery.enabled` is unset,\nOpenClaw only auto-adds the\nimplicit Bedrock provider when it sees one of these AWS auth markers:\n`AWS_BEARER_TOKEN_BEDROCK`, `AWS_ACCESS_KEY_ID` +\n`AWS_SECRET_ACCESS_KEY`, or `AWS_PROFILE`.\n- The actual Bedrock runtime auth path still uses the AWS SDK default chain, so\nshared config, SSO, and IMDS instance-role auth can work even when discovery\nneeded `enabled: true` to opt in.\n\nFor explicit `models.providers[\"amazon-bedrock\"]` entries, OpenClaw can still resolve Bedrock env-marker auth early from AWS env markers such as `AWS_BEARER_TOKEN_BEDROCK` without forcing full runtime auth loading. The actual model-call auth path still uses the AWS SDK default chain.\n\nDiscovery config options\n\nConfig options live under `plugins.entries.amazon-bedrock.config.discovery`:\n\n```\n{\n  plugins: {\n    entries: {\n      \"amazon-bedrock\": {\n        config: {\n          discovery: {\n            enabled: true,\n            region: \"us-east-1\",\n            providerFilter: [\"anthropic\", \"amazon\"],\n            refreshInterval: 3600,\n            defaultContextWindow: 32000,\n            defaultMaxTokens: 4096,\n          },\n        },\n      },\n    },\n  },\n}\n```\n\n| Option | Default | Description |\n| --- | --- | --- |\n| `enabled` | auto | In auto mode, OpenClaw only enables the implicit Bedrock provider when it sees a supported AWS env marker. Set `true` to force discovery. |\n| `region` | `AWS_REGION` / `AWS_DEFAULT_REGION` / `us-east-1` | AWS region used for discovery API calls. |\n| `providerFilter` | (all) | Matches Bedrock provider names (for example `anthropic`, `amazon`). |\n| `refreshInterval` | `3600` | Cache duration in seconds. Set to `0` to disable caching. |\n| `defaultContextWindow` | `32000` | Context window used for discovered models (override if you know your model limits). |\n| `defaultMaxTokens` | `4096` | Max output tokens used for discovered models (override if you know your model limits). |\n\n## [​](https://docs.openclaw.ai/providers/bedrock\\#quick-setup-aws-path)  Quick setup (AWS path)\n\nThis walkthrough creates an IAM role, attaches Bedrock permissions, associates\nthe instance profile, and enables OpenClaw discovery on the EC2 host.\n\n```\n# 1. Create IAM role and instance profile\naws iam create-role --role-name EC2-Bedrock-Access \\\n  --assume-role-policy-document \'{\n    \"Version\": \"2012-10-17\",\n    \"Statement\": [{\\\n      \"Effect\": \"Allow\",\\\n      \"Principal\": {\"Service\": \"ec2.amazonaws.com\"},\\\n      \"Action\": \"sts:AssumeRole\"\\\n    }]\n  }\'\n\naws iam attach-role-policy --role-name EC2-Bedrock-Access \\\n  --policy-arn arn:aws:iam::aws:policy/AmazonBedrockFullAccess\n\naws iam create-instance-profile --instance-profile-name EC2-Bedrock-Access\naws iam add-role-to-instance-profile \\\n  --instance-profile-name EC2-Bedrock-Access \\\n  --role-name EC2-Bedrock-Access\n\n# 2. Attach to your EC2 instance\naws ec2 associate-iam-instance-profile \\\n  --instance-id i-xxxxx \\\n  --iam-instance-profile Name=EC2-Bedrock-Access\n\n# 3. On the EC2 instance, enable discovery explicitly\nopenclaw config set plugins.entries.amazon-bedrock.config.discovery.enabled true\nopenclaw config set plugins.entries.amazon-bedrock.config.discovery.region us-east-1\n\n# 4. Optional: add an env marker if you want auto mode without explicit enable\necho \'export AWS_PROFILE=default\' >> ~/.bashrc\necho \'export AWS_REGION=us-east-1\' >> ~/.bashrc\nsource ~/.bashrc\n\n# 5. Verify models are discovered\nopenclaw models list\n```\n\n## [​](https://docs.openclaw.ai/providers/bedrock\\#advanced-configuration)  Advanced configuration\n\nInference profiles\n\nOpenClaw discovers **regional and global inference profiles** alongside\nfoundation models. When a profile maps to a known foundation model, the\nprofile inherits that model’s capabilities (context window, max tokens,\nreasoning, vision) and the correct Bedrock request region is injected\nautomatically. This means cross-region Claude profiles work without manual\nprovider overrides.Inference profile IDs look like `us.anthropic.claude-opus-4-6-v1:0` (regional)\nor `anthropic.claude-opus-4-6-v1:0` (global). If the backing model is already\nin the discovery results, the profile inherits its full capability set;\notherwise safe defaults apply.No extra configuration is needed. As long as discovery is enabled and the IAM\nprincipal has `bedrock:ListInferenceProfiles`, profiles appear alongside\nfoundation models in `openclaw models list`.\n\nGuardrails\n\nYou can apply [Amazon Bedrock Guardrails](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html)\nto all Bedrock model invocations by adding a `guardrail` object to the\n`amazon-bedrock` plugin config. Guardrails let you enforce content filtering,\ntopic denial, word filters, sensitive information filters, and contextual\ngrounding checks.\n\n```\n{\n  plugins: {\n    entries: {\n      \"amazon-bedrock\": {\n        config: {\n          guardrail: {\n            guardrailIdentifier: \"abc123\", // guardrail ID or full ARN\n            guardrailVersion: \"1\", // version number or \"DRAFT\"\n            streamProcessingMode: \"sync\", // optional: \"sync\" or \"async\"\n            trace: \"enabled\", // optional: \"enabled\", \"disabled\", or \"enabled_full\"\n          },\n        },\n      },\n    },\n  },\n}\n```\n\n| Option | Required | Description |\n| --- | --- | --- |\n| `guardrailIdentifier` | Yes | Guardrail ID (e.g. `abc123`) or full ARN (e.g. `arn:aws:bedrock:us-east-1:123456789012:guardrail/abc123`). |\n| `guardrailVersion` | Yes | Published version number, or `\"DRAFT\"` for the working draft. |\n| `streamProcessingMode` | No | `\"sync\"` or `\"async\"` for guardrail evaluation during streaming. If omitted, Bedrock uses its default. |\n| `trace` | No | `\"enabled\"` or `\"enabled_full\"` for debugging; omit or set `\"disabled\"` for production. |\n\nThe IAM principal used by the gateway must have the `bedrock:ApplyGuardrail` permission in addition to the standard invoke permissions.\n\nEmbeddings for memory search\n\nBedrock can also serve as the embedding provider for\n[memory search](https://docs.openclaw.ai/concepts/memory-search). This is configured separately from the\ninference provider — set `agents.defaults.memorySearch.provider` to `\"bedrock\"`:\n\n```\n{\n  agents: {\n    defaults: {\n      memorySearch: {\n        provider: \"bedrock\",\n        model: \"amazon.titan-embed-text-v2:0\", // default\n      },\n    },\n  },\n}\n```\n\nBedrock embeddings use the same AWS SDK credential chain as inference (instance\nroles, SSO, access keys, shared config, and web identity). No API key is\nneeded. When `provider` is `\"auto\"`, Bedrock is auto-detected if that\ncredential chain resolves successfully.Supported embedding models include Amazon Titan Embed (v1, v2), Amazon Nova\nEmbed, Cohere Embed (v3, v4), and TwelveLabs Marengo. See\n[Memory configuration reference — Bedrock](https://docs.openclaw.ai/reference/memory-config#bedrock-embedding-config)\nfor the full model list and dimension options.\n\nNotes and caveats\n\n- Bedrock requires **model access** enabled in your AWS account/region.\n- Automatic discovery needs the `bedrock:ListFoundationModels` and\n`bedrock:ListInferenceProfiles` permissions.\n- If you rely on auto mode, set one of the supported AWS auth env markers on the\ngateway host. If you prefer IMDS/shared-config auth without env markers, set\n`plugins.entries.amazon-bedrock.config.discovery.enabled: true`.\n- OpenClaw surfaces the credential source in this order: `AWS_BEARER_TOKEN_BEDROCK`,\nthen `AWS_ACCESS_KEY_ID` \\+ `AWS_SECRET_ACCESS_KEY`, then `AWS_PROFILE`, then the\ndefault AWS SDK chain.\n- Reasoning support depends on the model; check the Bedrock model card for\ncurrent capabilities.\n- If you prefer a managed key flow, you can also place an OpenAI-compatible\nproxy in front of Bedrock and configure it as an OpenAI provider instead.\n\n## [​](https://docs.openclaw.ai/providers/bedrock\\#related)  Related\n\n[**Model selection** \\\\\n\\\\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)\n\n[**Memory search** \\\\\n\\\\\nBedrock embeddings for memory search configuration.](https://docs.openclaw.ai/concepts/memory-search)\n\n[**Memory config reference** \\\\\n\\\\\nFull Bedrock embedding model list and dimension options.](https://docs.openclaw.ai/reference/memory-config#bedrock-embedding-config)\n\n[**Troubleshooting** \\\\\n\\\\\nGeneral troubleshooting and FAQ.](https://docs.openclaw.ai/help/troubleshooting)\n\n[Alibaba Model Studio](https://docs.openclaw.ai/providers/alibaba) [Amazon Bedrock Mantle](https://docs.openclaw.ai/providers/bedrock-mantle)\n\nCtrl+I
-
----
-
-## Claude Max API proxy - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/claude-max-api-proxy
-
-[Skip to main content](https://docs.openclaw.ai/providers/claude-max-api-proxy#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-Claude Max API proxy
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Why use this?](https://docs.openclaw.ai/providers/claude-max-api-proxy#why-use-this)
-- [How it works](https://docs.openclaw.ai/providers/claude-max-api-proxy#how-it-works)
-- [Getting started](https://docs.openclaw.ai/providers/claude-max-api-proxy#getting-started)
-- [Built-in catalog](https://docs.openclaw.ai/providers/claude-max-api-proxy#built-in-catalog)
-- [Advanced configuration](https://docs.openclaw.ai/providers/claude-max-api-proxy#advanced-configuration)
-- [Links](https://docs.openclaw.ai/providers/claude-max-api-proxy#links)
-- [Notes](https://docs.openclaw.ai/providers/claude-max-api-proxy#notes)
-- [Related](https://docs.openclaw.ai/providers/claude-max-api-proxy#related)
-
-**claude-max-api-proxy** is a community tool that exposes your Claude Max/Pro subscription as an OpenAI-compatible API endpoint. This allows you to use your subscription with any tool that supports the OpenAI API format.
-
-This path is technical compatibility only. Anthropic has blocked some subscription
-usage outside Claude Code in the past. You must decide for yourself whether to use
-it and verify Anthropic’s current terms before relying on it.
-
-## [​](https://docs.openclaw.ai/providers/claude-max-api-proxy\\#why-use-this)  Why use this?
-
-| Approach | Cost | Best For |
-| --- | --- | --- |
-| Anthropic API | Pay per token (~15/Minput,15/M input, 15/Minput,75/M output for Opus) | Production apps, high volume |
-| Claude Max subscription | $200/month flat | Personal use, development, unlimited usage |
-
-If you have a Claude Max subscription and want to use it with OpenAI-compatible tools, this proxy may reduce cost for some workflows. API keys remain the clearer policy path for production use.
-
-## [​](https://docs.openclaw.ai/providers/claude-max-api-proxy\\#how-it-works)  How it works
-
-```
-Your App → claude-max-api-proxy → Claude Code CLI → Anthropic (via subscription)
-     (OpenAI format)              (converts format)      (uses your login)
-```
-
-The proxy:
-
-1. Accepts OpenAI-format requests at `http://localhost:3456/v1/chat/completions`
-2. Converts them to Claude Code CLI commands
-3. Returns responses in OpenAI format (streaming supported)
-
-## [​](https://docs.openclaw.ai/providers/claude-max-api-proxy\\#getting-started)  Getting started
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/claude-max-api-proxy#)
-
-Install the proxy
-
-Requires Node.js 20+ and Claude Code CLI.
-
-```
-npm install -g claude-max-api-proxy
-
-# Verify Claude CLI is authenticated
-claude --version
-```
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/claude-max-api-proxy#)
-
-Start the server
-
-```
-claude-max-api
-# Server runs at http://localhost:3456
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/claude-max-api-proxy#)
-
-Test the proxy
-
-```
-# Health check
-curl http://localhost:3456/health
-
-# List models
-curl http://localhost:3456/v1/models
-
-# Chat completion
-curl http://localhost:3456/v1/chat/completions \\
-  -H \"Content-Type: application/json\" \\
-  -d \'{
-    \"model\": \"claude-opus-4\",
-    \"messages\": [{\"role\": \"user\", \"content\": \"Hello!\"}]
-  }\'
-```
-
-4
-
-[Navigate to header](https://docs.openclaw.ai/providers/claude-max-api-proxy#)
-
-Configure OpenClaw
-
-Point OpenClaw at the proxy as a custom OpenAI-compatible endpoint:
-
-```
-{
-  env: {
-    OPENAI_API_KEY: \"not-needed\",
-    OPENAI_BASE_URL: \"http://localhost:3456/v1\",
-  },
-  agents: {
-    defaults: {
-      model: { primary: \"openai/claude-opus-4\" },
-    },
-  },
-}
-```
-
-## [​](https://docs.openclaw.ai/providers/claude-max-api-proxy\\#built-in-catalog)  Built-in catalog
-
-| Model ID | Maps To |
-| --- | --- |
-| `claude-opus-4` | Claude Opus 4 |
-| `claude-sonnet-4` | Claude Sonnet 4 |
-| `claude-haiku-4` | Claude Haiku 4 |
-
-## [​](https://docs.openclaw.ai/providers/claude-max-api-proxy\\#advanced-configuration)  Advanced configuration
-
-Proxy-style OpenAI-compatible notes
-
-This path uses the same proxy-style OpenAI-compatible route as other custom
-`/v1` backends:
-
-- Native OpenAI-only request shaping does not apply
-- No `service_tier`, no Responses `store`, no prompt-cache hints, and no
-OpenAI reasoning-compat payload shaping
-- Hidden OpenClaw attribution headers (`originator`, `version`, `User-Agent`)
-are not injected on the proxy URL
-
-Auto-start on macOS with LaunchAgent
-
-Create a LaunchAgent to run the proxy automatically:
-
-```
-cat > ~/Library/LaunchAgents/com.claude-max-api.plist << \'EOF\'
-<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
-<dict>
-  <key>Label</key>
-  <string>com.claude-max-api</string>
-  <key>RunAtLoad</key>
-  <true/>
-  <key>KeepAlive</key>
-  <true/>
-  <key>ProgramArguments</key>
-  <array>
-    <string>/usr/local/bin/node</string>
-    <string>/usr/local/lib/node_modules/claude-max-api-proxy/dist/server/standalone.js</string>
-  </array>
-  <key>EnvironmentVariables</key>
-  <dict>
-    <key>PATH</key>
-    <string>/usr/local/bin:/opt/homebrew/bin:~/.local/bin:/usr/bin:/bin</string>
-  </dict>
-</dict>
-</plist>
-EOF
-
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.claude-max-api.plist
-```
-
-## [​](https://docs.openclaw.ai/providers/claude-max-api-proxy\\#links)  Links
-
-- **npm:** [https://www.npmjs.com/package/claude-max-api-proxy](https://www.npmjs.com/package/claude-max-api-proxy)
-- **GitHub:** [https://github.com/atalovesyou/claude-max-api-proxy](https://github.com/atalovesyou/claude-max-api-proxy)
-- **Issues:** [https://github.com/atalovesyou/claude-max-api-proxy/issues](https://github.com/atalovesyou/claude-max-api-proxy/issues)
-
-## [​](https://docs.openclaw.ai/providers/claude-max-api-proxy\\#notes)  Notes
-
-- This is a **community tool**, not officially supported by Anthropic or OpenClaw
-- Requires an active Claude Max/Pro subscription with Claude Code CLI authenticated
-- The proxy runs locally and does not send data to any third-party servers
-- Streaming responses are fully supported
-
-For native Anthropic integration with Claude CLI or API keys, see [Anthropic provider](https://docs.openclaw.ai/providers/anthropic). For OpenAI/Codex subscriptions, see [OpenAI provider](https://docs.openclaw.ai/providers/openai).
-
-## [​](https://docs.openclaw.ai/providers/claude-max-api-proxy\\#related)  Related
-
-[**Anthropic provider** \\\\
-\\\\\nNative OpenClaw integration with Claude CLI or API keys.](https://docs.openclaw.ai/providers/anthropic)
-
-[**OpenAI provider** \\\\
-\\\\\nFor OpenAI/Codex subscriptions.](https://docs.openclaw.ai/providers/openai)
-
-[**Model selection** \\\\
-\\\\\nOverview of all providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)
-
-[**Configuration** \\\\
-\\\\\nFull config reference.](https://docs.openclaw.ai/gateway/configuration)
-
-[Chutes](https://docs.openclaw.ai/providers/chutes) [Cloudflare AI gateway](https://docs.openclaw.ai/providers/cloudflare-ai-gateway)
-
-Ctrl+I
-
----
-
-## Venice AI - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/venice
-
-[Skip to main content](https://docs.openclaw.ai/providers/venice#content-area)\n\n[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)\n\n![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)\n\nEnglish\n\nSearch...\n\nCtrl K\n\nSearch...\n\nNavigation\n\nProviders\n\nVenice AI\n\n[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)\n\nOn this page\n\n- [Why Venice in OpenClaw](https://docs.openclaw.ai/providers/venice#why-venice-in-openclaw)\n- [Privacy modes](https://docs.openclaw.ai/providers/venice#privacy-modes)\n- [Features](https://docs.openclaw.ai/providers/venice#features)\n- [Getting started](https://docs.openclaw.ai/providers/venice#getting-started)\n- [Model selection](https://docs.openclaw.ai/providers/venice#model-selection)\n- [DeepSeek V4 replay behavior](https://docs.openclaw.ai/providers/venice#deepseek-v4-replay-behavior)\n- [Built-in catalog (41 total)](https://docs.openclaw.ai/providers/venice#built-in-catalog-41-total)\n- [Model discovery](https://docs.openclaw.ai/providers/venice#model-discovery)\n- [Streaming and tool support](https://docs.openclaw.ai/providers/venice#streaming-and-tool-support)\n- [Pricing](https://docs.openclaw.ai/providers/venice#pricing)\n- [Venice (anonymized) vs direct API](https://docs.openclaw.ai/providers/venice#venice-anonymized-vs-direct-api)\n- [Usage examples](https://docs.openclaw.ai/providers/venice#usage-examples)\n- [Troubleshooting](https://docs.openclaw.ai/providers/venice#troubleshooting)\n- [Advanced configuration](https://docs.openclaw.ai/providers/venice#advanced-configuration)\n- [Related](https://docs.openclaw.ai/providers/venice#related)\n\nVenice AI provides **privacy-focused AI inference** with support for uncensored models and access to major proprietary models through their anonymized proxy. All inference is private by default — no training on your data, no logging.\n\n## [​](https://docs.openclaw.ai/providers/venice\\#why-venice-in-openclaw)  Why Venice in OpenClaw\n\n- **Private inference** for open-source models (no logging).\n- **Uncensored models** when you need them.\n- **Anonymized access** to proprietary models (Opus/GPT/Gemini) when quality matters.\n- OpenAI-compatible `/v1` endpoints.\n\n## [​](https://docs.openclaw.ai/providers/venice\\#privacy-modes)  Privacy modes\n\nVenice offers two privacy levels — understanding this is key to choosing your model:\n\n| Mode | Description | Models |\n| --- | --- | --- |\n| **Private** | Fully private. Prompts/responses are **never stored or logged**. Ephemeral. | Llama, Qwen, DeepSeek, Kimi, MiniMax, Venice Uncensored, etc. |\n| **Anonymized** | Proxied through Venice with metadata stripped. The underlying provider (OpenAI, Anthropic, Google, xAI) sees anonymized requests. | Claude, GPT, Gemini, Grok |\n\nAnonymized models are **not** fully private. Venice strips metadata before forwarding, but the underlying provider (OpenAI, Anthropic, Google, xAI) still processes the request. Choose **Private** models when full privacy is required.\n\n## [​](https://docs.openclaw.ai/providers/venice\\#features)  Features\n\n- **Privacy-focused**: Choose between “private” (fully private) and “anonymized” (proxied) modes\n- **Uncensored models**: Access to models without content restrictions\n- **Major model access**: Use Claude, GPT, Gemini, and Grok via Venice’s anonymized proxy\n- **OpenAI-compatible API**: Standard `/v1` endpoints for easy integration\n- **Streaming**: Supported on all models\n- **Function calling**: Supported on select models (check model capabilities)\n- **Vision**: Supported on models with vision capability\n- **No hard rate limits**: Fair-use throttling may apply for extreme usage\n\n## [​](https://docs.openclaw.ai/providers/venice\\#getting-started)  Getting started\n\n1\n\n[Navigate to header](https://docs.openclaw.ai/providers/venice#)\n\nGet your API key\n\n1. Sign up at [venice.ai](https://venice.ai/)\n2. Go to **Settings > API Keys > Create new key**\n3. Copy your API key (format: `vapi_xxxxxxxxxxxx`)\n\n2\n\n[Navigate to header](https://docs.openclaw.ai/providers/venice#)\n\nConfigure OpenClaw\n\nChoose your preferred setup method:\n\n- Interactive (recommended)\n\n- Environment variable\n\n- Non-interactive\n\n\n```\nopenclaw onboard --auth-choice venice-api-key\n```\n\nThis will:\n\n1. Prompt for your API key (or use existing `VENICE_API_KEY`)\n2. Show all available Venice models\n3. Let you pick your default model\n4. Configure the provider automatically\n\n```\nexport VENICE_API_KEY=\"vapi_xxxxxxxxxxxx\"\n```\n\n```\nopenclaw onboard --non-interactive \\\n  --auth-choice venice-api-key \\\n  --venice-api-key \"vapi_xxxxxxxxxxxx\"\n```\n\n3\n\n[Navigate to header](https://docs.openclaw.ai/providers/venice#)\n\nVerify setup\n\n```\nopenclaw agent --model venice/kimi-k2-5 --message \"Hello, are you working?\"\n```\n\n## [​](https://docs.openclaw.ai/providers/venice\\#model-selection)  Model selection\n\nAfter setup, OpenClaw shows all available Venice models. Pick based on your needs:\n\n- **Default model**: `venice/kimi-k2-5` for strong private reasoning plus vision.\n- **High-capability option**: `venice/claude-opus-4-6` for the strongest anonymized Venice path.\n- **Privacy**: Choose “private” models for fully private inference.\n- **Capability**: Choose “anonymized” models to access Claude, GPT, Gemini via Venice’s proxy.\n\nChange your default model anytime:\n\n```\nopenclaw models set venice/kimi-k2-5\nopenclaw models set venice/claude-opus-4-6\n```\n\nList all available models:\n\n```\nopenclaw models list | grep venice\n```\n\nYou can also run `openclaw configure`, select **Model/auth**, and choose **Venice AI**.\n\nUse the table below to pick the right model for your use case.\n\n| Use Case | Recommended Model | Why |\n| --- | --- | --- |\n| **General chat (default)** | `kimi-k2-5` | Strong private reasoning plus vision |\n| **Best overall quality** | `claude-opus-4-6` | Strongest anonymized Venice option |\n| **Privacy + coding** | `qwen3-coder-480b-a35b-instruct` | Private coding model with large context |\n| **Private vision** | `kimi-k2-5` | Vision support without leaving private mode |\n| **Fast + cheap** | `qwen3-4b` | Lightweight reasoning model |\n| **Complex private tasks** | `deepseek-v3.2` | Strong reasoning, but no Venice tool support |\n| **Uncensored** | `venice-uncensored` | No content restrictions |\n\n## [​](https://docs.openclaw.ai/providers/venice\\#deepseek-v4-replay-behavior)  DeepSeek V4 replay behavior\n\nIf Venice exposes DeepSeek V4 models such as `venice/deepseek-v4-pro` or\n`venice/deepseek-v4-flash`, OpenClaw fills the required DeepSeek V4\n`reasoning_content` replay placeholder on assistant tool-call turns when the\nproxy omits it. Venice rejects DeepSeek’s native top-level `thinking` control,\nso OpenClaw keeps that provider-specific replay fix separate from the native\nDeepSeek provider’s thinking controls.\n\n## [​](https://docs.openclaw.ai/providers/venice\\#built-in-catalog-41-total)  Built-in catalog (41 total)\n\nPrivate models (26) — fully private, no logging\n\n| Model ID | Name | Context | Features |\n| --- | --- | --- | --- |\n| `kimi-k2-5` | Kimi K2.5 | 256k | Default, reasoning, vision |\n| `kimi-k2-thinking` | Kimi K2 Thinking | 256k | Reasoning |\n| `llama-3.3-70b` | Llama 3.3 70B | 128k | General |\n| `llama-3.2-3b` | Llama 3.2 3B | 128k | General |\n| `hermes-3-llama-3.1-405b` | Hermes 3 Llama 3.1 405B | 128k | General, tools disabled |\n| `qwen3-235b-a22b-thinking-2507` | Qwen3 235B Thinking | 128k | Reasoning |\n| `qwen3-235b-a22b-instruct-2507` | Qwen3 235B Instruct | 128k | General |\n| `qwen3-coder-480b-a35b-instruct` | Qwen3 Coder 480B | 256k | Coding |\n| `qwen3-coder-480b-a35b-instruct-turbo` | Qwen3 Coder 480B Turbo | 256k | Coding |\n| `qwen3-5-35b-a3b` | Qwen3.5 35B A3B | 256k | Reasoning, vision |\n| `qwen3-next-80b` | Qwen3 Next 80B | 256k | General |\n| `qwen3-vl-235b-a22b` | Qwen3 VL 235B (Vision) | 256k | Vision |\n| `qwen3-4b` | Venice Small (Qwen3 4B) | 32k | Fast, reasoning |\n| `deepseek-v3.2` | DeepSeek V3.2 | 160k | Reasoning, tools disabled |\n| `venice-uncensored` | Venice Uncensored (Dolphin-Mistral) | 32k | Uncensored, tools disabled |\n| `mistral-31-24b` | Venice Medium (Mistral) | 128k | Vision |\n| `google-gemma-3-27b-it` | Google Gemma 3 27B Instruct | 198k | Vision |\n| `openai-gpt-oss-120b` | OpenAI GPT OSS 120B | 128k | General |\n| `nvidia-nemotron-3-nano-30b-a3b` | NVIDIA Nemotron 3 Nano 30B | 128k | General |\n| `olafangensan-glm-4.7-flash-heretic` | GLM 4.7 Flash Heretic | 128k | Reasoning |\n| `zai-org-glm-4.6` | GLM 4.6 | 198k | General |\n| `zai-org-glm-4.7` | GLM 4.7 | 198k | Reasoning |\n| `zai-org-glm-4.7-flash` | GLM 4.7 Flash | 128k | Reasoning |\n| `zai-org-glm-5` | GLM 5 | 198k | Reasoning |\n| `minimax-m21` | MiniMax M2.1 | 198k | Reasoning |\n| `minimax-m25` | MiniMax M2.5 | 198k | Reasoning |\n\nAnonymized models (15) — via Venice proxy\n\n| Model ID | Name | Context | Features |\n| --- | --- | --- | --- |\n| `claude-opus-4-6` | Claude Opus 4.6 (via Venice) | 1M | Reasoning, vision |\n| `claude-opus-4-5` | Claude Opus 4.5 (via Venice) | 198k | Reasoning, vision |\n| `claude-sonnet-4-6` | Claude Sonnet 4.6 (via Venice) | 1M | Reasoning, vision |\n| `claude-sonnet-4-5` | Claude Sonnet 4.5 (via Venice) | 198k | Reasoning, vision |\n| `openai-gpt-54` | GPT-5.4 (via Venice) | 1M | Reasoning, vision |\n| `openai-gpt-53-codex` | GPT-5.3 Codex (via Venice) | 400k | Reasoning, vision, coding |\n| `openai-gpt-52` | GPT-5.2 (via Venice) | 256k | Reasoning |\n| `openai-gpt-52-codex` | GPT-5.2 Codex (via Venice) | 256k | Reasoning, vision, coding |\n| `openai-gpt-4o-2024-11-20` | GPT-4o (via Venice) | 128k | Vision |\n| `openai-gpt-4o-mini-2024-07-18` | GPT-4o Mini (via Venice) | 128k | Vision |\n| `gemini-3-1-pro-preview` | Gemini 3.1 Pro (via Venice) | 1M | Reasoning, vision |\n| `gemini-3-pro-preview` | Gemini 3 Pro (via Venice) | 198k | Reasoning, vision |\n| `gemini-3-flash-preview` | Gemini 3 Flash (via Venice) | 256k | Reasoning, vision |\n| `grok-41-fast` | Grok 4.1 Fast (via Venice) | 1M | Reasoning, vision |\n| `grok-code-fast-1` | Grok Code Fast 1 (via Venice) | 256k | Reasoning, coding |\n\n## [​](https://docs.openclaw.ai/providers/venice\\#model-discovery)  Model discovery\n\nOpenClaw automatically discovers models from the Venice API when `VENICE_API_KEY` is set. If the API is unreachable, it falls back to a static catalog.The `/models` endpoint is public (no auth needed for listing), but inference requires a valid API key.\n\n## [​](https://docs.openclaw.ai/providers/venice\\#streaming-and-tool-support)  Streaming and tool support\n\n| Feature | Support |\n| --- | --- |\n| **Streaming** | All models |\n| **Function calling** | Most models (check `supportsFunctionCalling` in API) |\n| **Vision/Images** | Models marked with “Vision” feature |\n| **JSON mode** | Supported via `response_format` |\n\n## [​](https://docs.openclaw.ai/providers/venice\\#pricing)  Pricing\n\nVenice uses a credit-based system. Check [venice.ai/pricing](https://venice.ai/pricing) for current rates:\n\n- **Private models**: Generally lower cost\n- **Anonymized models**: Similar to direct API pricing + small Venice fee\n\n### [​](https://docs.openclaw.ai/providers/venice\\#venice-anonymized-vs-direct-api)  Venice (anonymized) vs direct API\n\n| Aspect | Venice (Anonymized) | Direct API |\n| --- | --- | --- |\n| **Privacy** | Metadata stripped, anonymized | Your account linked |\n| **Latency** | +10-50ms (proxy) | Direct |\n| **Features** | Most features supported | Full features |\n| **Billing** | Venice credits | Provider billing |\n\n## [​](https://docs.openclaw.ai/providers/venice\\#usage-examples)  Usage examples\n\n```\n# Use the default private model\nopenclaw agent --model venice/kimi-k2-5 --message \"Quick health check\"\n\n# Use Claude Opus via Venice (anonymized)\nopenclaw agent --model venice/claude-opus-4-6 --message \"Summarize this task\"\n\n# Use uncensored model\nopenclaw agent --model venice/venice-uncensored --message \"Draft options\"\n\n# Use vision model with image\nopenclaw agent --model venice/qwen3-vl-235b-a22b --message \"Review attached image\"\n\n# Use coding model\nopenclaw agent --model venice/qwen3-coder-480b-a35b-instruct --message \"Refactor this function\"\n```\n\n## [​](https://docs.openclaw.ai/providers/venice\\#troubleshooting)  Troubleshooting\n\nAPI key not recognized\n\n```\necho $VENICE_API_KEY\nopenclaw models list | grep venice\n```\n\nEnsure the key starts with `vapi_`.\n\nModel not available\n\nThe Venice model catalog updates dynamically. Run `openclaw models list` to see currently available models. Some models may be temporarily offline.\n\nConnection issues\n\nVenice API is at `https://api.venice.ai/api/v1`. Ensure your network allows HTTPS connections.\n\nMore help: [Troubleshooting](https://docs.openclaw.ai/help/troubleshooting) and [FAQ](https://docs.openclaw.ai/help/faq).\n\n## [​](https://docs.openclaw.ai/providers/venice\\#advanced-configuration)  Advanced configuration\n\nConfig file example\n\n```\n{\n  env: { VENICE_API_KEY: \"vapi_...\" },\n  agents: { defaults: { model: { primary: \"venice/kimi-k2-5\" } } },\n  models: {\n    mode: \"merge\",\n    providers: {\n      venice: {\n        baseUrl: \"https://api.venice.ai/api/v1\",\n        apiKey: \"${VENICE_API_KEY}\",\n        api: \"openai-completions\",\n        models: [\\\n          {\\\n            id: \"kimi-k2-5\",\\\n            name: \"Kimi K2.5\",\\\n            reasoning: true,\\\n            input: [\"text\", \"image\"],\\\n            cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },\\\n            contextWindow: 256000,\\\n            maxTokens: 65536,\\\n          },\\\n        ],\n      },\n    },\n  },\n}\n```\n\n## [​](https://docs.openclaw.ai/providers/venice\\#related)  Related\n\n[**Model selection** \\\\\n\\\\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)\n\n[**Venice AI** \\\\\n\\\\\nVenice AI homepage and account signup.](https://venice.ai/)\n\n[**API documentation** \\\\\n\\\\\nVenice API reference and developer docs.](https://docs.venice.ai/)\n\n[**Pricing** \\\\\n\\\\\nCurrent Venice credit rates and plans.](https://venice.ai/pricing)\n\n[Together AI](https://docs.openclaw.ai/providers/together) [Vercel AI gateway](https://docs.openclaw.ai/providers/vercel-ai-gateway)\n\nCtrl+I
-
----
-
-## Qianfan - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/qianfan
-
-[Skip to main content](https://docs.openclaw.ai/providers/qianfan#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-Qianfan
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Getting started](https://docs.openclaw.ai/providers/qianfan#getting-started)
-- [Built-in catalog](https://docs.openclaw.ai/providers/qianfan#built-in-catalog)
-- [Config example](https://docs.openclaw.ai/providers/qianfan#config-example)
-- [Related](https://docs.openclaw.ai/providers/qianfan#related)
-
-Qianfan is Baidu’s MaaS platform, providing a **unified API** that routes requests to many models behind a single
-endpoint and API key. It is OpenAI-compatible, so most OpenAI SDKs work by switching the base URL.
-
-| Property | Value |
-| --- | --- |
-| Provider | `qianfan` |
-| Auth | `QIANFAN_API_KEY` |
-| API | OpenAI-compatible |
-| Base URL | `https://qianfan.baidubce.com/v2` |
-
-## [​](https://docs.openclaw.ai/providers/qianfan\\#getting-started)  Getting started
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/qianfan#)
-
-Create a Baidu Cloud account
-
-Sign up or log in at the [Qianfan Console](https://console.bce.baidu.com/qianfan/ais/console/apiKey) and ensure you have Qianfan API access enabled.
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/qianfan#)
-
-Generate an API key
-
-Create a new application or select an existing one, then generate an API key. The key format is `bce-v3/ALTAK-...`.
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/qianfan#)
-
-Run onboarding
-
-```
-openclaw onboard --auth-choice qianfan-api-key
-```
-
-4
-
-[Navigate to header](https://docs.openclaw.ai/providers/qianfan#)
-
-Verify the model is available
-
-```
-openclaw models list --provider qianfan
-```
-
-## [​](https://docs.openclaw.ai/providers/qianfan\\#built-in-catalog)  Built-in catalog
-
-| Model ref | Input | Context | Max output | Reasoning | Notes |
-| --- | --- | --- | --- | --- | --- |
-| `qianfan/deepseek-v3.2` | text | 98,304 | 32,768 | Yes | Default model |
-| `qianfan/ernie-5.0-thinking-preview` | text, image | 119,000 | 64,000 | Yes | Multimodal |
-
-The default bundled model ref is `qianfan/deepseek-v3.2`. You only need to override `models.providers.qianfan` when you need a custom base URL or model metadata.
-
-## [​](https://docs.openclaw.ai/providers/qianfan\\#config-example)  Config example
-
-```
-{
-  env: { QIANFAN_API_KEY: \"bce-v3/ALTAK-...\" },
-  agents: {
-    defaults: {
-      model: { primary: \"qianfan/deepseek-v3.2\" },
-      models: {
-        \"qianfan/deepseek-v3.2\": { alias: \"QIANFAN\" },
+## Supported providers (starter set)
+
+* [Alibaba Model Studio](/providers/alibaba)
+* [Amazon Bedrock](/providers/bedrock)
+* [Anthropic (API + Claude CLI)](/providers/anthropic)
+* [BytePlus (International)](/concepts/model-providers#byteplus-international)
+* [Chutes](/providers/chutes)
+* [ComfyUI](/providers/comfy)
+* [Cloudflare AI Gateway](/providers/cloudflare-ai-gateway)
+* [DeepInfra](/providers/deepinfra)
+* [fal](/providers/fal)
+* [Fireworks](/providers/fireworks)
+* [GLM models](/providers/glm)
+* [MiniMax](/providers/minimax)
+* [Mistral](/providers/mistral)
+* [Moonshot AI (Kimi + Kimi Coding)](/providers/moonshot)
+* [OpenAI (API + Codex)](/providers/openai)
+* [OpenCode (Zen + Go)](/providers/opencode)
+* [OpenRouter](/providers/openrouter)
+* [Qianfan](/providers/qianfan)
+* [Qwen](/providers/qwen)
+* [Runway](/providers/runway)
+* [StepFun](/providers/stepfun)
+* [Synthetic](/providers/synthetic)
+* [Vercel AI Gateway](/providers/vercel-ai-gateway)
+* [Venice (Venice AI)](/providers/venice)
+* [xAI](/providers/xai)
+* [Z.AI](/providers/zai)
+
+## Additional bundled provider variants
+
+* `anthropic-vertex` - implicit Anthropic on Google Vertex support when Vertex credentials are available; no separate onboarding auth choice
+* `copilot-proxy` - local VS Code Copilot Proxy bridge; use `openclaw onboard --auth-choice copilot-proxy`
+* `google-gemini-cli` - unofficial Gemini CLI OAuth flow; requires a local `gemini` install (`brew install gemini-cli` or `npm install -g @google/gemini-cli`); default model `google-gemini-cli/gemini-3-flash-preview`; use `openclaw onboard --auth-choice google-gemini-cli` or `openclaw models auth login --provider google-gemini-cli --set-default`
+
+For the full provider catalog (xAI, Groq, Mistral, etc.) and advanced configuration,
+see [Model providers](/concepts/model-providers).
+
+## Related
+
+* [Model selection](/concepts/model-providers)
+* [Model failover](/concepts/model-failover)
+* [Models CLI](/cli/models)
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Moonshot AI
+
+Moonshot provides the Kimi API with OpenAI-compatible endpoints. Configure the
+provider and set the default model to `moonshot/kimi-k2.6`, or use
+Kimi Coding with `kimi/kimi-code`.
+
+<Warning>
+  Moonshot and Kimi Coding are **separate providers**. Keys are not interchangeable, endpoints differ, and model refs differ (`moonshot/...` vs `kimi/...`).
+</Warning>
+
+## Built-in model catalog
+
+[//]: # "moonshot-kimi-k2-ids:start"
+
+| Model ref                         | Name                   | Reasoning | Input       | Context | Max output |
+| --------------------------------- | ---------------------- | --------- | ----------- | ------- | ---------- |
+| `moonshot/kimi-k2.6`              | Kimi K2.6              | No        | text, image | 262,144 | 262,144    |
+| `moonshot/kimi-k2.5`              | Kimi K2.5              | No        | text, image | 262,144 | 262,144    |
+| `moonshot/kimi-k2-thinking`       | Kimi K2 Thinking       | Yes       | text        | 262,144 | 262,144    |
+| `moonshot/kimi-k2-thinking-turbo` | Kimi K2 Thinking Turbo | Yes       | text        | 262,144 | 262,144    |
+| `moonshot/kimi-k2-turbo`          | Kimi K2 Turbo          | No        | text        | 256,000 | 16,384     |
+
+[//]: # "moonshot-kimi-k2-ids:end"
+
+Bundled cost estimates for current Moonshot-hosted K2 models use Moonshot's
+published pay-as-you-go rates: Kimi K2.6 is $0.16/MTok cache hit,
+$0.95/MTok input, and $4.00/MTok output; Kimi K2.5 is $0.10/MTok cache hit,
+$0.60/MTok input, and $3.00/MTok output. Other legacy catalog entries keep
+zero-cost placeholders unless you override them in config.
+
+## Getting started
+
+Choose your provider and follow the setup steps.
+
+<Tabs>
+  <Tab title="Moonshot API">
+    **Best for:** Kimi K2 models via the Moonshot Open Platform.
+
+    <Steps>
+      <Step title="Choose your endpoint region">
+        | Auth choice           | Endpoint                     | Region        |
+        | --------------------- | ---------------------------- | ------------- |
+        | `moonshot-api-key`    | `https://api.moonshot.ai/v1` | International |
+        | `moonshot-api-key-cn` | `https://api.moonshot.cn/v1` | China         |
+      </Step>
+
+      <Step title="Run onboarding">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw onboard --auth-choice moonshot-api-key
+        ```
+
+        Or for the China endpoint:
+
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw onboard --auth-choice moonshot-api-key-cn
+        ```
+      </Step>
+
+      <Step title="Set a default model">
+        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        {
+          agents: {
+            defaults: {
+              model: { primary: "moonshot/kimi-k2.6" },
+            },
+          },
+        }
+        ```
+      </Step>
+
+      <Step title="Verify models are available">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw models list --provider moonshot
+        ```
+      </Step>
+
+      <Step title="Run a live smoke test">
+        Use an isolated state dir when you want to verify model access and cost
+        tracking without touching your normal sessions:
+
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        OPENCLAW_CONFIG_PATH=/tmp/openclaw-kimi/openclaw.json \
+        OPENCLAW_STATE_DIR=/tmp/openclaw-kimi \
+        openclaw agent --local \
+          --session-id live-kimi-cost \
+          --message 'Reply exactly: KIMI_LIVE_OK' \
+          --thinking off \
+          --json
+        ```
+
+        The JSON response should report `provider: "moonshot"` and
+        `model: "kimi-k2.6"`. The assistant transcript entry stores normalized
+        token usage plus estimated cost under `usage.cost` when Moonshot returns
+        usage metadata.
+      </Step>
+    </Steps>
+
+    ### Config example
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      env: { MOONSHOT_API_KEY: "sk-..." },
+      agents: {
+        defaults: {
+          model: { primary: "moonshot/kimi-k2.6" },
+          models: {
+            // moonshot-kimi-k2-aliases:start
+            "moonshot/kimi-k2.6": { alias: "Kimi K2.6" },
+            "moonshot/kimi-k2.5": { alias: "Kimi K2.5" },
+            "moonshot/kimi-k2-thinking": { alias: "Kimi K2 Thinking" },
+            "moonshot/kimi-k2-thinking-turbo": { alias: "Kimi K2 Thinking Turbo" },
+            "moonshot/kimi-k2-turbo": { alias: "Kimi K2 Turbo" },
+            // moonshot-kimi-k2-aliases:end
+          },
+        },
       },
-    },
-  },
-  models: {
-    providers: {
-      qianfan: {
-        baseUrl: \"https://qianfan.baidubce.com/v2\",
-        api: \"openai-completions\",
-        models: [\\\
-          {\\\
-            id: \"deepseek-v3.2\\\",\\\
-            name: \"DEEPSEEK V3.2\\\",\\\
-            reasoning: true,\\\n            input: [\"text\"],\\\
-            cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },\\\
-            contextWindow: 98304,\\\n            maxTokens: 32768,\\\n          },\\\n          {\\\
-            id: \"ernie-5.0-thinking-preview\\\",\\\
-            name: \"ERNIE-5.0-Thinking-Preview\\\",\\\
-            reasoning: true,\\\n            input: [\"text\", \"image\"],\\\
-            cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },\\\
-            contextWindow: 119000,\\\n            maxTokens: 64000,\\\n          },\\\n        ],
-      },
-    },
-  },
-}
-```
-
-Transport and compatibility
-
-Qianfan runs through the OpenAI-compatible transport path, not native OpenAI request shaping. This means standard OpenAI SDK features work, but provider-specific parameters may not be forwarded.
-
-Catalog and overrides
-
-The bundled catalog currently includes `deepseek-v3.2` and `ernie-5.0-thinking-preview`. Add or override `models.providers.qianfan` only when you need a custom base URL or model metadata.
-
-Model refs use the `qianfan/` prefix (for example `qianfan/deepseek-v3.2`).
-
-Troubleshooting
-
-- Ensure your API key starts with `bce-v3/ALTAK-` and has Qianfan API access enabled in the Baidu Cloud console.
-- If models are not listed, confirm your account has the Qianfan service activated.
-- The default base URL is `https://qianfan.baidubce.com/v2`. Only change it if you use a custom endpoint or proxy.
-
-## [​](https://docs.openclaw.ai/providers/qianfan\\#related)  Related
-
-[**Model selection** \\\\\n\\\\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)
-
-[**Configuration reference** \\\\\n\\\\\nFull OpenClaw configuration reference.](https://docs.openclaw.ai/gateway/configuration-reference)
-
-[**Agent setup** \\\\\n\\\\\nConfiguring agent defaults and model assignments.](https://docs.openclaw.ai/concepts/agent)
-
-[**Qianfan API docs** \\\\\n\\\\\nOfficial Qianfan API documentation.](https://cloud.baidu.com/doc/qianfan-api/s/3m7of64lb)
-
-[Perplexity](https://docs.openclaw.ai/providers/perplexity-provider) [Qwen](https://docs.openclaw.ai/providers/qwen)
-
-Ctrl+I
-
----
-
-## Inferrs - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/inferrs
-
-[Skip to main content](https://docs.openclaw.ai/providers/inferrs#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-Inferrs
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Getting started](https://docs.openclaw.ai/providers/inferrs#getting-started)
-- [Full config example](https://docs.openclaw.ai/providers/inferrs#full-config-example)
-- [Advanced configuration](https://docs.openclaw.ai/providers/inferrs#advanced-configuration)
-- [Troubleshooting](https://docs.openclaw.ai/providers/inferrs#troubleshooting)
-- [Related](https://docs.openclaw.ai/providers/inferrs#related)
-
-[inferrs](https://github.com/ericcurtin/inferrs) can serve local models behind an
-OpenAI-compatible `/v1` API. OpenClaw works with `inferrs` through the generic
-`openai-completions` path.`inferrs` is currently best treated as a custom self-hosted OpenAI-compatible
-backend, not a dedicated OpenClaw provider plugin.
-
-## [​](https://docs.openclaw.ai/providers/inferrs\\#getting-started)  Getting started
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/inferrs#)
-
-Start inferrs with a model
-
-```
-inferrs serve google/gemma-4-E2B-it \\\
-  --host 127.0.0.1 \\\
-  --port 8080 \\\
-  --device metal
-```
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/inferrs#)
-
-Verify the server is reachable
-
-```
-curl http://127.0.0.1:8080/health
-curl http://127.0.0.1:8080/v1/models
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/inferrs#)
-
-Add an OpenClaw provider entry
-
-Add an explicit provider entry and point your default model at it. See the full config example below.
-
-## [​](https://docs.openclaw.ai/providers/inferrs\\#full-config-example)  Full config example
-
-This example uses Gemma 4 on a local `inferrs` server.
-
-```
-{
-  agents: {
-    defaults: {
-      model: { primary: \"inferrs/google/gemma-4-E2B-it\" },
       models: {
-        \"inferrs/google/gemma-4-E2B-it\": {
-          alias: \"Gemma 4 (inferrs)\",
+        mode: "merge",
+        providers: {
+          moonshot: {
+            baseUrl: "https://api.moonshot.ai/v1",
+            apiKey: "${MOONSHOT_API_KEY}",
+            api: "openai-completions",
+            models: [
+              // moonshot-kimi-k2-models:start
+              {
+                id: "kimi-k2.6",
+                name: "Kimi K2.6",
+                reasoning: false,
+                input: ["text", "image"],
+                cost: { input: 0.95, output: 4, cacheRead: 0.16, cacheWrite: 0 },
+                contextWindow: 262144,
+                maxTokens: 262144,
+              },
+              {
+                id: "kimi-k2.5",
+                name: "Kimi K2.5",
+                reasoning: false,
+                input: ["text", "image"],
+                cost: { input: 0.6, output: 3, cacheRead: 0.1, cacheWrite: 0 },
+                contextWindow: 262144,
+                maxTokens: 262144,
+              },
+              {
+                id: "kimi-k2-thinking",
+                name: "Kimi K2 Thinking",
+                reasoning: true,
+                input: ["text"],
+                cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+                contextWindow: 262144,
+                maxTokens: 262144,
+              },
+              {
+                id: "kimi-k2-thinking-turbo",
+                name: "Kimi K2 Thinking Turbo",
+                reasoning: true,
+                input: ["text"],
+                cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+                contextWindow: 262144,
+                maxTokens: 262144,
+              },
+              {
+                id: "kimi-k2-turbo",
+                name: "Kimi K2 Turbo",
+                reasoning: false,
+                input: ["text"],
+                cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+                contextWindow: 256000,
+                maxTokens: 16384,
+              },
+              // moonshot-kimi-k2-models:end
+            ],
+          },
+        },
+      },
+    }
+    ```
+  </Tab>
+
+  <Tab title="Kimi Coding">
+    **Best for:** code-focused tasks via the Kimi Coding endpoint.
+
+    <Note>
+      Kimi Coding uses a different API key and provider prefix (`kimi/...`) than Moonshot (`moonshot/...`). Legacy model ref `kimi/k2p5` remains accepted as a compatibility id.
+    </Note>
+
+    <Steps>
+      <Step title="Run onboarding">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw onboard --auth-choice kimi-code-api-key
+        ```
+      </Step>
+
+      <Step title="Set a default model">
+        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        {
+          agents: {
+            defaults: {
+              model: { primary: "kimi/kimi-code" },
+            },
+          },
+        }
+        ```
+      </Step>
+
+      <Step title="Verify the model is available">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw models list --provider kimi
+        ```
+      </Step>
+    </Steps>
+
+    ### Config example
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      env: { KIMI_API_KEY: "sk-..." },
+      agents: {
+        defaults: {
+          model: { primary: "kimi/kimi-code" },
+          models: {
+            "kimi/kimi-code": { alias: "Kimi" },
+          },
+        },
+      },
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Kimi web search
+
+OpenClaw also ships **Kimi** as a `web_search` provider, backed by Moonshot web
+search.
+
+<Steps>
+  <Step title="Run interactive web search setup">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw configure --section web
+    ```
+
+    Choose **Kimi** in the web-search section to store
+    `plugins.entries.moonshot.config.webSearch.*`.
+  </Step>
+
+  <Step title="Configure the web search region and model">
+    Interactive setup prompts for:
+
+    | Setting          | Options                                                                              |
+    | ---------------- | ------------------------------------------------------------------------------------ |
+    | API region       | `https://api.moonshot.ai/v1` (international) or `https://api.moonshot.cn/v1` (China) |
+    | Web search model | Defaults to `kimi-k2.6`                                                              |
+  </Step>
+</Steps>
+
+Config lives under `plugins.entries.moonshot.config.webSearch`:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  plugins: {
+    entries: {
+      moonshot: {
+        config: {
+          webSearch: {
+            apiKey: "sk-...", // or use KIMI_API_KEY / MOONSHOT_API_KEY
+            baseUrl: "https://api.moonshot.ai/v1",
+            model: "kimi-k2.6",
+          },
         },
       },
     },
   },
-  models: {
-    mode: \"merge\",
-    providers: {
-      inferrs: {
-        baseUrl: \"http://127.0.0.1:8080/v1\",
-
----
-
-## Inworld - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/inworld
-
-[Skip to main content](https://docs.openclaw.ai/providers/inworld#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-Inworld
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Getting started](https://docs.openclaw.ai/providers/inworld#getting-started)
-- [Configuration options](https://docs.openclaw.ai/providers/inworld#configuration-options)
-- [Notes](https://docs.openclaw.ai/providers/inworld#notes)
-- [Related](https://docs.openclaw.ai/providers/inworld#related)
-
-Inworld is a streaming text-to-speech (TTS) provider. In OpenClaw it
-synthesizes outbound reply audio (MP3 by default, OGG\\_OPUS for voice notes)
-and PCM audio for telephony channels such as Voice Call.OpenClaw posts to Inworld’s streaming TTS endpoint, concatenates the
-returned base64 audio chunks into a single buffer, and hands the result to
-the standard reply-audio pipeline.
-
-| Detail | Value |
-| --- | --- |
-| Website | [inworld.ai](https://inworld.ai/) |
-| Docs | [docs.inworld.ai/tts/tts](https://docs.inworld.ai/tts/tts) |
-| Auth | `INWORLD_API_KEY` (HTTP Basic, Base64 dashboard credential) |
-| Default voice | `Sarah` |
-| Default model | `inworld-tts-1.5-max` |
-
-## [​](https://docs.openclaw.ai/providers/inworld\\#getting-started)  Getting started
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/inworld#)
-
-Set your API key
-
-Copy the credential from your Inworld dashboard (Workspace > API Keys)
-and set it as an env var. The value is sent verbatim as the HTTP Basic
-credential, so do not Base64-encode it again or convert it to a bearer
-token.
-
-```
-INWORLD_API_KEY=<base64-credential-from-dashboard>
-```
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/inworld#)
-
-Select Inworld in messages.tts
-
-```
-{
-  messages: {
-    tts: {
-      auto: \"always\",
-      provider: \"inworld\",
-      providers: {
-        inworld: {
-          voiceId: \"Sarah\",
-          modelId: \"inworld-tts-1.5-max\",
-        },
+  tools: {
+    web: {
+      search: {
+        provider: "kimi",
       },
     },
   },
 }
 ```
 
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/inworld#)
-
-Send a message
-
-Send a reply through any connected channel. OpenClaw synthesizes the
-audio with Inworld and delivers it as MP3 (or OGG\\_OPUS when the channel
-expects a voice note).
-
-## [​](https://docs.openclaw.ai/providers/inworld\\#configuration-options)  Configuration options
-
-| Option | Path | Description |
-| --- | --- | --- |
-| `apiKey` | `messages.tts.providers.inworld.apiKey` | Base64 dashboard credential. Falls back to `INWORLD_API_KEY`. |
-| `baseUrl` | `messages.tts.providers.inworld.baseUrl` | Override Inworld API base URL (default `https://api.inworld.ai`). |
-| `voiceId` | `messages.tts.providers.inworld.voiceId` | Voice identifier (default `Sarah`). |
-| `modelId` | `messages.tts.providers.inworld.modelId` | TTS model id (default `inworld-tts-1.5-max`). |
-| `temperature` | `messages.tts.providers.inworld.temperature` | Sampling temperature `0..2` (optional). |
-
-## [​](https://docs.openclaw.ai/providers/inworld\\#notes)  Notes
-
-Authentication
-
-Inworld uses HTTP Basic auth with a single Base64-encoded credential
-string. Copy it verbatim from the Inworld dashboard. The provider sends
-it as `Authorization: Basic <apiKey>` without any further encoding, so
-do not Base64-encode it yourself and do not pass a bearer-style token.
-See [TTS auth notes](https://docs.openclaw.ai/tools/tts#inworld-primary) for the same callout.
-
-Models
-
-Supported model ids: `inworld-tts-1.5-max` (default),
-`inworld-tts-1.5-mini`, `inworld-tts-1-max`, `inworld-tts-1`.
-
-Audio outputs
-
-Replies use MP3 by default. When the channel target is `voice-note`
-OpenClaw asks Inworld for `OGG_OPUS` so the audio plays as a native
-voice bubble. Telephony synthesis uses raw `PCM` at 22050 Hz to feed
-the telephony bridge.
-
-Custom endpoints
-
-Override the API host with `messages.tts.providers.inworld.baseUrl`.
-Trailing slashes are stripped before requests are sent.
-
-## [​](https://docs.openclaw.ai/providers/inworld\\#related)  Related
-
-[**Text-to-speech** \\\\\n\\\\\nTTS overview, providers, and `messages.tts` config.](https://docs.openclaw.ai/tools/tts)
-
-[**Configuration** \\\\\n\\\\\nFull config reference including `messages.tts` settings.](https://docs.openclaw.ai/gateway/configuration)
-
-[**Providers** \\\\\n\\\\\nAll bundled OpenClaw providers.](https://docs.openclaw.ai/providers)
-
-[**Troubleshooting** \\\\\n\\\\\nCommon issues and debugging steps.](https://docs.openclaw.ai/help/troubleshooting)
-
-[Inferrs](https://docs.openclaw.ai/providers/inferrs) [Kilocode](https://docs.openclaw.ai/providers/kilocode)
-
-Ctrl+I
-
----
-
-## Kilocode - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/kilocode
-
-[Skip to main content](https://docs.openclaw.ai/providers/kilocode#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-Kilocode
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Kilo Gateway](https://docs.openclaw.ai/providers/kilocode#kilo-gateway)
-- [Getting started](https://docs.openclaw.ai/providers/kilocode#getting-started)
-- [Default model](https://docs.openclaw.ai/providers/kilocode#default-model)
-- [Built-in catalog](https://docs.openclaw.ai/providers/kilocode#built-in-catalog)
-- [Config example](https://docs.openclaw.ai/providers/kilocode#config-example)
-- [Related](https://docs.openclaw.ai/providers/kilocode#related)
-
-# [​](https://docs.openclaw.ai/providers/kilocode\\#kilo-gateway)  Kilo Gateway
-
-Kilo Gateway provides a **unified API** that routes requests to many models behind a single
-endpoint and API key. It is OpenAI-compatible, so most OpenAI SDKs work by switching the base URL.
-
-| Property | Value |
-| --- | --- |
-| Provider | `kilocode` |
-| Auth | `KILOCODE_API_KEY` |
-| API | OpenAI-compatible |
-| Base URL | `https://api.kilo.ai/api/gateway/` |
-
-## [​](https://docs.openclaw.ai/providers/kilocode\\#getting-started)  Getting started
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/kilocode#)
-
-Create an account
-
-Go to [app.kilo.ai](https://app.kilo.ai/), sign in or create an account, then navigate to API Keys and generate a new key.
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/kilocode#)
-
-Run onboarding
-
-```
-openclaw onboard --auth-choice kilocode-api-key
-```
-
-Or set the environment variable directly:
-
-```
-export KILOCODE_API_KEY=\"<your-kilocode-api-key>\" # pragma: allowlist secret
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/kilocode#)
-
-Verify the model is available
-
-```
-openclaw models list --provider kilocode
-```
-
-## [​](https://docs.openclaw.ai/providers/kilocode\\#default-model)  Default model
-
-The default model is `kilocode/kilo/auto`, a provider-owned smart-routing
-model managed by Kilo Gateway.
-
-OpenClaw treats `kilocode/kilo/auto` as the stable default ref, but does not
-publish a source-backed task-to-upstream-model mapping for that route. Exact
-upstream routing behind `kilocode/kilo/auto` is owned by Kilo Gateway, not
-hard-coded in OpenClaw.
-
-## [​](https://docs.openclaw.ai/providers/kilocode\\#built-in-catalog)  Built-in catalog
-
-OpenClaw dynamically discovers available models from the Kilo Gateway at startup. Use
-`/models kilocode` to see the full list of models available with your account.Any model available on the gateway can be used with the `kilocode/` prefix:
-
-| Model ref | Notes |
-| --- | --- |
-| `kilocode/kilo/auto` | Default — smart routing |
-| `kilocode/anthropic/claude-sonnet-4` | Anthropic via Kilo |
-| `kilocode/openai/gpt-5.5` | OpenAI via Kilo |
-| `kilocode/google/gemini-3-pro-preview` | Google via Kilo |
-| …and many more | Use `/models kilocode` to list all |
-
-At startup, OpenClaw queries `GET https://api.kilo.ai/api/gateway/models` and merges
-discovered models ahead of the static fallback catalog. The bundled fallback always
-includes `kilocode/kilo/auto` (`Kilo Auto`) with `input: [\"text\", \"image\"]`,
-`reasoning: true`, `contextWindow: 1000000`, and `maxTokens: 128000`.
-
-## [​](https://docs.openclaw.ai/providers/kilocode\\#config-example)  Config example
-
-```
-{
-  env: { KILOCODE_API_KEY: \"<your-kilocode-api-key>\" }, // pragma: allowlist secret
-  agents: {
-    defaults: {
-      model: { primary: \"kilocode/kilo/auto\" },
-    },
-  },
-}
-```
-
-Transport and compatibility
-
-Kilo Gateway is documented in source as OpenRouter-compatible, so it stays on
-the proxy-style OpenAI-compatible path rather than native OpenAI request shaping.
-
-- Gemini-backed Kilo refs stay on the proxy-Gemini path, so OpenClaw keeps
-Gemini thought-signature sanitation there without enabling native Gemini
-replay validation or bootstrap rewrites.
-- Kilo Gateway uses a Bearer token with your API key under the hood.
-
-Stream wrapper and reasoning
-
-Kilo’s shared stream wrapper adds the provider app header and normalizes
-proxy reasoning payloads for supported concrete model refs.
-
-`kilocode/kilo/auto` and other proxy-reasoning-unsupported hints skip reasoning
-injection. If you need reasoning support, use a concrete model ref such as
-`kilocode/anthropic/claude-sonnet-4`.
-
-Troubleshooting
-
-- If model discovery fails at startup, OpenClaw falls back to the bundled static catalog containing `kilocode/kilo/auto`.
-- Confirm your API key is valid and that your Kilo account has the desired models enabled.
-- When the Gateway runs as a daemon, ensure `KILOCODE_API_KEY` is available to that process (for example in `~/.openclaw/.env` or via `env.shellEnv`).
-
-## [​](https://docs.openclaw.ai/providers/kilocode\\#related)  Related
-
-[**Model selection** \\\\\n\\\\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)
-
-[**Configuration reference** \\\\\n\\\\\nFull OpenClaw configuration reference.](https://docs.openclaw.ai/gateway/configuration-reference)
-
-[**Kilo Gateway** \\\\\n\\\\\nKilo Gateway dashboard, API keys, and account management.](https://app.kilo.ai/)
-
-[Inworld](https://docs.openclaw.ai/providers/inworld) [LiteLLM](https://docs.openclaw.ai/providers/litellm)
-
-Ctrl+I
-
----
-
-## OpenCode - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/opencode
-
-[Skip to main content](https://docs.openclaw.ai/providers/opencode#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-OpenCode
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Getting started](https://docs.openclaw.ai/providers/opencode#getting-started)
-- [Config example](https://docs.openclaw.ai/providers/opencode#config-example)
-- [Built-in catalogs](https://docs.openclaw.ai/providers/opencode#built-in-catalogs)
-- [Zen](https://docs.openclaw.ai/providers/opencode#zen)
-- [Go](https://docs.openclaw.ai/providers/opencode#go)
-- [Advanced configuration](https://docs.openclaw.ai/providers/opencode#advanced-configuration)
-- [Related](https://docs.openclaw.ai/providers/opencode#related)
-
-OpenCode exposes two hosted catalogs in OpenClaw:
-
-| Catalog | Prefix | Runtime provider |
-| --- | --- | --- |
-| **Zen** | `opencode/...` | `opencode` |
-| **Go** | `opencode-go/...` | `opencode-go` |
-
-Both catalogs use the same OpenCode API key. OpenClaw keeps the runtime provider ids
-split so upstream per-model routing stays correct, but onboarding and docs treat them
-as one OpenCode setup.
-
-## [​](https://docs.openclaw.ai/providers/opencode\\#getting-started)  Getting started
-
-- Zen catalog
-
-- Go catalog
-
-
-**Best for:** the curated OpenCode multi-model proxy (Claude, GPT, Gemini).
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/opencode#)
-
-Run onboarding
-
-```
-openclaw onboard --auth-choice opencode-zen
-```
-
-Or pass the key directly:
-
-```
-openclaw onboard --opencode-zen-api-key \"$OPENCODE_API_KEY\"
-```
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/opencode#)
-
-Set a Zen model as the default
-
-```
-openclaw config set agents.defaults.model.primary \"opencode/claude-opus-4-6\"
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/opencode#)
-
-Verify models are available
-
-```
-openclaw models list --provider opencode
-```
-
-**Best for:** the OpenCode-hosted Kimi, GLM, and MiniMax lineup.
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/providers/opencode#)
-
-Run onboarding
-
-```
-openclaw onboard --auth-choice opencode-go
-```
-
-Or pass the key directly:
-
-```
-openclaw onboard --opencode-go-api-key \"$OPENCODE_API_KEY\"
-```
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/providers/opencode#)
-
-Set a Go model as the default
-
-```
-openclaw config set agents.defaults.model.primary \"opencode-go/kimi-k2.6\"
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/opencode#)
-
-Verify models are available
-
-```
-openclaw models list --provider opencode-go
-```
-
-## [​](https://docs.openclaw.ai/providers/opencode\\#config-example)  Config example
-
-```
-{
-  env: { OPENCODE_API_KEY: \"sk-...\" },
-  agents: { defaults: { model: { primary: \"opencode/claude-opus-4-6\" } } },
-}
-```
-
-## [​](https://docs.openclaw.ai/providers/opencode\\#built-in-catalogs)  Built-in catalogs
-
-### [​](https://docs.openclaw.ai/providers/opencode\\#zen)  Zen
-
-| Property | Value |
-| --- | --- |
-| Runtime provider | `opencode` |
-| Example models | `opencode/claude-opus-4-6`, `opencode/gpt-5.5`, `opencode/gemini-3-pro` |
-
-### [​](https://docs.openclaw.ai/providers/opencode\\#go)  Go
-
-| Property | Value |
-| --- | --- |
-| Runtime provider | `opencode-go` |
-| Example models | `opencode-go/kimi-k2.6`, `opencode-go/glm-5`, `opencode-go/minimax-m2.5` |
-
-## [​](https://docs.openclaw.ai/providers/opencode\\#advanced-configuration)  Advanced configuration
-
-API key aliases
-
-`OPENCODE_ZEN_API_KEY` is also supported as an alias for `OPENCODE_API_KEY`.
-
-Shared credentials
-
-Entering one OpenCode key during setup stores credentials for both runtime
-providers. You do not need to onboard each catalog separately.
-
-Billing and dashboard
-
-You sign in to OpenCode, add billing details, and copy your API key. Billing
-and catalog availability are managed from the OpenCode dashboard.
-
-Gemini replay behavior
-
-Gemini-backed OpenCode refs stay on the proxy-Gemini path, so OpenClaw keeps
-Gemini thought-signature sanitation there without enabling native Gemini
-replay validation or bootstrap rewrites.
-
-Non-Gemini replay behavior
-
-Non-Gemini OpenCode refs keep the minimal OpenAI-compatible replay policy.
-
-Entering one OpenCode key during setup stores credentials for both the Zen and
-Go runtime providers, so you only need to onboard once.
-
-## [​](https://docs.openclaw.ai/providers/opencode\\#related)  Related
-
-[**Model selection** \\\\\n\\\\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)
-
-[**Configuration reference** \\\\\n\\\\\nFull config reference for agents, models, and providers.](https://docs.openclaw.ai/gateway/configuration-reference)
-
-[OpenAI](https://docs.openclaw.ai/providers/openai) [OpenCode Go](https://docs.openclaw.ai/providers/opencode-go)
-
-Ctrl+I
-
----
-
-## xAI - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/xai
-
-[Skip to main content](https://docs.openclaw.ai/providers/xai#content-area)\n\n[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)\n\n![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)\n\nEnglish\n\nSearch...\n\nCtrl K\n\nSearch...\n\nNavigation\n\nProviders\n\nxAI\n\n[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)\n\nOn this page\n\n- [Getting started](https://docs.openclaw.ai/providers/xai#getting-started)\n- [Built-in catalog](https://docs.openclaw.ai/providers/xai#built-in-catalog)\n- [OpenClaw feature coverage](https://docs.openclaw.ai/providers/xai#openclaw-feature-coverage)\n- [Fast-mode mappings](https://docs.openclaw.ai/providers/xai#fast-mode-mappings)\n- [Legacy compatibility aliases](https://docs.openclaw.ai/providers/xai#legacy-compatibility-aliases)\n- [Features](https://docs.openclaw.ai/providers/xai#features)\n- [Live testing](https://docs.openclaw.ai/providers/xai#live-testing)\n- [Related](https://docs.openclaw.ai/providers/xai#related)\n\nOpenClaw ships a bundled `xai` provider plugin for Grok models.\n\n## [​](https://docs.openclaw.ai/providers/xai\\#getting-started)  Getting started\n\n1\n\n[Navigate to header](https://docs.openclaw.ai/providers/xai#)\n\nCreate an API key\n\nCreate an API key in the [xAI console](https://console.x.ai/).\n\n2\n\n[Navigate to header](https://docs.openclaw.ai/providers/xai#)\n\nSet your API key\n\nSet `XAI_API_KEY`, or run:\n\n```\nopenclaw onboard --auth-choice xai-api-key\n```\n\n3\n\n[Navigate to header](https://docs.openclaw.ai/providers/xai#)\n\nPick a model\n\n```\n{\n  agents: { defaults: { model: { primary: \"xai/grok-4\" } } },\n}\n```\n\nOpenClaw uses the xAI Responses API as the bundled xAI transport. The same\n`XAI_API_KEY` can also power Grok-backed `web_search`, first-class `x_search`,\nand remote `code_execution`.\nIf you store an xAI key under `plugins.entries.xai.config.webSearch.apiKey`,\nthe bundled xAI model provider reuses that key as a fallback too.\n`code_execution` tuning lives under `plugins.entries.xai.config.codeExecution`.\n\n## [​](https://docs.openclaw.ai/providers/xai\\#built-in-catalog)  Built-in catalog\n\nOpenClaw includes these xAI model families out of the box:\n\n| Family | Model ids |\n| --- | --- |\n| Grok 3 | `grok-3`, `grok-3-fast`, `grok-3-mini`, `grok-3-mini-fast` |\n| Grok 4 | `grok-4`, `grok-4-0709` |\n| Grok 4 Fast | `grok-4-fast`, `grok-4-fast-non-reasoning` |\n| Grok 4.1 Fast | `grok-4-1-fast`, `grok-4-1-fast-non-reasoning` |\n| Grok 4.20 Beta | `grok-4.20-beta-latest-reasoning`, `grok-4.20-beta-latest-non-reasoning` |\n| Grok Code | `grok-code-fast-1` |\n\nThe plugin also forward-resolves newer `grok-4*` and `grok-code-fast*` ids when\nthey follow the same API shape.\n\n`grok-4-fast`, `grok-4-1-fast`, and the `grok-4.20-beta-*` variants are the\ncurrent image-capable Grok refs in the bundled catalog.\n\n## [​](https://docs.openclaw.ai/providers/xai\\#openclaw-feature-coverage)  OpenClaw feature coverage\n\nThe bundled plugin maps xAI’s current public API surface onto OpenClaw’s shared\nprovider and tool contracts. Capabilities that don’t fit the shared contract\n(for example streaming TTS and realtime voice) are not exposed — see the table\nbelow.\n\n| xAI capability | OpenClaw surface | Status |\n| --- | --- | --- |\n| Chat / Responses | `xai/<model>` model provider | Yes |\n| Server-side web search | `web_search` provider `grok` | Yes |\n| Server-side X search | `x_search` tool | Yes |\n| Server-side code execution | `code_execution` tool | Yes |\n| Images | `image_generate` | Yes |\n| Videos | `video_generate` | Yes |\n| Batch text-to-speech | `messages.tts.provider: \"xai\"` / `tts` | Yes |\n| Streaming TTS | — | Not exposed; OpenClaw’s TTS contract returns complete audio buffers |\n| Batch speech-to-text | `tools.media.audio` / media understanding | Yes |\n| Streaming speech-to-text | Voice Call `streaming.provider: \"xai\"` | Yes |\n| Realtime voice | — | Not exposed yet; different session/WebSocket contract |\n| Files / batches | Generic model API compatibility only | Not a first-class OpenClaw tool |\n\nOpenClaw uses xAI’s REST image/video/TTS/STT APIs for media generation,\nspeech, and batch transcription, xAI’s streaming STT WebSocket for live\nvoice-call transcription, and the Responses API for model, search, and\ncode-execution tools. Features that need different OpenClaw contracts, such as\nRealtime voice sessions, are documented here as upstream capabilities rather\nthan hidden plugin behavior.\n\n### [​](https://docs.openclaw.ai/providers/xai\\#fast-mode-mappings)  Fast-mode mappings\n\n`/fast on` or `agents.defaults.models[\"xai/<model>\"].params.fastMode: true`\nrewrites native xAI requests as follows:\n\n| Source model | Fast-mode target |\n| --- | --- |\n| `grok-3` | `grok-3-fast` |\n| `grok-3-mini` | `grok-3-mini-fast` |\n| `grok-4` | `grok-4-fast` |\n| `grok-4-0709` | `grok-4-fast` |\n\n### [​](https://docs.openclaw.ai/providers/xai\\#legacy-compatibility-aliases)  Legacy compatibility aliases\n\nLegacy aliases still normalize to the canonical bundled ids:\n\n| Legacy alias | Canonical id |\n| --- | --- |\n| `grok-4-fast-reasoning` | `grok-4-fast` |\n| `grok-4-1-fast-reasoning` | `grok-4-1-fast` |\n| `grok-4.20-reasoning` | `grok-4.20-beta-latest-reasoning` |\n| `grok-4.20-non-reasoning` | `grok-4.20-beta-latest-non-reasoning` |\n\n## [​](https://docs.openclaw.ai/providers/xai\\#features)  Features\n\nWeb search\n\nThe bundled `grok` web-search provider uses `XAI_API_KEY` too:\n\n```\nopenclaw config set tools.web.search.provider grok\n```\n\nVideo generation\n\nThe bundled `xai` plugin registers video generation through the shared\n`video_generate` tool.\n\n- Default video model: `xai/grok-imagine-video`\n- Modes: text-to-video, image-to-video, reference-image generation, remote\nvideo edit, and remote video extension\n- Aspect ratios: `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `3:2`, `2:3`\n- Resolutions: `480P`, `720P`\n- Duration: 1-15 seconds for generation/image-to-video, 1-10 seconds when\nusing `reference_image` roles, 2-10 seconds for extension\n- Reference-image generation: set `imageRoles` to `reference_image` for\nevery supplied image; xAI accepts up to 7 such images\n\nLocal video buffers are not accepted. Use remote `http(s)` URLs for\nvideo edit/extend inputs. Image-to-video accepts local image buffers because\nOpenClaw can encode those as data URLs for xAI.\n\nTo use xAI as the default video provider:\n\n```\n{\n  agents: {\n    defaults: {\n      videoGenerationModel: {\n        primary: \"xai/grok-imagine-video\",\n      },\n    },\n  },\n}\n```\n\nSee [Video Generation](https://docs.openclaw.ai/tools/video-generation) for shared tool parameters,\nprovider selection, and failover behavior.\n\nImage generation\n\nThe bundled `xai` plugin registers image generation through the shared\n`image_generate` tool.\n\n- Default image model: `xai/grok-imagine-image`\n- Additional model: `xai/grok-imagine-image-pro`\n- Modes: text-to-image and reference-image edit\n- Reference inputs: one `image` or up to five `images`\n- Aspect ratios: `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `2:3`, `3:2`\n- Resolutions: `1K`, `2K`\n- Count: up to 4 images\n\nOpenClaw asks xAI for `b64_json` image responses so generated media can be\nstored and delivered through the normal channel attachment path. Local\nreference images are converted to data URLs; remote `http(s)` references are\npassed through.To use xAI as the default image provider:\n\n```\n{\n  agents: {\n    defaults: {\n      imageGenerationModel: {\n        primary: \"xai/grok-imagine-image\",\n      },\n    },\n  },\n}\n```\n\nxAI also documents `quality`, `mask`, `user`, and additional native ratios\nsuch as `1:2`, `2:1`, `9:20`, and `20:9`. OpenClaw forwards only the\nshared cross-provider image controls today; unsupported native-only knobs\nare intentionally not exposed through `image_generate`.\n\nText-to-speech\n\nThe bundled `xai` plugin registers text-to-speech through the shared `tts`\nprovider surface.\n\n- Voices: `eve`, `ara`, `rex`, `sal`, `leo`, `una`\n- Default voice: `eve`\n- Formats: `mp3`, `wav`, `pcm`, `mulaw`, `alaw`\n- Language: BCP-47 code or `auto`\n- Speed: provider-native speed override\n- Native Opus voice-note format is not supported\n\nTo use xAI as the default TTS provider:\n\n```\n{\n  messages: {\n    tts: {\n      provider: \"xai\",\n      providers: {\n        xai: {\n          voiceId: \"eve\",\n        },\n      },\n    },\n  },\n}\n```\n\nOpenClaw uses xAI’s batch `/v1/tts` endpoint. xAI also offers streaming TTS\nover WebSocket, but the OpenClaw speech provider contract currently expects\na complete audio buffer before reply delivery.\n\nSpeech-to-text\n\nThe bundled `xai` plugin registers batch speech-to-text through OpenClaw’s\nmedia-understanding transcription surface.\n\n- Default model: `grok-stt`\n- Endpoint: xAI REST `/v1/stt`\n- Input path: multipart audio file upload\n- Supported by OpenClaw wherever inbound audio transcription uses\n`tools.media.audio`, including Discord voice-channel segments and\nchannel audio attachments\n\nTo force xAI for inbound audio transcription:\n\n```\n{\n  tools: {\n    media: {\n      audio: {\n        models: [\\\n          {\\\n            type: \"provider\",\\\n            provider: \"xai\",\\\n            model: \"grok-stt\",\\\n          },\\\n        ],\n      },\n    },\n  },\n}\n```\n\nLanguage can be supplied through the shared audio media config or per-call\ntranscription request. Prompt hints are accepted by the shared OpenClaw\nsurface, but the xAI REST STT integration only forwards file, model, and\nlanguage because those map cleanly to the current public xAI endpoint.\n\nStreaming speech-to-text\n\nThe bundled `xai` plugin also registers a realtime transcription provider\nfor live voice-call audio.\n\n- Endpoint: xAI WebSocket `wss://api.x.ai/v1/stt`\n- Default encoding: `mulaw`\n- Default sample rate: `8000`\n- Default endpointing: `800ms`\n- Interim transcripts: enabled by default\n\nVoice Call’s Twilio media stream sends G.711 µ-law audio frames, so the\nxAI provider can forward those frames directly without transcoding:\n\n```\n{\n  plugins: {\n    entries: {\n      \"voice-call\": {\n        config: {\n          streaming: {\n            enabled: true,\n            provider: \"xai\",\n            providers: {\n              xai: {\n                apiKey: \"${XAI_API_KEY}\",\n                endpointingMs: 800,\n                language: \"en\",\n              },\n            },\n          },\n        },\n      },\n    },\n  },\n}\n```\n\nProvider-owned config lives under\n`plugins.entries.voice-call.config.streaming.providers.xai`. Supported\nkeys are `apiKey`, `baseUrl`, `sampleRate`, `encoding` (`pcm`, `mulaw`, or\n`alaw`), `interimResults`, `endpointingMs`, and `language`.\n\nThis streaming provider is for Voice Call’s realtime transcription path.\nDiscord voice currently records short segments and uses the batch\n`tools.media.audio` transcription path instead.\n\nx\\_search configuration\n\nThe bundled xAI plugin exposes `x_search` as an OpenClaw tool for searching\nX (formerly Twitter) content via Grok.Config path: `plugins.entries.xai.config.xSearch`\n\n| Key | Type | Default | Description |\n| --- | --- | --- | --- |\n| `enabled` | boolean | — | Enable or disable x\\_search |\n| `model` | string | `grok-4-1-fast` | Model used for x\\_search requests |\n| `inlineCitations` | boolean | — | Include inline citations in results |\n| `maxTurns` | number | — | Maximum conversation turns |\n| `timeoutSeconds` | number | — | Request timeout in seconds |\n| `cacheTtlMinutes` | number | — | Cache time-to-live in minutes |\n\n```\n{\n  plugins: {\n    entries: {\n      xai: {\n        config: {\n          xSearch: {\n            enabled: true,\n            model: \"grok-4-1-fast\",\n            inlineCitations: true,\n          },\n        },\n      },\n    },\n  },\n}\n```\n\nCode execution configuration\n\nThe bundled xAI plugin exposes `code_execution` as an OpenClaw tool for\nremote code execution in xAI’s sandbox environment.Config path: `plugins.entries.xai.config.codeExecution`\n\n| Key | Type | Default | Description |\n| --- | --- | --- | --- |\n| `enabled` | boolean | `true` (if key available) | Enable or disable code execution |\n| `model` | string | `grok-4-1-fast` | Model used for code execution requests |\n| `maxTurns` | number | — | Maximum conversation turns |\n| `timeoutSeconds` | number | — | Request timeout in seconds |\n\nThis is remote xAI sandbox execution, not local [`exec`](https://docs.openclaw.ai/tools/exec).\n\n```\n{\n  plugins: {\n    entries: {\n      xai: {\n        config: {\n          codeExecution: {\n            enabled: true,\n            model: \"grok-4-1-fast\",\n          },\n        },\n      },\n    },\n  },\n}\n```\n\nKnown limits\n\n- Auth is API-key only today. There is no xAI OAuth or device-code flow in\nOpenClaw yet.\n- `grok-4.20-multi-agent-experimental-beta-0304` is not supported on the\nnormal xAI provider path because it requires a different upstream API\nsurface than the standard OpenClaw xAI transport.\n- xAI Realtime voice is not registered as an OpenClaw provider yet. It\nneeds a different bidirectional voice session contract than batch STT or\nstreaming transcription.\n- xAI image `quality`, image `mask`, and extra native-only aspect ratios are\nnot exposed until the shared `image_generate` tool has corresponding\ncross-provider controls.\n\nAdvanced notes\n\n- OpenClaw applies xAI-specific tool-schema and tool-call compatibility fixes\nautomatically on the shared runner path.\n- Native xAI requests default `tool_stream: true`. Set\n`agents.defaults.models[\"xai/<model>\"].params.tool_stream` to `false` to\ndisable it.\n- The bundled xAI wrapper strips unsupported strict tool-schema flags and\nreasoning payload keys before sending native xAI requests.\n- `web_search`, `x_search`, and `code_execution` are exposed as OpenClaw\ntools. OpenClaw enables the specific xAI built-in it needs inside each tool\nrequest instead of attaching all native tools to every chat turn.\n- `x_search` and `code_execution` are owned by the bundled xAI plugin rather\nthan hardcoded into the core model runtime.\n- `code_execution` is remote xAI sandbox execution, not local\n[`exec`](https://docs.openclaw.ai/tools/exec).\n\n## [​](https://docs.openclaw.ai/providers/xai\\#live-testing)  Live testing\n\nThe xAI media paths are covered by unit tests and opt-in live suites. The live\ncommands load secrets from your login shell, including `~/.profile`, before\nprobing `XAI_API_KEY`.\n\n```\npnpm test extensions/xai\nOPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_TEST_QUIET=1 pnpm test:live -- extensions/xai/xai.live.test.ts\nOPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_TEST_QUIET=1 OPENCLAW_LIVE_IMAGE_GENERATION_PROVIDERS=xai pnpm test:live -- test/image-generation.runtime.live.test.ts\n```\n\nThe provider-specific live file synthesizes normal TTS, telephony-friendly PCM\nTTS, transcribes audio through xAI batch STT, streams the same PCM through xAI\nrealtime STT, generates text-to-image output, and edits a reference image. The\nshared image live file verifies the same xAI provider through OpenClaw’s\nruntime selection, fallback, normalization, and media attachment path.\n\n## [​](https://docs.openclaw.ai/providers/xai\\#related)  Related\n\n[**Model selection** \\\\\n\\\\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)\n\n[**Video generation** \\\\\n\\\\\nShared video tool parameters and provider selection.](https://docs.openclaw.ai/tools/video-generation)\n\n[**All providers** \\\\\n\\\\\nThe broader provider overview.](https://docs.openclaw.ai/providers/index)\n\n[**Troubleshooting** \\\\\n\\\\\nCommon issues and fixes.](https://docs.openclaw.ai/help/troubleshooting)\n\n[Vydra](https://docs.openclaw.ai/providers/vydra) [Xiaomi MiMo](https://docs.openclaw.ai/providers/xiaomi)\n\nCtrl+I
-
----
-
-## NVIDIA - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/nvidia
-
-[Skip to main content](https://docs.openclaw.ai/providers/nvidia#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Providers
-
-NVIDIA
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Getting started](https://docs.openclaw.ai/providers/nvidia#getting-started)
-- [Config example](https://docs.openclaw.ai/providers/nvidia#config-example)
-- [Built-in catalog](https://docs.openclaw.ai/providers/nvidia#built-in-catalog)
-- [Advanced configuration](https://docs.openclaw.ai/providers/nvidia#advanced-configuration)
-- [Related](https://docs.openclaw.ai/providers/nvidia#related)
+## Advanced configuration
+
+<AccordionGroup>
+  <Accordion title="Native thinking mode">
+    Moonshot Kimi supports binary native thinking:
+
+    * `thinking: { type: "enabled" }`
+    * `thinking: { type: "disabled" }`
+
+    Configure it per model via `agents.defaults.models.<provider/model>.params`:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          models: {
+            "moonshot/kimi-k2.6": {
+              params: {
+                thinking: { type: "disabled" },
+              },
+            },
+          },
+        },
+      },
+    }
+    ```
+
+    OpenClaw also maps runtime `/think` levels for Moonshot:
+
+    | `/think` level    | Moonshot behavior        |
+    | ----------------- | ------------------------ |
+    | `/think off`      | `thinking.type=disabled` |
+    | Any non-off level | `thinking.type=enabled`  |
+
+    <Warning>
+      When Moonshot thinking is enabled, `tool_choice` must be `auto` or `none`. OpenClaw normalizes incompatible `tool_choice` values to `auto` for compatibility.
+    </Warning>
+
+    Kimi K2.6 also accepts an optional `thinking.keep` field that controls
+    multi-turn retention of `reasoning_content`. Set it to `"all"` to keep full
+    reasoning across turns; omit it (or leave it `null`) to use the server
+    default strategy. OpenClaw only forwards `thinking.keep` for
+    `moonshot/kimi-k2.6` and strips it from other models.
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          models: {
+            "moonshot/kimi-k2.6": {
+              params: {
+                thinking: { type: "enabled", keep: "all" },
+              },
+            },
+          },
+        },
+      },
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Tool call id sanitization">
+    Moonshot Kimi serves tool\_call ids shaped like `functions.<name>:<index>`. OpenClaw preserves them unchanged so multi-turn tool calls keep working.
+
+    To force strict sanitization on a custom OpenAI-compatible provider, set `sanitizeToolCallIds: true`:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      models: {
+        providers: {
+          "my-kimi-proxy": {
+            api: "openai-completions",
+            sanitizeToolCallIds: true,
+          },
+        },
+      },
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Streaming usage compatibility">
+    Native Moonshot endpoints (`https://api.moonshot.ai/v1` and
+    `https://api.moonshot.cn/v1`) advertise streaming usage compatibility on the
+    shared `openai-completions` transport. OpenClaw keys that off endpoint
+    capabilities, so compatible custom provider ids targeting the same native
+    Moonshot hosts inherit the same streaming-usage behavior.
+
+    With the bundled K2.6 pricing, streamed usage that includes input, output,
+    and cache-read tokens is also converted into local estimated USD cost for
+    `/status`, `/usage full`, `/usage cost`, and transcript-backed session
+    accounting.
+  </Accordion>
+
+  <Accordion title="Endpoint and model ref reference">
+    | Provider    | Model ref prefix | Endpoint                     | Auth env var                         |
+    | ----------- | ---------------- | ---------------------------- | ------------------------------------ |
+    | Moonshot    | `moonshot/`      | `https://api.moonshot.ai/v1` | `MOONSHOT_API_KEY`                   |
+    | Moonshot CN | `moonshot/`      | `https://api.moonshot.cn/v1` | `MOONSHOT_API_KEY`                   |
+    | Kimi Coding | `kimi/`          | Kimi Coding endpoint         | `KIMI_API_KEY`                       |
+    | Web search  | N/A              | Same as Moonshot API region  | `KIMI_API_KEY` or `MOONSHOT_API_KEY` |
+
+    * Kimi web search uses `KIMI_API_KEY` or `MOONSHOT_API_KEY`, and defaults to `https://api.moonshot.ai/v1` with model `kimi-k2.6`.
+    * Override pricing and context metadata in `models.providers` if needed.
+    * If Moonshot publishes different context limits for a model, adjust `contextWindow` accordingly.
+  </Accordion>
+</AccordionGroup>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Model selection" href="/concepts/model-providers" icon="layers">
+    Choosing providers, model refs, and failover behavior.
+  </Card>
+
+  <Card title="Web search" href="/tools/web" icon="magnifying-glass">
+    Configuring web search providers including Kimi.
+  </Card>
+
+  <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
+    Full config schema for providers, models, and plugins.
+  </Card>
+
+  <Card title="Moonshot Open Platform" href="https://platform.moonshot.ai" icon="globe">
+    Moonshot API key management and documentation.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# NVIDIA
 
 NVIDIA provides an OpenAI-compatible API at `https://integrate.api.nvidia.com/v1` for
 open models for free. Authenticate with an API key from
 [build.nvidia.com](https://build.nvidia.com/settings/api-keys).
 
-## [​](https://docs.openclaw.ai/providers/nvidia\\#getting-started)  Getting started
+## Getting started
 
-1
+<Steps>
+  <Step title="Get your API key">
+    Create an API key at [build.nvidia.com](https://build.nvidia.com/settings/api-keys).
+  </Step>
 
-[Navigate to header](https://docs.openclaw.ai/providers/nvidia#)
+  <Step title="Export the key and run onboarding">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    export NVIDIA_API_KEY="nvapi-..."
+    openclaw onboard --auth-choice nvidia-api-key
+    ```
+  </Step>
 
-Get your API key
+  <Step title="Set an NVIDIA model">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw models set nvidia/nvidia/nemotron-3-super-120b-a12b
+    ```
+  </Step>
+</Steps>
 
-Create an API key at [build.nvidia.com](https://build.nvidia.com/settings/api-keys).
+<Warning>
+  If you pass `--nvidia-api-key` instead of the env var, the value lands in shell
+  history and `ps` output. Prefer the `NVIDIA_API_KEY` environment variable when
+  possible.
+</Warning>
 
-2
+For non-interactive setup, you can also pass the key directly:
 
-[Navigate to header](https://docs.openclaw.ai/providers/nvidia#)
-
-Export the key and run onboarding
-
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw onboard --auth-choice nvidia-api-key --nvidia-api-key "nvapi-..."
 ```
-export NVIDIA_API_KEY=\"nvapi-...\"
-openclaw onboard --auth-choice skip
-```
 
-3
+## Config example
 
-[Navigate to header](https://docs.openclaw.ai/providers/nvidia#)
-
-Set an NVIDIA model
-
-```
-openclaw models set nvidia/nvidia/nemotron-3-super-120b-a12b
-```
-
-If you pass `--token` instead of the env var, the value lands in shell history and
-`ps` output. Prefer the `NVIDIA_API_KEY` environment variable when possible.
-
-## [​](https://docs.openclaw.ai/providers/nvidia\\#config-example)  Config example
-
-```
-env: { NVIDIA_API_KEY: \"nvapi-...\" },
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  env: { NVIDIA_API_KEY: "nvapi-..." },
   models: {
     providers: {
       nvidia: {
-        baseUrl: \"https://integrate.api.nvidia.com/v1\",
-        api: \"openai-completions\",
+        baseUrl: "https://integrate.api.nvidia.com/v1",
+        api: "openai-completions",
       },
     },
   },
   agents: {
     defaults: {
-      model: { primary: \"nvidia/nvidia/nemotron-3-super-120b-a12b\" },
+      model: { primary: "nvidia/nvidia/nemotron-3-super-120b-a12b" },
     },
   },
 }
 ```
 
-## [​](https://docs.openclaw.ai/providers/nvidia\\#built-in-catalog)  Built-in catalog
+## Built-in catalog
 
-| Model ref | Name | Context | Max output |
-| --- | --- | --- | --- |
-| `nvidia/nvidia/nemotron-3-super-120b-a12b` | NVIDIA Nemotron 3 Super 120B | 262,144 | 8,192 |
-| `nvidia/moonshotai/kimi-k2.5` | Kimi K2.5 | 262,144 | 8,192 |
-| `nvidia/minimaxai/minimax-m2.5` | Minimax M2.5 | 196,608 | 8,192 |
-| `nvidia/z-ai/glm5` | GLM 5 | 202,752 | 8,192 |
+| Model ref                                  | Name                         | Context | Max output |
+| ------------------------------------------ | ---------------------------- | ------- | ---------- |
+| `nvidia/nvidia/nemotron-3-super-120b-a12b` | NVIDIA Nemotron 3 Super 120B | 262,144 | 8,192      |
+| `nvidia/moonshotai/kimi-k2.5`              | Kimi K2.5                    | 262,144 | 8,192      |
+| `nvidia/minimaxai/minimax-m2.5`            | Minimax M2.5                 | 196,608 | 8,192      |
+| `nvidia/z-ai/glm5`                         | GLM 5                        | 202,752 | 8,192      |
 
-## [​](https://docs.openclaw.ai/providers/nvidia\\#advanced-configuration)  Advanced configuration
+## Advanced configuration
 
-Auto-enable behavior
+<AccordionGroup>
+  <Accordion title="Auto-enable behavior">
+    The provider auto-enables when the `NVIDIA_API_KEY` environment variable is set.
+    No explicit provider config is required beyond the key.
+  </Accordion>
 
-The provider auto-enables when the `NVIDIA_API_KEY` environment variable is set.
-No explicit provider config is required beyond the key.
+  <Accordion title="Catalog and pricing">
+    The bundled catalog is static. Costs default to `0` in source since NVIDIA
+    currently offers free API access for the listed models.
+  </Accordion>
 
-Catalog and pricing
+  <Accordion title="OpenAI-compatible endpoint">
+    NVIDIA uses the standard `/v1` completions endpoint. Any OpenAI-compatible
+    tooling should work out of the box with the NVIDIA base URL.
+  </Accordion>
+</AccordionGroup>
 
-The bundled catalog is static. Costs default to `0` in source since NVIDIA
-currently offers free API access for the listed models.
+<Tip>
+  NVIDIA models are currently free to use. Check
+  [build.nvidia.com](https://build.nvidia.com/) for the latest availability and
+  rate-limit details.
+</Tip>
 
-OpenAI-compatible endpoint
+## Related
 
-NVIDIA uses the standard `/v1` completions endpoint. Any OpenAI-compatible
-tooling should work out of the box with the NVIDIA base URL.
+<CardGroup cols={2}>
+  <Card title="Model selection" href="/concepts/model-providers" icon="layers">
+    Choosing providers, model refs, and failover behavior.
+  </Card>
 
-NVIDIA models are currently free to use. Check
-[build.nvidia.com](https://build.nvidia.com/) for the latest availability and
-rate-limit details.
+  <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
+    Full config reference for agents, models, and providers.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
 
-## [​](https://docs.openclaw.ai/providers/nvidia\\#related)  Related
+# Ollama
 
-[**Model selection** \\\\\n\\\\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)
+OpenClaw integrates with Ollama's native API (`/api/chat`) for hosted cloud models and local/self-hosted Ollama servers. You can use Ollama in three modes: `Cloud + Local` through a reachable Ollama host, `Cloud only` against `https://ollama.com`, or `Local only` against a reachable Ollama host.
 
-[**Configuration reference** \\\\\n\\\\\nFull config reference for agents, models, and providers.](https://docs.openclaw.ai/gateway/configuration-reference)
+<Warning>
+  **Remote Ollama users**: Do not use the `/v1` OpenAI-compatible URL (`http://host:11434/v1`) with OpenClaw. This breaks tool calling and models may output raw tool JSON as plain text. Use the native Ollama API URL instead: `baseUrl: "http://host:11434"` (no `/v1`).
+</Warning>
 
-[Moonshot AI](https://docs.openclaw.ai/providers/moonshot) [Ollama](https://docs.openclaw.ai/providers/ollama)
+Ollama provider config uses `baseUrl` as the canonical key. OpenClaw also accepts `baseURL` for compatibility with OpenAI SDK-style examples, but new config should prefer `baseUrl`.
 
-Ctrl+I
+## Auth rules
 
----
+<AccordionGroup>
+  <Accordion title="Local and LAN hosts">
+    Local and LAN Ollama hosts do not need a real bearer token. OpenClaw uses the local `ollama-local` marker only for loopback, private-network, `.local`, and bare-hostname Ollama base URLs.
+  </Accordion>
 
-## Vercel AI gateway - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/vercel-ai-gateway
+  <Accordion title="Remote and Ollama Cloud hosts">
+    Remote public hosts and Ollama Cloud (`https://ollama.com`) require a real credential through `OLLAMA_API_KEY`, an auth profile, or the provider's `apiKey`.
+  </Accordion>
 
-[Skip to main content](https://docs.openclaw.ai/providers/vercel-ai-gateway#content-area)
+  <Accordion title="Custom provider ids">
+    Custom provider ids that set `api: "ollama"` follow the same rules. For example, an `ollama-remote` provider that points at a private LAN Ollama host can use `apiKey: "ollama-local"` and sub-agents will resolve that marker through the Ollama provider hook instead of treating it as a missing credential. Memory search can also set `agents.defaults.memorySearch.provider` to that custom provider id so embeddings use the matching Ollama endpoint.
+  </Accordion>
 
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
+  <Accordion title="Auth profiles">
+    `auth-profiles.json` stores the credential for a provider id. Put endpoint settings (`baseUrl`, `api`, model ids, headers, timeouts) in `models.providers.<id>`. Older flat auth-profile files such as `{ "ollama-windows": { "apiKey": "ollama-local" } }` are not a runtime format; run `openclaw doctor --fix` to rewrite them to the canonical `ollama-windows:default` API-key profile with a backup. `baseUrl` in that file is compatibility noise and should be moved to provider config.
+  </Accordion>
 
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
+  <Accordion title="Memory embedding scope">
+    When Ollama is used for memory embeddings, bearer auth is scoped to the host where it was declared:
 
-English
+    * A provider-level key is sent only to that provider's Ollama host.
+    * `agents.*.memorySearch.remote.apiKey` is sent only to its remote embedding host.
+    * A pure `OLLAMA_API_KEY` env value is treated as the Ollama Cloud convention, not sent to local or self-hosted hosts by default.
+  </Accordion>
+</AccordionGroup>
 
-Search...
+## Getting started
 
-Ctrl K
+Choose your preferred setup method and mode.
 
-Search...
+<Tabs>
+  <Tab title="Onboarding (recommended)">
+    **Best for:** fastest path to a working Ollama cloud or local setup.
 
-Navigation
+    <Steps>
+      <Step title="Run onboarding">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw onboard
+        ```
 
-Providers
+        Select **Ollama** from the provider list.
+      </Step>
 
-Vercel AI gateway
+      <Step title="Choose your mode">
+        * **Cloud + Local** — local Ollama host plus cloud models routed through that host
+        * **Cloud only** — hosted Ollama models via `https://ollama.com`
+        * **Local only** — local models only
+      </Step>
 
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
+      <Step title="Select a model">
+        `Cloud only` prompts for `OLLAMA_API_KEY` and suggests hosted cloud defaults. `Cloud + Local` and `Local only` ask for an Ollama base URL, discover available models, and auto-pull the selected local model if it is not available yet. When Ollama reports an installed `:latest` tag such as `gemma4:latest`, setup shows that installed model once instead of showing both `gemma4` and `gemma4:latest` or pulling the bare alias again. `Cloud + Local` also checks whether that Ollama host is signed in for cloud access.
+      </Step>
 
-On this page
+      <Step title="Verify the model is available">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw models list --provider ollama
+        ```
+      </Step>
+    </Steps>
 
-- [Getting started](https://docs.openclaw.ai/providers/vercel-ai-gateway#getting-started)
-- [Non-interactive example](https://docs.openclaw.ai/providers/vercel-ai-gateway#non-interactive-example)
-- [Model ID shorthand](https://docs.openclaw.ai/providers/vercel-ai-gateway#model-id-shorthand)
-- [Advanced configuration](https://docs.openclaw.ai/providers/vercel-ai-gateway#advanced-configuration)
-- [Related](https://docs.openclaw.ai/providers/vercel-ai-gateway#related)
+    ### Non-interactive mode
 
-The [Vercel AI Gateway](https://vercel.com/ai-gateway) provides a unified API to
-access hundreds of models through a single endpoint.
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw onboard --non-interactive \
+      --auth-choice ollama \
+      --accept-risk
+    ```
 
-| Property | Value |
-| --- | --- |
-| Provider | `vercel-ai-gateway` |
-| Auth | `AI_GATEWAY_API_KEY` |
-| API | Anthropic Messages compatible |
-| Model catalog | Auto-discovered via `/v1/models` |
+    Optionally specify a custom base URL or model:
 
-OpenClaw auto-discovers the Gateway `/v1/models` catalog, so
-`/models vercel-ai-gateway` includes current model refs such as
-`vercel-ai-gateway/openai/gpt-5.5` and
-`vercel-ai-gateway/moonshotai/kimi-k2.6`.
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw onboard --non-interactive \
+      --auth-choice ollama \
+      --custom-base-url "http://ollama-host:11434" \
+      --custom-model-id "qwen3.5:27b" \
+      --accept-risk
+    ```
+  </Tab>
 
-## [​](https://docs.openclaw.ai/providers/vercel-ai-gateway\#getting-started)  Getting started
+  <Tab title="Manual setup">
+    **Best for:** full control over cloud or local setup.
 
-1
+    <Steps>
+      <Step title="Choose cloud or local">
+        * **Cloud + Local**: install Ollama, sign in with `ollama signin`, and route cloud requests through that host
+        * **Cloud only**: use `https://ollama.com` with an `OLLAMA_API_KEY`
+        * **Local only**: install Ollama from [ollama.com/download](https://ollama.com/download)
+      </Step>
 
-[Navigate to header](https://docs.openclaw.ai/providers/vercel-ai-gateway#)
+      <Step title="Pull a local model (local only)">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ollama pull gemma4
+        # or
+        ollama pull gpt-oss:20b
+        # or
+        ollama pull llama3.3
+        ```
+      </Step>
 
-Set the API key
+      <Step title="Enable Ollama for OpenClaw">
+        For `Cloud only`, use your real `OLLAMA_API_KEY`. For host-backed setups, any placeholder value works:
 
-Run onboarding and choose the AI Gateway auth option:
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        # Cloud
+        export OLLAMA_API_KEY="your-ollama-api-key"
 
+        # Local-only
+        export OLLAMA_API_KEY="ollama-local"
+
+        # Or configure in your config file
+        openclaw config set models.providers.ollama.apiKey "OLLAMA_API_KEY"
+        ```
+      </Step>
+
+      <Step title="Inspect and set your model">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw models list
+        openclaw models set ollama/gemma4
+        ```
+
+        Or set the default in config:
+
+        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        {
+          agents: {
+            defaults: {
+              model: { primary: "ollama/gemma4" },
+            },
+          },
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Cloud models
+
+<Tabs>
+  <Tab title="Cloud + Local">
+    `Cloud + Local` uses a reachable Ollama host as the control point for both local and cloud models. This is Ollama's preferred hybrid flow.
+
+    Use **Cloud + Local** during setup. OpenClaw prompts for the Ollama base URL, discovers local models from that host, and checks whether the host is signed in for cloud access with `ollama signin`. When the host is signed in, OpenClaw also suggests hosted cloud defaults such as `kimi-k2.5:cloud`, `minimax-m2.7:cloud`, and `glm-5.1:cloud`.
+
+    If the host is not signed in yet, OpenClaw keeps the setup local-only until you run `ollama signin`.
+  </Tab>
+
+  <Tab title="Cloud only">
+    `Cloud only` runs against Ollama's hosted API at `https://ollama.com`.
+
+    Use **Cloud only** during setup. OpenClaw prompts for `OLLAMA_API_KEY`, sets `baseUrl: "https://ollama.com"`, and seeds the hosted cloud model list. This path does **not** require a local Ollama server or `ollama signin`.
+
+    The cloud model list shown during `openclaw onboard` is populated live from `https://ollama.com/api/tags`, capped at 500 entries, so the picker reflects the current hosted catalog rather than a static seed. If `ollama.com` is unreachable or returns no models at setup time, OpenClaw falls back to the previous hardcoded suggestions so onboarding still completes.
+  </Tab>
+
+  <Tab title="Local only">
+    In local-only mode, OpenClaw discovers models from the configured Ollama instance. This path is for local or self-hosted Ollama servers.
+
+    OpenClaw currently suggests `gemma4` as the local default.
+  </Tab>
+</Tabs>
+
+## Model discovery (implicit provider)
+
+When you set `OLLAMA_API_KEY` (or an auth profile) and **do not** define `models.providers.ollama` or another custom remote provider with `api: "ollama"`, OpenClaw discovers models from the local Ollama instance at `http://127.0.0.1:11434`.
+
+| Behavior             | Detail                                                                                                                                                               |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Catalog query        | Queries `/api/tags`                                                                                                                                                  |
+| Capability detection | Uses best-effort `/api/show` lookups to read `contextWindow`, expanded `num_ctx` Modelfile parameters, and capabilities including vision/tools                       |
+| Vision models        | Models with a `vision` capability reported by `/api/show` are marked as image-capable (`input: ["text", "image"]`), so OpenClaw auto-injects images into the prompt  |
+| Reasoning detection  | Uses `/api/show` capabilities when available, including `thinking`; falls back to a model-name heuristic (`r1`, `reasoning`, `think`) when Ollama omits capabilities |
+| Token limits         | Sets `maxTokens` to the default Ollama max-token cap used by OpenClaw                                                                                                |
+| Costs                | Sets all costs to `0`                                                                                                                                                |
+
+This avoids manual model entries while keeping the catalog aligned with the local Ollama instance. You can use a full ref such as `ollama/<pulled-model>:latest` in local `infer model run`; OpenClaw resolves that installed model from Ollama's live catalog without requiring a hand-written `models.json` entry.
+
+For signed-in Ollama hosts, some `:cloud` models may be usable through `/api/chat`
+and `/api/show` before they appear in `/api/tags`. When you explicitly select a
+full `ollama/<model>:cloud` ref, OpenClaw validates that exact missing model with
+`/api/show` and adds it to the runtime catalog only if Ollama confirms model
+metadata. Typos still fail as unknown models instead of being auto-created.
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+# See what models are available
+ollama list
+openclaw models list
 ```
-openclaw onboard --auth-choice ai-gateway-api-key
+
+For a narrow text-generation smoke test that avoids the full agent tool surface,
+use local `infer model run` with a full Ollama model ref:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+OLLAMA_API_KEY=ollama-local \
+  openclaw infer model run \
+    --local \
+    --model ollama/llama3.2:latest \
+    --prompt "Reply with exactly: pong" \
+    --json
 ```
 
-2
+That path still uses OpenClaw's configured provider, auth, and native Ollama
+transport, but it does not start a chat-agent turn or load MCP/tool context. If
+this succeeds while normal agent replies fail, troubleshoot the model's agent
+prompt/tool capacity next.
 
-[Navigate to header](https://docs.openclaw.ai/providers/vercel-ai-gateway#)
+For a narrow vision-model smoke test on the same lean path, add one or more
+image files to `infer model run`. This sends the prompt and image directly to
+the selected Ollama vision model without loading chat tools, memory, or prior
+session context:
 
-Set a default model
-
-Add the model to your OpenClaw config:
-
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+OLLAMA_API_KEY=ollama-local \
+  openclaw infer model run \
+    --local \
+    --model ollama/qwen2.5vl:7b \
+    --prompt "Describe this image in one sentence." \
+    --file ./photo.jpg \
+    --json
 ```
+
+`model run --file` accepts files detected as `image/*`, including common PNG,
+JPEG, and WebP inputs. Non-image files are rejected before Ollama is called.
+For speech recognition, use `openclaw infer audio transcribe` instead.
+
+When you switch a conversation with `/model ollama/<model>`, OpenClaw treats
+that as an exact user selection. If the configured Ollama `baseUrl` is
+unreachable, the next reply fails with the provider error instead of silently
+answering from another configured fallback model.
+
+Isolated cron jobs do one extra local safety check before they start the agent
+turn. If the selected model resolves to a local, private-network, or `.local`
+Ollama provider and `/api/tags` is unreachable, OpenClaw records that cron run
+as `skipped` with the selected `ollama/<model>` in the error text. The endpoint
+preflight is cached for 5 minutes, so multiple cron jobs pointed at the same
+stopped Ollama daemon do not all launch failing model requests.
+
+Live-verify the local text path, native stream path, and embeddings against
+local Ollama with:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_OLLAMA=1 OPENCLAW_LIVE_OLLAMA_WEB_SEARCH=0 \
+  pnpm test:live -- extensions/ollama/ollama.live.test.ts
+```
+
+To add a new model, simply pull it with Ollama:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+ollama pull mistral
+```
+
+The new model will be automatically discovered and available to use.
+
+<Note>
+  If you set `models.providers.ollama` explicitly, or configure a custom remote provider such as `models.providers.ollama-cloud` with `api: "ollama"`, auto-discovery is skipped and you must define models manually. Loopback custom providers such as `http://127.0.0.2:11434` are still treated as local. See the explicit config section below.
+</Note>
+
+## Vision and image description
+
+The bundled Ollama plugin registers Ollama as an image-capable media-understanding provider. This lets OpenClaw route explicit image-description requests and configured image-model defaults through local or hosted Ollama vision models.
+
+For local vision, pull a model that supports images:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+ollama pull qwen2.5vl:7b
+export OLLAMA_API_KEY="ollama-local"
+```
+
+Then verify with the infer CLI:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw infer image describe \
+  --file ./photo.jpg \
+  --model ollama/qwen2.5vl:7b \
+  --json
+```
+
+`--model` must be a full `<provider/model>` ref. When it is set, `openclaw infer image describe` runs that model directly instead of skipping description because the model supports native vision.
+
+Use `infer image describe` when you want OpenClaw's image-understanding provider flow, configured `agents.defaults.imageModel`, and image-description output shape. Use `infer model run --file` when you want a raw multimodal model probe with a custom prompt and one or more images.
+
+To make Ollama the default image-understanding model for inbound media, configure `agents.defaults.imageModel`:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   agents: {
     defaults: {
-      model: { primary: \"vercel-ai-gateway/anthropic/claude-opus-4.6\" },
+      imageModel: {
+        primary: "ollama/qwen2.5vl:7b",
+      },
     },
   },
 }
 ```
 
-3
+Prefer the full `ollama/<model>` ref. If the same model is listed under `models.providers.ollama.models` with `input: ["text", "image"]` and no other configured image provider exposes that bare model ID, OpenClaw also normalizes a bare `imageModel` ref such as `qwen2.5vl:7b` to `ollama/qwen2.5vl:7b`. If more than one configured image provider has the same bare ID, use the provider prefix explicitly.
 
-[Navigate to header](https://docs.openclaw.ai/providers/vercel-ai-gateway#)
+Slow local vision models can need a longer image-understanding timeout than cloud models. They can also crash or stop when Ollama tries to allocate the full advertised vision context on constrained hardware. Set a capability timeout, and cap `num_ctx` on the model entry when you only need a normal image-description turn:
 
-Verify the model is available
-
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  models: {
+    providers: {
+      ollama: {
+        models: [
+          {
+            id: "qwen2.5vl:7b",
+            name: "qwen2.5vl:7b",
+            input: ["text", "image"],
+            params: { num_ctx: 2048, keep_alive: "1m" },
+          },
+        ],
+      },
+    },
+  },
+  tools: {
+    media: {
+      image: {
+        timeoutSeconds: 180,
+        models: [{ provider: "ollama", model: "qwen2.5vl:7b", timeoutSeconds: 300 }],
+      },
+    },
+  },
+}
 ```
-openclaw models list --provider vercel-ai-gateway
+
+This timeout applies to inbound image understanding and to the explicit `image` tool the agent can call during a turn. Provider-level `models.providers.ollama.timeoutSeconds` still controls the underlying Ollama HTTP request guard for normal model calls.
+
+Live-verify the explicit image tool against local Ollama with:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_OLLAMA_IMAGE=1 \
+  pnpm test:live -- src/agents/tools/image-tool.ollama.live.test.ts
 ```
 
-## [​](https://docs.openclaw.ai/providers/vercel-ai-gateway\#non-interactive-example)  Non-interactive example
+If you define `models.providers.ollama.models` manually, mark vision models with image input support:
 
-For scripted or CI setups, pass all values on the command line:
-
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  id: "qwen2.5vl:7b",
+  name: "qwen2.5vl:7b",
+  input: ["text", "image"],
+  contextWindow: 128000,
+  maxTokens: 8192,
+}
 ```
-openclaw onboard --non-interactive \
-  --mode local \
-  --auth-choice ai-gateway-api-key \
-  --ai-gateway-api-key \"$AI_GATEWAY_API_KEY\"
+
+OpenClaw rejects image-description requests for models that are not marked image-capable. With implicit discovery, OpenClaw reads this from Ollama when `/api/show` reports a vision capability.
+
+## Configuration
+
+<Tabs>
+  <Tab title="Basic (implicit discovery)">
+    The simplest local-only enablement path is via environment variable:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    export OLLAMA_API_KEY="ollama-local"
+    ```
+
+    <Tip>
+      If `OLLAMA_API_KEY` is set, you can omit `apiKey` in the provider entry and OpenClaw will fill it for availability checks.
+    </Tip>
+  </Tab>
+
+  <Tab title="Explicit (manual models)">
+    Use explicit config when you want hosted cloud setup, Ollama runs on another host/port, you want to force specific context windows or model lists, or you want fully manual model definitions.
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      models: {
+        providers: {
+          ollama: {
+            baseUrl: "https://ollama.com",
+            apiKey: "OLLAMA_API_KEY",
+            api: "ollama",
+            models: [
+              {
+                id: "kimi-k2.5:cloud",
+                name: "kimi-k2.5:cloud",
+                reasoning: false,
+                input: ["text", "image"],
+                cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+                contextWindow: 128000,
+                maxTokens: 8192
+              }
+            ]
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab title="Custom base URL">
+    If Ollama is running on a different host or port (explicit config disables auto-discovery, so define models manually):
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      models: {
+        providers: {
+          ollama: {
+            apiKey: "ollama-local",
+            baseUrl: "http://ollama-host:11434", // No /v1 - use native Ollama API URL
+            api: "ollama", // Set explicitly to guarantee native tool-calling behavior
+            timeoutSeconds: 300, // Optional: give cold local models longer to connect and stream
+            models: [
+              {
+                id: "qwen3:32b",
+                name: "qwen3:32b",
+                params: {
+                  keep_alive: "15m", // Optional: keep the model loaded between turns
+                },
+              },
+            ],
+          },
+        },
+      },
+    }
+    ```
+
+    <Warning>
+      Do not add `/v1` to the URL. The `/v1` path uses OpenAI-compatible mode, where tool calling is not reliable. Use the base Ollama URL without a path suffix.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## Common recipes
+
+Use these as starting points and replace model IDs with the exact names from `ollama list` or `openclaw models list --provider ollama`.
+
+<AccordionGroup>
+  <Accordion title="Local model with auto-discovery">
+    Use this when Ollama runs on the same machine as the Gateway and you want OpenClaw to discover the installed models automatically.
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ollama serve
+    ollama pull gemma4
+    export OLLAMA_API_KEY="ollama-local"
+    openclaw models list --provider ollama
+    openclaw models set ollama/gemma4
+    ```
+
+    This path keeps config minimal. Do not add a `models.providers.ollama` block unless you want to define models manually.
+  </Accordion>
+
+  <Accordion title="LAN Ollama host with manual models">
+    Use native Ollama URLs for LAN hosts. Do not add `/v1`.
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      models: {
+        providers: {
+          ollama: {
+            baseUrl: "http://gpu-box.local:11434",
+            apiKey: "ollama-local",
+            api: "ollama",
+            timeoutSeconds: 300,
+            contextWindow: 32768,
+            maxTokens: 8192,
+            models: [
+              {
+                id: "qwen3.5:9b",
+                name: "qwen3.5:9b",
+                reasoning: true,
+                input: ["text"],
+                params: {
+                  num_ctx: 32768,
+                  thinking: false,
+                  keep_alive: "15m",
+                },
+              },
+            ],
+          },
+        },
+      },
+      agents: {
+        defaults: {
+          model: { primary: "ollama/qwen3.5:9b" },
+        },
+      },
+    }
+    ```
+
+    `contextWindow` is the OpenClaw-side context budget. `params.num_ctx` is sent to Ollama for the request. Keep them aligned when your hardware cannot run the model's full advertised context.
+  </Accordion>
+
+  <Accordion title="Ollama Cloud only">
+    Use this when you do not run a local daemon and want hosted Ollama models directly.
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    export OLLAMA_API_KEY="your-ollama-api-key"
+    ```
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      models: {
+        providers: {
+          ollama: {
+            baseUrl: "https://ollama.com",
+            apiKey: "OLLAMA_API_KEY",
+            api: "ollama",
+            models: [
+              {
+                id: "kimi-k2.5:cloud",
+                name: "kimi-k2.5:cloud",
+                reasoning: false,
+                input: ["text", "image"],
+                contextWindow: 128000,
+                maxTokens: 8192,
+              },
+            ],
+          },
+        },
+      },
+      agents: {
+        defaults: {
+          model: { primary: "ollama/kimi-k2.5:cloud" },
+        },
+      },
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Cloud plus local through a signed-in daemon">
+    Use this when a local or LAN Ollama daemon is signed in with `ollama signin` and should serve both local models and `:cloud` models.
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ollama signin
+    ollama pull gemma4
+    ```
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      models: {
+        providers: {
+          ollama: {
+            baseUrl: "http://127.0.0.1:11434",
+            apiKey: "ollama-local",
+            api: "ollama",
+            timeoutSeconds: 300,
+            models: [
+              { id: "gemma4", name: "gemma4", input: ["text"] },
+              { id: "kimi-k2.5:cloud", name: "kimi-k2.5:cloud", input: ["text", "image"] },
+            ],
+          },
+        },
+      },
+      agents: {
+        defaults: {
+          model: {
+            primary: "ollama/gemma4",
+            fallbacks: ["ollama/kimi-k2.5:cloud"],
+          },
+        },
+      },
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Multiple Ollama hosts">
+    Use custom provider IDs when you have more than one Ollama server. Each provider gets its own host, models, auth, timeout, and model refs.
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      models: {
+        providers: {
+          "ollama-fast": {
+            baseUrl: "http://mini.local:11434",
+            apiKey: "ollama-local",
+            api: "ollama",
+            contextWindow: 32768,
+            models: [{ id: "gemma4", name: "gemma4", input: ["text"] }],
+          },
+          "ollama-large": {
+            baseUrl: "http://gpu-box.local:11434",
+            apiKey: "ollama-local",
+            api: "ollama",
+            timeoutSeconds: 420,
+            contextWindow: 131072,
+            maxTokens: 16384,
+            models: [{ id: "qwen3.5:27b", name: "qwen3.5:27b", input: ["text"] }],
+          },
+        },
+      },
+      agents: {
+        defaults: {
+          model: {
+            primary: "ollama-fast/gemma4",
+            fallbacks: ["ollama-large/qwen3.5:27b"],
+          },
+        },
+      },
+    }
+    ```
+
+    When OpenClaw sends the request, the active provider prefix is stripped so `ollama-large/qwen3.5:27b` reaches Ollama as `qwen3.5:27b`.
+  </Accordion>
+
+  <Accordion title="Lean local model profile">
+    Some local models can answer simple prompts but struggle with the full agent tool surface. Start by limiting tools and context before changing global runtime settings.
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          experimental: {
+            localModelLean: true,
+          },
+          model: { primary: "ollama/gemma4" },
+        },
+      },
+      models: {
+        providers: {
+          ollama: {
+            baseUrl: "http://127.0.0.1:11434",
+            apiKey: "ollama-local",
+            api: "ollama",
+            contextWindow: 32768,
+            models: [
+              {
+                id: "gemma4",
+                name: "gemma4",
+                input: ["text"],
+                params: { num_ctx: 32768 },
+                compat: { supportsTools: false },
+              },
+            ],
+          },
+        },
+      },
+    }
+    ```
+
+    Use `compat.supportsTools: false` only when the model or server reliably fails on tool schemas. It trades agent capability for stability.
+    `localModelLean` removes the browser, cron, and message tools from the agent surface, but it does not change Ollama's runtime context or thinking mode. Pair it with explicit `params.num_ctx` and `params.thinking: false` for small Qwen-style thinking models that loop or spend their response budget on hidden reasoning.
+  </Accordion>
+</AccordionGroup>
+
+### Model selection
+
+Once configured, all your Ollama models are available:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  agents: {
+    defaults: {
+      model: {
+        primary: "ollama/gpt-oss:20b",
+        fallbacks: ["ollama/llama3.3", "ollama/qwen2.5-coder:32b"],
+      },
+    },
+  },
+}
 ```
 
-## [​](https://docs.openclaw.ai/providers/vercel-ai-gateway\#model-id-shorthand)  Model ID shorthand
+Custom Ollama provider ids are also supported. When a model ref uses the active
+provider prefix, such as `ollama-spark/qwen3:32b`, OpenClaw strips only that
+prefix before calling Ollama so the server receives `qwen3:32b`.
 
-OpenClaw accepts Vercel Claude shorthand model refs and normalizes them at
-runtime:
+For slow local models, prefer provider-scoped request tuning before raising the
+whole agent runtime timeout:
 
-| Shorthand input | Normalized model ref |
-| --- | --- |
-| `vercel-ai-gateway/claude-opus-4.6` | `vercel-ai-gateway/anthropic/claude-opus-4.6` |
-| `vercel-ai-gateway/opus-4.6` | `vercel-ai-gateway/anthropic/claude-opus-4-6` |
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  models: {
+    providers: {
+      ollama: {
+        timeoutSeconds: 300,
+        models: [
+          {
+            id: "gemma4:26b",
+            name: "gemma4:26b",
+            params: { keep_alive: "15m" },
+          },
+        ],
+      },
+    },
+  },
+}
+```
 
-You can use either the shorthand or the fully qualified model ref in your
-configuration. OpenClaw resolves the canonical form automatically.
+`timeoutSeconds` applies to the model HTTP request, including connection setup,
+headers, body streaming, and the total guarded-fetch abort. `params.keep_alive`
+is forwarded to Ollama as top-level `keep_alive` on native `/api/chat` requests;
+set it per model when first-turn load time is the bottleneck.
 
-## [​](https://docs.openclaw.ai/providers/vercel-ai-gateway\#advanced-configuration)  Advanced configuration
+### Quick verification
 
-Environment variable for daemon processes
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+# Ollama daemon visible to this machine
+curl http://127.0.0.1:11434/api/tags
 
-If the OpenClaw Gateway runs as a daemon (launchd/systemd), make sure
-`AI_GATEWAY_API_KEY` is available to that process.
+# OpenClaw catalog and selected model
+openclaw models list --provider ollama
+openclaw models status
 
-A key set only in `~/.profile` will not be visible to a launchd/systemd
-daemon unless that environment is explicitly imported. Set the key in
-`~/.openclaw/.env` or via `env.shellEnv` to ensure the gateway process can
-read it.
+# Direct model smoke
+openclaw infer model run \
+  --model ollama/gemma4 \
+  --prompt "Reply with exactly: ok"
+```
 
-Provider routing
+For remote hosts, replace `127.0.0.1` with the host used in `baseUrl`. If `curl` works but OpenClaw does not, check whether the Gateway runs on a different machine, container, or service account.
 
-Vercel AI Gateway routes requests to the upstream provider based on the model
-ref prefix. For example, `vercel-ai-gateway/anthropic/claude-opus-4.6` routes
-through Anthropic, while `vercel-ai-gateway/openai/gpt-5.5` routes through
-OpenAI and `vercel-ai-gateway/moonshotai/kimi-k2.6` routes through
-MoonshotAI. Your single `AI_GATEWAY_API_KEY` handles authentication for all
-upstream providers.
+## Ollama Web Search
 
-## [​](https://docs.openclaw.ai/providers/vercel-ai-gateway\#related)  Related
+OpenClaw supports **Ollama Web Search** as a bundled `web_search` provider.
 
-[**Model selection** \
-\
-Choosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)
+| Property    | Detail                                                                                                                                                               |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Host        | Uses your configured Ollama host (`models.providers.ollama.baseUrl` when set, otherwise `http://127.0.0.1:11434`); `https://ollama.com` uses the hosted API directly |
+| Auth        | Key-free for signed-in local Ollama hosts; `OLLAMA_API_KEY` or configured provider auth for direct `https://ollama.com` search or auth-protected hosts               |
+| Requirement | Local/self-hosted hosts must be running and signed in with `ollama signin`; direct hosted search requires `baseUrl: "https://ollama.com"` plus a real Ollama API key |
 
-[**Troubleshooting** \
-\
-General troubleshooting and FAQ.](https://docs.openclaw.ai/help/troubleshooting)
+Choose **Ollama Web Search** during `openclaw onboard` or `openclaw configure --section web`, or set:
 
-[Venice AI](https://docs.openclaw.ai/providers/venice) [vLLM](https://docs.openclaw.ai/providers/vllm)
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  tools: {
+    web: {
+      search: {
+        provider: "ollama",
+      },
+    },
+  },
+}
+```
 
-Ctrl+I
+For direct hosted search through Ollama Cloud:
 
----
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  models: {
+    providers: {
+      ollama: {
+        baseUrl: "https://ollama.com",
+        apiKey: "OLLAMA_API_KEY",
+        api: "ollama",
+        models: [{ id: "kimi-k2.5:cloud", name: "kimi-k2.5:cloud", input: ["text"] }],
+      },
+    },
+  },
+  tools: {
+    web: {
+      search: { provider: "ollama" },
+    },
+  },
+}
+```
 
-## OpenRouter - OpenClaw
-**Source:** https://docs.openclaw.ai/providers/openrouter
+For a signed-in local daemon, OpenClaw uses the daemon's `/api/experimental/web_search` proxy. For `https://ollama.com`, it calls the hosted `/api/web_search` endpoint directly.
 
-[Skip to main content](https://docs.openclaw.ai/providers/openrouter#content-area)
+<Note>
+  For the full setup and behavior details, see [Ollama Web Search](/tools/ollama-search).
+</Note>
 
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
+## Advanced configuration
 
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
+<AccordionGroup>
+  <Accordion title="Legacy OpenAI-compatible mode">
+    <Warning>
+      **Tool calling is not reliable in OpenAI-compatible mode.** Use this mode only if you need OpenAI format for a proxy and do not depend on native tool calling behavior.
+    </Warning>
 
-English
+    If you need to use the OpenAI-compatible endpoint instead (for example, behind a proxy that only supports OpenAI format), set `api: "openai-completions"` explicitly:
 
-Search...
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      models: {
+        providers: {
+          ollama: {
+            baseUrl: "http://ollama-host:11434/v1",
+            api: "openai-completions",
+            injectNumCtxForOpenAICompat: true, // default: true
+            apiKey: "ollama-local",
+            models: [...]
+          }
+        }
+      }
+    }
+    ```
 
-Ctrl K
+    This mode may not support streaming and tool calling simultaneously. You may need to disable streaming with `params: { streaming: false }` in model config.
 
-Search...
+    When `api: "openai-completions"` is used with Ollama, OpenClaw injects `options.num_ctx` by default so Ollama does not silently fall back to a 4096 context window. If your proxy/upstream rejects unknown `options` fields, disable this behavior:
 
-Navigation
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      models: {
+        providers: {
+          ollama: {
+            baseUrl: "http://ollama-host:11434/v1",
+            api: "openai-completions",
+            injectNumCtxForOpenAICompat: false,
+            apiKey: "ollama-local",
+            models: [...]
+          }
+        }
+      }
+    }
+    ```
+  </Accordion>
 
-Providers
+  <Accordion title="Context windows">
+    For auto-discovered models, OpenClaw uses the context window reported by Ollama when available, including larger `PARAMETER num_ctx` values from custom Modelfiles. Otherwise it falls back to the default Ollama context window used by OpenClaw.
 
-OpenRouter
+    You can set provider-level `contextWindow`, `contextTokens`, and `maxTokens` defaults for every model under that Ollama provider, then override them per model when needed. `contextWindow` is OpenClaw's prompt and compaction budget. Native Ollama requests leave `options.num_ctx` unset unless you explicitly configure `params.num_ctx`, so Ollama can apply its own model, `OLLAMA_CONTEXT_LENGTH`, or VRAM-based default. To cap or force Ollama's per-request runtime context without rebuilding a Modelfile, set `params.num_ctx`; invalid, zero, negative, and non-finite values are ignored. The OpenAI-compatible Ollama adapter still injects `options.num_ctx` by default from the configured `params.num_ctx` or `contextWindow`; disable that with `injectNumCtxForOpenAICompat: false` if your upstream rejects `options`.
 
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
+    Native Ollama model entries also accept the common Ollama runtime options under `params`, including `temperature`, `top_p`, `top_k`, `min_p`, `num_predict`, `stop`, `repeat_penalty`, `num_batch`, `num_thread`, and `use_mmap`. OpenClaw forwards only Ollama request keys, so OpenClaw runtime params such as `streaming` are not leaked to Ollama. Use `params.think` or `params.thinking` to send top-level Ollama `think`; `false` disables API-level thinking for Qwen-style thinking models.
 
-On this page
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      models: {
+        providers: {
+          ollama: {
+            contextWindow: 32768,
+            models: [
+              {
+                id: "llama3.3",
+                contextWindow: 131072,
+                maxTokens: 65536,
+                params: {
+                  num_ctx: 32768,
+                  temperature: 0.7,
+                  top_p: 0.9,
+                  thinking: false,
+                },
+              }
+            ]
+          }
+        }
+      }
+    }
+    ```
 
-- [Getting started](https://docs.openclaw.ai/providers/openrouter#getting-started)
-- [Config example](https://docs.openclaw.ai/providers/openrouter#config-example)
-- [Model references](https://docs.openclaw.ai/providers/openrouter#model-references)
-- [Image generation](https://docs.openclaw.ai/providers/openrouter#image-generation)
-- [Video generation](https://docs.openclaw.ai/providers/openrouter#video-generation)
-- [Text-to-speech](https://docs.openclaw.ai/providers/openrouter#text-to-speech)
-- [Authentication and headers](https://docs.openclaw.ai/providers/openrouter#authentication-and-headers)
-- [Advanced configuration](https://docs.openclaw.ai/providers/openrouter#advanced-configuration)
-- [Related](https://docs.openclaw.ai/providers/openrouter#related)
+    Per-model `agents.defaults.models["ollama/<model>"].params.num_ctx` works too. If both are configured, the explicit provider model entry wins over the agent default.
+  </Accordion>
+
+  <Accordion title="Thinking control">
+    For native Ollama models, OpenClaw forwards thinking control as Ollama expects it: top-level `think`, not `options.think`. Auto-discovered models whose `/api/show` response includes the `thinking` capability expose `/think low`, `/think medium`, `/think high`, and `/think max`; non-thinking models expose only `/think off`.
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw agent --model ollama/gemma4 --thinking off
+    openclaw agent --model ollama/gemma4 --thinking low
+    ```
+
+    You can also set a model default:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          models: {
+            "ollama/gemma4": {
+              thinking: "low",
+            },
+          },
+        },
+      },
+    }
+    ```
+
+    Per-model `params.think` or `params.thinking` can disable or force Ollama API thinking for a specific configured model. OpenClaw preserves those explicit model params when the active run only has the implicit default `off`; non-off runtime commands such as `/think medium` still override the active run.
+  </Accordion>
+
+  <Accordion title="Reasoning models">
+    OpenClaw treats models with names such as `deepseek-r1`, `reasoning`, or `think` as reasoning-capable by default.
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ollama pull deepseek-r1:32b
+    ```
+
+    No additional configuration is needed. OpenClaw marks them automatically.
+  </Accordion>
+
+  <Accordion title="Model costs">
+    Ollama is free and runs locally, so all model costs are set to \$0. This applies to both auto-discovered and manually defined models.
+  </Accordion>
+
+  <Accordion title="Memory embeddings">
+    The bundled Ollama plugin registers a memory embedding provider for
+    [memory search](/concepts/memory). It uses the configured Ollama base URL
+    and API key, calls Ollama's current `/api/embed` endpoint, and batches
+    multiple memory chunks into one `input` request when possible.
+
+    | Property      | Value                                                                    |
+    | ------------- | ------------------------------------------------------------------------ |
+    | Default model | `nomic-embed-text`                                                       |
+    | Auto-pull     | Yes — the embedding model is pulled automatically if not present locally |
+
+    Query-time embeddings use retrieval prefixes for models that require or recommend them, including `nomic-embed-text`, `qwen3-embedding`, and `mxbai-embed-large`. Memory document batches stay raw so existing indexes do not need a format migration.
+
+    To select Ollama as the memory search embedding provider:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          memorySearch: {
+            provider: "ollama",
+            remote: {
+              // Default for Ollama. Raise on larger hosts if reindexing is too slow.
+              nonBatchConcurrency: 1,
+            },
+          },
+        },
+      },
+    }
+    ```
+
+    For a remote embedding host, keep auth scoped to that host:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          memorySearch: {
+            provider: "ollama",
+            model: "nomic-embed-text",
+            remote: {
+              baseUrl: "http://gpu-box.local:11434",
+              apiKey: "ollama-local",
+              nonBatchConcurrency: 2,
+            },
+          },
+        },
+      },
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Streaming configuration">
+    OpenClaw's Ollama integration uses the **native Ollama API** (`/api/chat`) by default, which fully supports streaming and tool calling simultaneously. No special configuration is needed.
+
+    For native `/api/chat` requests, OpenClaw also forwards thinking control directly to Ollama: `/think off` and `openclaw agent --thinking off` send top-level `think: false` unless an explicit model `params.think`/`params.thinking` value is configured, while `/think low|medium|high` send the matching top-level `think` effort string. `/think max` maps to Ollama's highest native effort, `think: "high"`.
+
+    <Tip>
+      If you need to use the OpenAI-compatible endpoint, see the "Legacy OpenAI-compatible mode" section above. Streaming and tool calling may not work simultaneously in that mode.
+    </Tip>
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="WSL2 crash loop (repeated reboots)">
+    On WSL2 with NVIDIA/CUDA, the official Ollama Linux installer creates an `ollama.service` systemd unit with `Restart=always`. If that service autostarts and loads a GPU-backed model during WSL2 boot, Ollama can pin host memory while the model loads. Hyper-V memory reclaim cannot always reclaim those pinned pages, so Windows can terminate the WSL2 VM, systemd starts Ollama again, and the loop repeats.
+
+    Common evidence:
+
+    * repeated WSL2 reboots or terminations from the Windows side
+    * high CPU in `app.slice` or `ollama.service` shortly after WSL2 startup
+    * SIGTERM from systemd rather than a Linux OOM-killer event
+
+    OpenClaw logs a startup warning when it detects WSL2, `ollama.service` enabled with `Restart=always`, and visible CUDA markers.
+
+    Mitigation:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    sudo systemctl disable ollama
+    ```
+
+    Add this to `%USERPROFILE%\.wslconfig` on the Windows side, then run `wsl --shutdown`:
+
+    ```ini theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    [experimental]
+    autoMemoryReclaim=disabled
+    ```
+
+    Set a shorter keep-alive in the Ollama service environment, or start Ollama manually only when you need it:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    export OLLAMA_KEEP_ALIVE=5m
+    ollama serve
+    ```
+
+    See [ollama/ollama#11317](https://github.com/ollama/ollama/issues/11317).
+  </Accordion>
+
+  <Accordion title="Ollama not detected">
+    Make sure Ollama is running and that you set `OLLAMA_API_KEY` (or an auth profile), and that you did **not** define an explicit `models.providers.ollama` entry:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ollama serve
+    ```
+
+    Verify that the API is accessible:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    curl http://localhost:11434/api/tags
+    ```
+  </Accordion>
+
+  <Accordion title="No models available">
+    If your model is not listed, either pull the model locally or define it explicitly in `models.providers.ollama`.
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ollama list  # See what's installed
+    ollama pull gemma4
+    ollama pull gpt-oss:20b
+    ollama pull llama3.3     # Or another model
+    ```
+  </Accordion>
+
+  <Accordion title="Connection refused">
+    Check that Ollama is running on the correct port:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    # Check if Ollama is running
+    ps aux | grep ollama
+
+    # Or restart Ollama
+    ollama serve
+    ```
+  </Accordion>
+
+  <Accordion title="Remote host works with curl but not OpenClaw">
+    Verify from the same machine and runtime that runs the Gateway:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw gateway status --deep
+    curl http://ollama-host:11434/api/tags
+    ```
+
+    Common causes:
+
+    * `baseUrl` points at `localhost`, but the Gateway runs in Docker or on another host.
+    * The URL uses `/v1`, which selects OpenAI-compatible behavior instead of native Ollama.
+    * The remote host needs firewall or LAN binding changes on the Ollama side.
+    * The model is present on your laptop's daemon but not on the remote daemon.
+  </Accordion>
+
+  <Accordion title="Model outputs tool JSON as text">
+    This usually means the provider is using OpenAI-compatible mode or the model cannot handle tool schemas.
+
+    Prefer native Ollama mode:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      models: {
+        providers: {
+          ollama: {
+            baseUrl: "http://ollama-host:11434",
+            api: "ollama",
+          },
+        },
+      },
+    }
+    ```
+
+    If a small local model still fails on tool schemas, set `compat.supportsTools: false` on that model entry and retest.
+  </Accordion>
+
+  <Accordion title="Kimi or GLM returns garbled symbols">
+    Hosted Kimi/GLM responses that are long, non-linguistic symbol runs are treated as failed provider output instead of a successful assistant answer. That lets normal retry, fallback, or error handling take over without persisting the corrupted text into the session.
+
+    If it happens repeatedly, capture the raw model name, the current session file, and whether the run used `Cloud + Local` or `Cloud only`, then try a fresh session and a fallback model:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw infer model run --model ollama/kimi-k2.5:cloud --prompt "Reply with exactly: ok" --json
+    openclaw models set ollama/gemma4
+    ```
+  </Accordion>
+
+  <Accordion title="Cold local model times out">
+    Large local models can need a long first load before streaming begins. Keep the timeout scoped to the Ollama provider, and optionally ask Ollama to keep the model loaded between turns:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      models: {
+        providers: {
+          ollama: {
+            timeoutSeconds: 300,
+            models: [
+              {
+                id: "gemma4:26b",
+                name: "gemma4:26b",
+                params: { keep_alive: "15m" },
+              },
+            ],
+          },
+        },
+      },
+    }
+    ```
+
+    If the host itself is slow to accept connections, `timeoutSeconds` also extends the guarded Undici connect timeout for this provider.
+  </Accordion>
+
+  <Accordion title="Large-context model is too slow or runs out of memory">
+    Many Ollama models advertise contexts that are larger than your hardware can run comfortably. Native Ollama uses Ollama's own runtime context default unless you set `params.num_ctx`. Cap both OpenClaw's budget and Ollama's request context when you want predictable first-token latency:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      models: {
+        providers: {
+          ollama: {
+            contextWindow: 32768,
+            maxTokens: 8192,
+            models: [
+              {
+                id: "qwen3.5:9b",
+                name: "qwen3.5:9b",
+                params: { num_ctx: 32768, thinking: false },
+              },
+            ],
+          },
+        },
+      },
+    }
+    ```
+
+    Lower `contextWindow` first if OpenClaw is sending too much prompt. Lower `params.num_ctx` if Ollama is loading a runtime context that is too large for the machine. Lower `maxTokens` if generation runs too long.
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+  More help: [Troubleshooting](/help/troubleshooting) and [FAQ](/help/faq).
+</Note>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Model providers" href="/concepts/model-providers" icon="layers">
+    Overview of all providers, model refs, and failover behavior.
+  </Card>
+
+  <Card title="Model selection" href="/concepts/models" icon="brain">
+    How to choose and configure models.
+  </Card>
+
+  <Card title="Ollama Web Search" href="/tools/ollama-search" icon="magnifying-glass">
+    Full setup and behavior details for Ollama-powered web search.
+  </Card>
+
+  <Card title="Configuration" href="/gateway/configuration" icon="gear">
+    Full config reference.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# OpenRouter
 
 OpenRouter provides a **unified API** that routes requests to many models behind a single
 endpoint and API key. It is OpenAI-compatible, so most OpenAI SDKs work by switching the base URL.
 
-## [​](https://docs.openclaw.ai/providers/openrouter\\#getting-started)  Getting started
+## Getting started
 
-1
+<Steps>
+  <Step title="Get your API key">
+    Create an API key at [openrouter.ai/keys](https://openrouter.ai/keys).
+  </Step>
 
-[Navigate to header](https://docs.openclaw.ai/providers/openrouter#)
+  <Step title="Run onboarding">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw onboard --auth-choice openrouter-api-key
+    ```
+  </Step>
 
-Get your API key
+  <Step title="(Optional) Switch to a specific model">
+    Onboarding defaults to `openrouter/auto`. Pick a concrete model later:
 
-Create an API key at [openrouter.ai/keys](https://openrouter.ai/keys).
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw models set openrouter/<provider>/<model>
+    ```
+  </Step>
+</Steps>
 
-2
+## Config example
 
-[Navigate to header](https://docs.openclaw.ai/providers/openrouter#)
-
-Run onboarding
-
-```
-openclaw onboard --auth-choice openrouter-api-key
-```
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/providers/openrouter#)
-
-(Optional) Switch to a specific model
-
-Onboarding defaults to `openrouter/auto`. Pick a concrete model later:
-
-```
-openclaw models set openrouter/<provider>/<model>
-```
-
-## [​](https://docs.openclaw.ai/providers/openrouter\\#config-example)  Config example
-
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-  env: { OPENROUTER_API_KEY: \"sk-or-...\" },
+  env: { OPENROUTER_API_KEY: "sk-or-..." },
   agents: {
     defaults: {
-      model: { primary: \"openrouter/auto\" },
+      model: { primary: "openrouter/auto" },
     },
   },
 }
 ```
 
-## [​](https://docs.openclaw.ai/providers/openrouter\\#model-references)  Model references
+## Model references
 
-Model refs follow the pattern `openrouter/<provider>/<model>`. For the full list of
-available providers and models, see [/concepts/model-providers](https://docs.openclaw.ai/concepts/model-providers).
+<Note>
+  Model refs follow the pattern `openrouter/<provider>/<model>`. For the full list of
+  available providers and models, see [/concepts/model-providers](/concepts/model-providers).
+</Note>
 
 Bundled fallback examples:
 
-| Model ref | Notes |
-| --- | --- |
-| `openrouter/auto` | OpenRouter automatic routing |
-| `openrouter/moonshotai/kimi-k2.6` | Kimi K2.6 via MoonshotAI |
+| Model ref                         | Notes                        |
+| --------------------------------- | ---------------------------- |
+| `openrouter/auto`                 | OpenRouter automatic routing |
+| `openrouter/moonshotai/kimi-k2.6` | Kimi K2.6 via MoonshotAI     |
 
-## [​](https://docs.openclaw.ai/providers/openrouter\\#image-generation)  Image generation
+## Image generation
 
 OpenRouter can also back the `image_generate` tool. Use an OpenRouter image model under `agents.defaults.imageGenerationModel`:
 
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-  env: { OPENROUTER_API_KEY: \"sk-or-...\" },
+  env: { OPENROUTER_API_KEY: "sk-or-..." },
   agents: {
     defaults: {
       imageGenerationModel: {
-        primary: \"openrouter/google/gemini-3.1-flash-image-preview\",
+        primary: "openrouter/google/gemini-3.1-flash-image-preview",
         timeoutMs: 180_000,
       },
     },
@@ -4903,19 +3852,19 @@ OpenRouter can also back the `image_generate` tool. Use an OpenRouter image mode
 }
 ```
 
-OpenClaw sends image requests to OpenRouter’s chat completions image API with `modalities: [\"image\", \"text\"]`. Gemini image models receive supported `aspectRatio` and `resolution` hints through OpenRouter’s `image_config`. Use `agents.defaults.imageGenerationModel.timeoutMs` for slower OpenRouter image models; the `image_generate` tool’s per-call `timeoutMs` parameter still wins.
+OpenClaw sends image requests to OpenRouter's chat completions image API with `modalities: ["image", "text"]`. Gemini image models receive supported `aspectRatio` and `resolution` hints through OpenRouter's `image_config`. Use `agents.defaults.imageGenerationModel.timeoutMs` for slower OpenRouter image models; the `image_generate` tool's per-call `timeoutMs` parameter still wins.
 
-## [​](https://docs.openclaw.ai/providers/openrouter\\#video-generation)  Video generation
+## Video generation
 
 OpenRouter can also back the `video_generate` tool through its asynchronous `/videos` API. Use an OpenRouter video model under `agents.defaults.videoGenerationModel`:
 
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-  env: { OPENROUTER_API_KEY: \"sk-or-...\" },
+  env: { OPENROUTER_API_KEY: "sk-or-..." },
   agents: {
     defaults: {
       videoGenerationModel: {
-        primary: \"openrouter/google/veo-3.1-fast\",
+        primary: "openrouter/google/veo-3.1-fast",
       },
     },
   },
@@ -4924,7 +3873,7 @@ OpenRouter can also back the `video_generate` tool through its asynchronous `/vi
 
 OpenClaw submits text-to-video and image-to-video jobs to OpenRouter, polls
 the returned `polling_url`, and downloads the completed video from
-OpenRouter’s `unsigned_urls` or the documented job content endpoint.
+OpenRouter's `unsigned_urls` or the documented job content endpoint.
 Reference images are sent as first/last frame images by default; images
 tagged with `reference_image` are sent as OpenRouter input references. The
 bundled `google/veo-3.1-fast` default advertises the currently supported 4/6/8
@@ -4932,22 +3881,22 @@ second durations, `720P`/`1080P` resolutions, and `16:9`/`9:16` aspect
 ratios. Video-to-video is not registered for OpenRouter because the upstream
 video generation API currently accepts text and image references.
 
-## [​](https://docs.openclaw.ai/providers/openrouter\\#text-to-speech)  Text-to-speech
+## Text-to-speech
 
 OpenRouter can also be used as a TTS provider through its OpenAI-compatible
 `/audio/speech` endpoint.
 
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   messages: {
     tts: {
-      auto: \"always\",
-      provider: \"openrouter\",
+      auto: "always",
+      provider: "openrouter",
       providers: {
         openrouter: {
-          model: \"hexgrad/kokoro-82m\",
-          voice: \"af_alloy\",
-          responseFormat: \"mp3\",
+          model: "hexgrad/kokoro-82m",
+          voice: "af_alloy",
+          responseFormat: "mp3",
         },
       },
     },
@@ -4958,62 +3907,851 @@ OpenRouter can also be used as a TTS provider through its OpenAI-compatible
 If `messages.tts.providers.openrouter.apiKey` is omitted, TTS reuses
 `models.providers.openrouter.apiKey`, then `OPENROUTER_API_KEY`.
 
-## [​](https://docs.openclaw.ai/providers/openrouter\\#authentication-and-headers)  Authentication and headers
+## Authentication and headers
 
-OpenRouter uses a Bearer token with your API key under the hood.On real OpenRouter requests (`https://openrouter.ai/api/v1`), OpenClaw also adds
-OpenRouter’s documented app-attribution headers:
+OpenRouter uses a Bearer token with your API key under the hood.
 
-| Header | Value |
-| --- | --- |
-| `HTTP-Referer` | `https://openclaw.ai` |
-| `X-OpenRouter-Title` | `OpenClaw` |
-| `X-OpenRouter-Categories` | `cli-agent` |
+On real OpenRouter requests (`https://openrouter.ai/api/v1`), OpenClaw also adds
+OpenRouter's documented app-attribution headers:
 
-If you repoint the OpenRouter provider at some other proxy or base URL, OpenClaw
-does **not** inject those OpenRouter-specific headers or Anthropic cache markers.
+| Header                    | Value                                                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `HTTP-Referer`            | `https://openclaw.ai`                                                                                  |
+| `X-OpenRouter-Title`      | `OpenClaw`                                                                                             |
+| `X-OpenRouter-Categories` | `cli-agent,cloud-agent,programming-app,creative-writing,writing-assistant,general-chat,personal-agent` |
 
-## [​](https://docs.openclaw.ai/providers/openrouter\\#advanced-configuration)  Advanced configuration
+<Warning>
+  If you repoint the OpenRouter provider at some other proxy or base URL, OpenClaw
+  does **not** inject those OpenRouter-specific headers or Anthropic cache markers.
+</Warning>
 
-Anthropic cache markers
+## Advanced configuration
 
-On verified OpenRouter routes, Anthropic model refs keep the
-OpenRouter-specific Anthropic `cache_control` markers that OpenClaw uses for
-better prompt-cache reuse on system/developer prompt blocks.
+<AccordionGroup>
+  <Accordion title="Response caching">
+    OpenRouter response caching is opt-in. Enable it per OpenRouter model with
+    model params:
 
-Thinking / reasoning injection
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          models: {
+            "openrouter/auto": {
+              params: {
+                responseCache: true,
+                responseCacheTtlSeconds: 300,
+              },
+            },
+          },
+        },
+      },
+    }
+    ```
 
-On supported non-`auto` routes, OpenClaw maps the selected thinking level to
-OpenRouter proxy reasoning payloads. Unsupported model hints and
-`openrouter/auto` skip that reasoning injection. Hunter Alpha also skips
-proxy reasoning for stale configured model refs because OpenRouter could
-return final answer text in reasoning fields for that retired route.
+    OpenClaw sends `X-OpenRouter-Cache: true` and, when configured,
+    `X-OpenRouter-Cache-TTL`. `responseCacheClear: true` forces a refresh for
+    the current request and stores the replacement response. Snake\_case aliases
+    (`response_cache`, `response_cache_ttl_seconds`, and
+    `response_cache_clear`) are also accepted.
 
-OpenAI-only request shaping
+    This is separate from provider prompt caching and from OpenRouter's
+    Anthropic `cache_control` markers. It is only applied on verified
+    `openrouter.ai` routes, not custom proxy base URLs.
+  </Accordion>
 
-OpenRouter still runs through the proxy-style OpenAI-compatible path, so
-native OpenAI-only request shaping such as `serviceTier`, Responses `store`,
-OpenAI reasoning-compat payloads, and prompt-cache hints is not forwarded.
+  <Accordion title="Anthropic cache markers">
+    On verified OpenRouter routes, Anthropic model refs keep the
+    OpenRouter-specific Anthropic `cache_control` markers that OpenClaw uses for
+    better prompt-cache reuse on system/developer prompt blocks.
+  </Accordion>
 
-Gemini-backed routes
+  <Accordion title="Anthropic reasoning prefill">
+    On verified OpenRouter routes, Anthropic model refs with reasoning enabled
+    drop trailing assistant prefill turns before the request reaches OpenRouter,
+    matching Anthropic's requirement that reasoning conversations end with a user
+    turn.
+  </Accordion>
 
-Gemini-backed OpenRouter refs stay on the proxy-Gemini path: OpenClaw keeps
-Gemini thought-signature sanitation there, but does not enable native Gemini
-replay validation or bootstrap rewrites.
+  <Accordion title="Thinking / reasoning injection">
+    On supported non-`auto` routes, OpenClaw maps the selected thinking level to
+    OpenRouter proxy reasoning payloads. Unsupported model hints and
+    `openrouter/auto` skip that reasoning injection. Hunter Alpha also skips
+    proxy reasoning for stale configured model refs because OpenRouter could
+    return final answer text in reasoning fields for that retired route.
+  </Accordion>
 
-Provider routing metadata
+  <Accordion title="DeepSeek V4 reasoning replay">
+    On verified OpenRouter routes, `openrouter/deepseek/deepseek-v4-flash` and
+    `openrouter/deepseek/deepseek-v4-pro` fill missing `reasoning_content` on
+    replayed assistant turns so thinking/tool conversations keep DeepSeek V4's
+    required follow-up shape. OpenClaw sends OpenRouter-supported
+    `reasoning_effort` values for these routes; `xhigh` is the highest advertised
+    level, and stale `max` overrides are mapped to `xhigh`.
+  </Accordion>
 
-If you pass OpenRouter provider routing under model params, OpenClaw forwards
-it as OpenRouter routing metadata before the shared stream wrappers run.
+  <Accordion title="OpenAI-only request shaping">
+    OpenRouter still runs through the proxy-style OpenAI-compatible path, so
+    native OpenAI-only request shaping such as `serviceTier`, Responses `store`,
+    OpenAI reasoning-compat payloads, and prompt-cache hints is not forwarded.
+  </Accordion>
 
-## [​](https://docs.openclaw.ai/providers/openrouter\\#related)  Related
+  <Accordion title="Gemini-backed routes">
+    Gemini-backed OpenRouter refs stay on the proxy-Gemini path: OpenClaw keeps
+    Gemini thought-signature sanitation there, but does not enable native Gemini
+    replay validation or bootstrap rewrites.
+  </Accordion>
 
-[**Model selection** \\\\\n\\\\\nChoosing providers, model refs, and failover behavior.](https://docs.openclaw.ai/concepts/model-providers)
+  <Accordion title="Provider routing metadata">
+    If you pass OpenRouter provider routing under model params, OpenClaw forwards
+    it as OpenRouter routing metadata before the shared stream wrappers run.
+  </Accordion>
+</AccordionGroup>
 
-[**Configuration reference** \\\\\n\\\\\nFull config reference for agents, models, and providers.](https://docs.openclaw.ai/gateway/configuration-reference)
+## Related
 
-[OpenCode Go](https://docs.openclaw.ai/providers/opencode-go) [Perplexity](https://docs.openclaw.ai/providers/perplexity-provider)
+<CardGroup cols={2}>
+  <Card title="Model selection" href="/concepts/model-providers" icon="layers">
+    Choosing providers, model refs, and failover behavior.
+  </Card>
 
-Ctrl+I
+  <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
+    Full config reference for agents, models, and providers.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
 
----
+# Perplexity
 
+The Perplexity plugin provides web search capabilities through the Perplexity
+Search API or Perplexity Sonar via OpenRouter.
+
+<Note>
+  This page is the Perplexity **provider** setup. For the Perplexity **tool** (how the agent uses it), see [Perplexity tool](/tools/perplexity-search).
+</Note>
+
+| Property    | Value                                                                  |
+| ----------- | ---------------------------------------------------------------------- |
+| Type        | Web search provider (not a model provider)                             |
+| Auth        | `PERPLEXITY_API_KEY` (direct) or `OPENROUTER_API_KEY` (via OpenRouter) |
+| Config path | `plugins.entries.perplexity.config.webSearch.apiKey`                   |
+
+## Getting started
+
+<Steps>
+  <Step title="Set the API key">
+    Run the interactive web-search configuration flow:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw configure --section web
+    ```
+
+    Or set the key directly:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw config set plugins.entries.perplexity.config.webSearch.apiKey "pplx-xxxxxxxxxxxx"
+    ```
+  </Step>
+
+  <Step title="Start searching">
+    The agent will automatically use Perplexity for web searches once the key is
+    configured. No additional steps are required.
+  </Step>
+</Steps>
+
+## Search modes
+
+The plugin auto-selects the transport based on API key prefix:
+
+<Tabs>
+  <Tab title="Native Perplexity API (pplx-)">
+    When your key starts with `pplx-`, OpenClaw uses the native Perplexity Search
+    API. This transport returns structured results and supports domain, language,
+    and date filters (see filtering options below).
+  </Tab>
+
+  <Tab title="OpenRouter / Sonar (sk-or-)">
+    When your key starts with `sk-or-`, OpenClaw routes through OpenRouter using
+    the Perplexity Sonar model. This transport returns AI-synthesized answers with
+    citations.
+  </Tab>
+</Tabs>
+
+| Key prefix | Transport                    | Features                                         |
+| ---------- | ---------------------------- | ------------------------------------------------ |
+| `pplx-`    | Native Perplexity Search API | Structured results, domain/language/date filters |
+| `sk-or-`   | OpenRouter (Sonar)           | AI-synthesized answers with citations            |
+
+## Native API filtering
+
+<Note>
+  Filtering options are only available when using the native Perplexity API
+  (`pplx-` key). OpenRouter/Sonar searches do not support these parameters.
+</Note>
+
+When using the native Perplexity API, searches support the following filters:
+
+| Filter         | Description                            | Example                             |
+| -------------- | -------------------------------------- | ----------------------------------- |
+| Country        | 2-letter country code                  | `us`, `de`, `jp`                    |
+| Language       | ISO 639-1 language code                | `en`, `fr`, `zh`                    |
+| Date range     | Recency window                         | `day`, `week`, `month`, `year`      |
+| Domain filters | Allowlist or denylist (max 20 domains) | `example.com`                       |
+| Content budget | Token limits per response / per page   | `max_tokens`, `max_tokens_per_page` |
+
+## Advanced configuration
+
+<AccordionGroup>
+  <Accordion title="Environment variable for daemon processes">
+    If the OpenClaw Gateway runs as a daemon (launchd/systemd), make sure
+    `PERPLEXITY_API_KEY` is available to that process.
+
+    <Warning>
+      A key set only in `~/.profile` will not be visible to a launchd/systemd
+      daemon unless that environment is explicitly imported. Set the key in
+      `~/.openclaw/.env` or via `env.shellEnv` to ensure the gateway process can
+      read it.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="OpenRouter proxy setup">
+    If you prefer to route Perplexity searches through OpenRouter, set an
+    `OPENROUTER_API_KEY` (prefix `sk-or-`) instead of a native Perplexity key.
+    OpenClaw will detect the prefix and switch to the Sonar transport
+    automatically.
+
+    <Tip>
+      The OpenRouter transport is useful if you already have an OpenRouter account
+      and want consolidated billing across multiple providers.
+    </Tip>
+  </Accordion>
+</AccordionGroup>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Perplexity search tool" href="/tools/perplexity-search" icon="magnifying-glass">
+    How the agent invokes Perplexity searches and interprets results.
+  </Card>
+
+  <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
+    Full configuration reference including plugin entries.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Together AI
+
+[Together AI](https://together.ai) provides access to leading open-source
+models including Llama, DeepSeek, Kimi, and more through a unified API.
+
+| Property | Value                         |
+| -------- | ----------------------------- |
+| Provider | `together`                    |
+| Auth     | `TOGETHER_API_KEY`            |
+| API      | OpenAI-compatible             |
+| Base URL | `https://api.together.xyz/v1` |
+
+## Getting started
+
+<Steps>
+  <Step title="Get an API key">
+    Create an API key at
+    [api.together.ai/settings/api-keys](https://api.together.ai/settings/api-keys).
+  </Step>
+
+  <Step title="Run onboarding">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw onboard --auth-choice together-api-key
+    ```
+  </Step>
+
+  <Step title="Set a default model">
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          model: { primary: "together/moonshotai/Kimi-K2.5" },
+        },
+      },
+    }
+    ```
+  </Step>
+</Steps>
+
+### Non-interactive example
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw onboard --non-interactive \
+  --mode local \
+  --auth-choice together-api-key \
+  --together-api-key "$TOGETHER_API_KEY"
+```
+
+<Note>
+  The onboarding preset sets `together/moonshotai/Kimi-K2.5` as the default
+  model.
+</Note>
+
+## Built-in catalog
+
+OpenClaw ships this bundled Together catalog:
+
+| Model ref                                                    | Name                                   | Input       | Context    | Notes                            |
+| ------------------------------------------------------------ | -------------------------------------- | ----------- | ---------- | -------------------------------- |
+| `together/moonshotai/Kimi-K2.5`                              | Kimi K2.5                              | text, image | 262,144    | Default model; reasoning enabled |
+| `together/zai-org/GLM-4.7`                                   | GLM 4.7 Fp8                            | text        | 202,752    | General-purpose text model       |
+| `together/meta-llama/Llama-3.3-70B-Instruct-Turbo`           | Llama 3.3 70B Instruct Turbo           | text        | 131,072    | Fast instruction model           |
+| `together/meta-llama/Llama-4-Scout-17B-16E-Instruct`         | Llama 4 Scout 17B 16E Instruct         | text, image | 10,000,000 | Multimodal                       |
+| `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8` | Llama 4 Maverick 17B 128E Instruct FP8 | text, image | 20,000,000 | Multimodal                       |
+| `together/deepseek-ai/DeepSeek-V3.1`                         | DeepSeek V3.1                          | text        | 131,072    | General text model               |
+| `together/deepseek-ai/DeepSeek-R1`                           | DeepSeek R1                            | text        | 131,072    | Reasoning model                  |
+| `together/moonshotai/Kimi-K2-Instruct-0905`                  | Kimi K2-Instruct 0905                  | text        | 262,144    | Secondary Kimi text model        |
+
+## Video generation
+
+The bundled `together` plugin also registers video generation through the
+shared `video_generate` tool.
+
+| Property             | Value                                 |
+| -------------------- | ------------------------------------- |
+| Default video model  | `together/Wan-AI/Wan2.2-T2V-A14B`     |
+| Modes                | text-to-video, single-image reference |
+| Supported parameters | `aspectRatio`, `resolution`           |
+
+To use Together as the default video provider:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  agents: {
+    defaults: {
+      videoGenerationModel: {
+        primary: "together/Wan-AI/Wan2.2-T2V-A14B",
+      },
+    },
+  },
+}
+```
+
+<Tip>
+  See [Video Generation](/tools/video-generation) for the shared tool parameters,
+  provider selection, and failover behavior.
+</Tip>
+
+<AccordionGroup>
+  <Accordion title="Environment note">
+    If the Gateway runs as a daemon (launchd/systemd), make sure
+    `TOGETHER_API_KEY` is available to that process (for example, in
+    `~/.openclaw/.env` or via `env.shellEnv`).
+
+    <Warning>
+      Keys set only in your interactive shell are not visible to daemon-managed
+      gateway processes. Use `~/.openclaw/.env` or `env.shellEnv` config for
+      persistent availability.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Troubleshooting">
+    * Verify your key works: `openclaw models list --provider together`
+    * If models are not appearing, confirm the API key is set in the correct
+      environment for your Gateway process.
+    * Model refs use the form `together/<model-id>`.
+  </Accordion>
+</AccordionGroup>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Model selection" href="/concepts/model-providers" icon="layers">
+    Provider rules, model refs, and failover behavior.
+  </Card>
+
+  <Card title="Video generation" href="/tools/video-generation" icon="video">
+    Shared video generation tool parameters and provider selection.
+  </Card>
+
+  <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
+    Full config schema including provider settings.
+  </Card>
+
+  <Card title="Together AI" href="https://together.ai" icon="arrow-up-right-from-square">
+    Together AI dashboard, API docs, and pricing.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# xAI
+
+OpenClaw ships a bundled `xai` provider plugin for Grok models.
+
+## Getting started
+
+<Steps>
+  <Step title="Create an API key">
+    Create an API key in the [xAI console](https://console.x.ai/).
+  </Step>
+
+  <Step title="Set your API key">
+    Set `XAI_API_KEY`, or run:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw onboard --auth-choice xai-api-key
+    ```
+  </Step>
+
+  <Step title="Pick a model">
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: { defaults: { model: { primary: "xai/grok-4.3" } } },
+    }
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  OpenClaw uses the xAI Responses API as the bundled xAI transport. The same
+  `XAI_API_KEY` can also power Grok-backed `web_search`, first-class `x_search`,
+  and remote `code_execution`.
+  If you store an xAI key under `plugins.entries.xai.config.webSearch.apiKey`,
+  the bundled xAI model provider reuses that key as a fallback too.
+  Set `plugins.entries.xai.config.webSearch.baseUrl` to route Grok `web_search`
+  and, by default, `x_search` through an operator xAI Responses proxy.
+  `code_execution` tuning lives under `plugins.entries.xai.config.codeExecution`.
+</Note>
+
+## Built-in catalog
+
+OpenClaw includes these xAI model families out of the box:
+
+| Family         | Model ids                                                                |
+| -------------- | ------------------------------------------------------------------------ |
+| Grok 3         | `grok-3`, `grok-3-fast`, `grok-3-mini`, `grok-3-mini-fast`               |
+| Grok 4.3       | `grok-4.3`                                                               |
+| Grok 4         | `grok-4`, `grok-4-0709`                                                  |
+| Grok 4 Fast    | `grok-4-fast`, `grok-4-fast-non-reasoning`                               |
+| Grok 4.1 Fast  | `grok-4-1-fast`, `grok-4-1-fast-non-reasoning`                           |
+| Grok 4.20 Beta | `grok-4.20-beta-latest-reasoning`, `grok-4.20-beta-latest-non-reasoning` |
+| Grok Code      | `grok-code-fast-1`                                                       |
+
+The plugin also forward-resolves newer `grok-4*` and `grok-code-fast*` ids when
+they follow the same API shape.
+
+<Tip>
+  `grok-4.3`, `grok-4-fast`, `grok-4-1-fast`, and the `grok-4.20-beta-*`
+  variants are the current image-capable Grok refs in the bundled catalog.
+</Tip>
+
+## OpenClaw feature coverage
+
+The bundled plugin maps xAI's current public API surface onto OpenClaw's shared
+provider and tool contracts. Capabilities that don't fit the shared contract
+(for example streaming TTS and realtime voice) are not exposed - see the table
+below.
+
+| xAI capability             | OpenClaw surface                          | Status                                                              |
+| -------------------------- | ----------------------------------------- | ------------------------------------------------------------------- |
+| Chat / Responses           | `xai/<model>` model provider              | Yes                                                                 |
+| Server-side web search     | `web_search` provider `grok`              | Yes                                                                 |
+| Server-side X search       | `x_search` tool                           | Yes                                                                 |
+| Server-side code execution | `code_execution` tool                     | Yes                                                                 |
+| Images                     | `image_generate`                          | Yes                                                                 |
+| Videos                     | `video_generate`                          | Yes                                                                 |
+| Batch text-to-speech       | `messages.tts.provider: "xai"` / `tts`    | Yes                                                                 |
+| Streaming TTS              | -                                         | Not exposed; OpenClaw's TTS contract returns complete audio buffers |
+| Batch speech-to-text       | `tools.media.audio` / media understanding | Yes                                                                 |
+| Streaming speech-to-text   | Voice Call `streaming.provider: "xai"`    | Yes                                                                 |
+| Realtime voice             | -                                         | Not exposed yet; different session/WebSocket contract               |
+| Files / batches            | Generic model API compatibility only      | Not a first-class OpenClaw tool                                     |
+
+<Note>
+  OpenClaw uses xAI's REST image/video/TTS/STT APIs for media generation,
+  speech, and batch transcription, xAI's streaming STT WebSocket for live
+  voice-call transcription, and the Responses API for model, search, and
+  code-execution tools. Features that need different OpenClaw contracts, such as
+  Realtime voice sessions, are documented here as upstream capabilities rather
+  than hidden plugin behavior.
+</Note>
+
+### Fast-mode mappings
+
+`/fast on` or `agents.defaults.models["xai/<model>"].params.fastMode: true`
+rewrites native xAI requests as follows:
+
+| Source model  | Fast-mode target   |
+| ------------- | ------------------ |
+| `grok-3`      | `grok-3-fast`      |
+| `grok-3-mini` | `grok-3-mini-fast` |
+| `grok-4`      | `grok-4-fast`      |
+| `grok-4-0709` | `grok-4-fast`      |
+
+### Legacy compatibility aliases
+
+Legacy aliases still normalize to the canonical bundled ids:
+
+| Legacy alias              | Canonical id                          |
+| ------------------------- | ------------------------------------- |
+| `grok-4-fast-reasoning`   | `grok-4-fast`                         |
+| `grok-4-1-fast-reasoning` | `grok-4-1-fast`                       |
+| `grok-4.20-reasoning`     | `grok-4.20-beta-latest-reasoning`     |
+| `grok-4.20-non-reasoning` | `grok-4.20-beta-latest-non-reasoning` |
+
+## Features
+
+<AccordionGroup>
+  <Accordion title="Web search">
+    The bundled `grok` web-search provider uses `XAI_API_KEY` too:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw config set tools.web.search.provider grok
+    ```
+  </Accordion>
+
+  <Accordion title="Video generation">
+    The bundled `xai` plugin registers video generation through the shared
+    `video_generate` tool.
+
+    * Default video model: `xai/grok-imagine-video`
+    * Modes: text-to-video, image-to-video, reference-image generation, remote
+      video edit, and remote video extension
+    * Aspect ratios: `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `3:2`, `2:3`
+    * Resolutions: `480P`, `720P`
+    * Duration: 1-15 seconds for generation/image-to-video, 1-10 seconds when
+      using `reference_image` roles, 2-10 seconds for extension
+    * Reference-image generation: set `imageRoles` to `reference_image` for
+      every supplied image; xAI accepts up to 7 such images
+
+    <Warning>
+      Local video buffers are not accepted. Use remote `http(s)` URLs for
+      video edit/extend inputs. Image-to-video accepts local image buffers because
+      OpenClaw can encode those as data URLs for xAI.
+    </Warning>
+
+    To use xAI as the default video provider:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          videoGenerationModel: {
+            primary: "xai/grok-imagine-video",
+          },
+        },
+      },
+    }
+    ```
+
+    <Note>
+      See [Video Generation](/tools/video-generation) for shared tool parameters,
+      provider selection, and failover behavior.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Image generation">
+    The bundled `xai` plugin registers image generation through the shared
+    `image_generate` tool.
+
+    * Default image model: `xai/grok-imagine-image`
+    * Additional model: `xai/grok-imagine-image-pro`
+    * Modes: text-to-image and reference-image edit
+    * Reference inputs: one `image` or up to five `images`
+    * Aspect ratios: `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `2:3`, `3:2`
+    * Resolutions: `1K`, `2K`
+    * Count: up to 4 images
+
+    OpenClaw asks xAI for `b64_json` image responses so generated media can be
+    stored and delivered through the normal channel attachment path. Local
+    reference images are converted to data URLs; remote `http(s)` references are
+    passed through.
+
+    To use xAI as the default image provider:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          imageGenerationModel: {
+            primary: "xai/grok-imagine-image",
+          },
+        },
+      },
+    }
+    ```
+
+    <Note>
+      xAI also documents `quality`, `mask`, `user`, and additional native ratios
+      such as `1:2`, `2:1`, `9:20`, and `20:9`. OpenClaw forwards only the
+      shared cross-provider image controls today; unsupported native-only knobs
+      are intentionally not exposed through `image_generate`.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Text-to-speech">
+    The bundled `xai` plugin registers text-to-speech through the shared `tts`
+    provider surface.
+
+    * Voices: `eve`, `ara`, `rex`, `sal`, `leo`, `una`
+    * Default voice: `eve`
+    * Formats: `mp3`, `wav`, `pcm`, `mulaw`, `alaw`
+    * Language: BCP-47 code or `auto`
+    * Speed: provider-native speed override
+    * Native Opus voice-note format is not supported
+
+    To use xAI as the default TTS provider:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      messages: {
+        tts: {
+          provider: "xai",
+          providers: {
+            xai: {
+              voiceId: "eve",
+            },
+          },
+        },
+      },
+    }
+    ```
+
+    <Note>
+      OpenClaw uses xAI's batch `/v1/tts` endpoint. xAI also offers streaming TTS
+      over WebSocket, but the OpenClaw speech provider contract currently expects
+      a complete audio buffer before reply delivery.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Speech-to-text">
+    The bundled `xai` plugin registers batch speech-to-text through OpenClaw's
+    media-understanding transcription surface.
+
+    * Default model: `grok-stt`
+    * Endpoint: xAI REST `/v1/stt`
+    * Input path: multipart audio file upload
+    * Supported by OpenClaw wherever inbound audio transcription uses
+      `tools.media.audio`, including Discord voice-channel segments and
+      channel audio attachments
+
+    To force xAI for inbound audio transcription:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      tools: {
+        media: {
+          audio: {
+            models: [
+              {
+                type: "provider",
+                provider: "xai",
+                model: "grok-stt",
+              },
+            ],
+          },
+        },
+      },
+    }
+    ```
+
+    Language can be supplied through the shared audio media config or per-call
+    transcription request. Prompt hints are accepted by the shared OpenClaw
+    surface, but the xAI REST STT integration only forwards file, model, and
+    language because those map cleanly to the current public xAI endpoint.
+  </Accordion>
+
+  <Accordion title="Streaming speech-to-text">
+    The bundled `xai` plugin also registers a realtime transcription provider
+    for live voice-call audio.
+
+    * Endpoint: xAI WebSocket `wss://api.x.ai/v1/stt`
+    * Default encoding: `mulaw`
+    * Default sample rate: `8000`
+    * Default endpointing: `800ms`
+    * Interim transcripts: enabled by default
+
+    Voice Call's Twilio media stream sends G.711 µ-law audio frames, so the
+    xAI provider can forward those frames directly without transcoding:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      plugins: {
+        entries: {
+          "voice-call": {
+            config: {
+              streaming: {
+                enabled: true,
+                provider: "xai",
+                providers: {
+                  xai: {
+                    apiKey: "${XAI_API_KEY}",
+                    endpointingMs: 800,
+                    language: "en",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }
+    ```
+
+    Provider-owned config lives under
+    `plugins.entries.voice-call.config.streaming.providers.xai`. Supported
+    keys are `apiKey`, `baseUrl`, `sampleRate`, `encoding` (`pcm`, `mulaw`, or
+    `alaw`), `interimResults`, `endpointingMs`, and `language`.
+
+    <Note>
+      This streaming provider is for Voice Call's realtime transcription path.
+      Discord voice currently records short segments and uses the batch
+      `tools.media.audio` transcription path instead.
+    </Note>
+  </Accordion>
+
+  <Accordion title="x_search configuration">
+    The bundled xAI plugin exposes `x_search` as an OpenClaw tool for searching
+    X (formerly Twitter) content via Grok.
+
+    Config path: `plugins.entries.xai.config.xSearch`
+
+    | Key               | Type    | Default         | Description                         |
+    | ----------------- | ------- | --------------- | ----------------------------------- |
+    | `enabled`         | boolean | -               | Enable or disable x\_search         |
+    | `model`           | string  | `grok-4-1-fast` | Model used for x\_search requests   |
+    | `baseUrl`         | string  | -               | xAI Responses base URL override     |
+    | `inlineCitations` | boolean | -               | Include inline citations in results |
+    | `maxTurns`        | number  | -               | Maximum conversation turns          |
+    | `timeoutSeconds`  | number  | -               | Request timeout in seconds          |
+    | `cacheTtlMinutes` | number  | -               | Cache time-to-live in minutes       |
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      plugins: {
+        entries: {
+          xai: {
+            config: {
+              xSearch: {
+                enabled: true,
+                model: "grok-4-1-fast",
+                baseUrl: "https://api.x.ai/v1",
+                inlineCitations: true,
+              },
+            },
+          },
+        },
+      },
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Code execution configuration">
+    The bundled xAI plugin exposes `code_execution` as an OpenClaw tool for
+    remote code execution in xAI's sandbox environment.
+
+    Config path: `plugins.entries.xai.config.codeExecution`
+
+    | Key              | Type    | Default                   | Description                            |
+    | ---------------- | ------- | ------------------------- | -------------------------------------- |
+    | `enabled`        | boolean | `true` (if key available) | Enable or disable code execution       |
+    | `model`          | string  | `grok-4-1-fast`           | Model used for code execution requests |
+    | `maxTurns`       | number  | -                         | Maximum conversation turns             |
+    | `timeoutSeconds` | number  | -                         | Request timeout in seconds             |
+
+    <Note>
+      This is remote xAI sandbox execution, not local [`exec`](/tools/exec).
+    </Note>
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      plugins: {
+        entries: {
+          xai: {
+            config: {
+              codeExecution: {
+                enabled: true,
+                model: "grok-4-1-fast",
+              },
+            },
+          },
+        },
+      },
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Known limits">
+    * Auth is API-key only today. There is no xAI OAuth or device-code flow in
+      OpenClaw yet.
+    * `grok-4.20-multi-agent-experimental-beta-0304` is not supported on the
+      normal xAI provider path because it requires a different upstream API
+      surface than the standard OpenClaw xAI transport.
+    * xAI Realtime voice is not registered as an OpenClaw provider yet. It
+      needs a different bidirectional voice session contract than batch STT or
+      streaming transcription.
+    * xAI image `quality`, image `mask`, and extra native-only aspect ratios are
+      not exposed until the shared `image_generate` tool has corresponding
+      cross-provider controls.
+  </Accordion>
+
+  <Accordion title="Advanced notes">
+    * OpenClaw applies xAI-specific tool-schema and tool-call compatibility fixes
+      automatically on the shared runner path.
+    * Native xAI requests default `tool_stream: true`. Set
+      `agents.defaults.models["xai/<model>"].params.tool_stream` to `false` to
+      disable it.
+    * The bundled xAI wrapper strips unsupported strict tool-schema flags and
+      reasoning payload keys before sending native xAI requests.
+    * `web_search`, `x_search`, and `code_execution` are exposed as OpenClaw
+      tools. OpenClaw enables the specific xAI built-in it needs inside each tool
+      request instead of attaching all native tools to every chat turn.
+    * Grok `web_search` reads `plugins.entries.xai.config.webSearch.baseUrl`.
+      `x_search` reads `plugins.entries.xai.config.xSearch.baseUrl`, then
+      falls back to the Grok web-search base URL.
+    * `x_search` and `code_execution` are owned by the bundled xAI plugin rather
+      than hardcoded into the core model runtime.
+    * `code_execution` is remote xAI sandbox execution, not local
+      [`exec`](/tools/exec).
+  </Accordion>
+</AccordionGroup>
+
+## Live testing
+
+The xAI media paths are covered by unit tests and opt-in live suites. The live
+commands load secrets from your login shell, including `~/.profile`, before
+probing `XAI_API_KEY`.
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+pnpm test extensions/xai
+OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_TEST_QUIET=1 pnpm test:live -- extensions/xai/xai.live.test.ts
+OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_TEST_QUIET=1 OPENCLAW_LIVE_IMAGE_GENERATION_PROVIDERS=xai pnpm test:live -- test/image-generation.runtime.live.test.ts
+```
+
+The provider-specific live file synthesizes normal TTS, telephony-friendly PCM
+TTS, transcribes audio through xAI batch STT, streams the same PCM through xAI
+realtime STT, generates text-to-image output, and edits a reference image. The
+shared image live file verifies the same xAI provider through OpenClaw's
+runtime selection, fallback, normalization, and media attachment path.
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Model selection" href="/concepts/model-providers" icon="layers">
+    Choosing providers, model refs, and failover behavior.
+  </Card>
+
+  <Card title="Video generation" href="/tools/video-generation" icon="video">
+    Shared video tool parameters and provider selection.
+  </Card>
+
+  <Card title="All providers" href="/providers/index" icon="grid-2">
+    The broader provider overview.
+  </Card>
+
+  <Card title="Troubleshooting" href="/help/troubleshooting" icon="wrench">
+    Common issues and fixes.
+  </Card>
+</CardGroup>

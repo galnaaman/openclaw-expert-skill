@@ -1,148 +1,1333 @@
-# OpenClaw Channels Documentation
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
 
-## Nostr - OpenClaw
-**Source:** https://docs.openclaw.ai/channels/nostr
+# Access groups
 
-[Skip to main content](https://docs.openclaw.ai/channels/nostr#content-area)
+Access groups are named sender lists you define once and reference from channel allowlists with `accessGroup:<name>`.
 
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
+Use them when the same people should be allowed across several message channels, or when one trusted set should apply to both DMs and group sender authorization.
 
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
+Access groups do not grant access by themselves. A group only matters when an allowlist field references it.
 
-English
+## Static message sender groups
 
-Search...
+Static sender groups use `type: "message.senders"`.
 
-Ctrl K
-
-Search...
-
-Navigation
-
-Developer and self-hosted
-
-Nostr
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Bundled plugin](https://docs.openclaw.ai/channels/nostr#bundled-plugin)
-- [Older/custom installs](https://docs.openclaw.ai/channels/nostr#older%2Fcustom-installs)
-- [Non-interactive setup](https://docs.openclaw.ai/channels/nostr#non-interactive-setup)
-- [Quick setup](https://docs.openclaw.ai/channels/nostr#quick-setup)
-- [Configuration reference](https://docs.openclaw.ai/channels/nostr#configuration-reference)
-- [Profile metadata](https://docs.openclaw.ai/channels/nostr#profile-metadata)
-- [Access control](https://docs.openclaw.ai/channels/nostr#access-control)
-- [DM policies](https://docs.openclaw.ai/channels/nostr#dm-policies)
-- [Allowlist example](https://docs.openclaw.ai/channels/nostr#allowlist-example)
-- [Key formats](https://docs.openclaw.ai/channels/nostr#key-formats)
-- [Relays](https://docs.openclaw.ai/channels/nostr#relays)
-- [Protocol support](https://docs.openclaw.ai/channels/nostr#protocol-support)
-- [Testing](https://docs.openclaw.ai/channels/nostr#testing)
-- [Local relay](https://docs.openclaw.ai/channels/nostr#local-relay)
-- [Manual test](https://docs.openclaw.ai/channels/nostr#manual-test)
-- [Troubleshooting](https://docs.openclaw.ai/channels/nostr#troubleshooting)
-- [Not receiving messages](https://docs.openclaw.ai/channels/nostr#not-receiving-messages)
-- [Not sending responses](https://docs.openclaw.ai/channels/nostr#not-sending-responses)
-- [Duplicate responses](https://docs.openclaw.ai/channels/nostr#duplicate-responses)
-- [Security](https://docs.openclaw.ai/channels/nostr#security)
-- [Limitations (MVP)](https://docs.openclaw.ai/channels/nostr#limitations-mvp)
-- [Related](https://docs.openclaw.ai/channels/nostr#related)
-
-**Status:** Optional bundled plugin (disabled by default until configured).Nostr is a decentralized protocol for social networking. This channel enables OpenClaw to receive and respond to encrypted direct messages (DMs) via NIP-04.
-
-## [​](https://docs.openclaw.ai/channels/nostr\\#bundled-plugin)  Bundled plugin
-
-Current OpenClaw releases ship Nostr as a bundled plugin, so normal packaged
-builds do not need a separate install.
-
-### [​](https://docs.openclaw.ai/channels/nostr\\#older/custom-installs)  Older/custom installs
-
-- Onboarding (`openclaw onboard`) and `openclaw channels add` still surface
-Nostr from the shared channel catalog.
-- If your build excludes bundled Nostr, install it manually.
-
-```
-openclaw plugins install @openclaw/nostr
-```
-
-Use a local checkout (dev workflows):
-
-```
-openclaw plugins install --link <path-to-local-nostr-plugin>
-```
-
-Restart the Gateway after installing or enabling plugins.
-
-### [​](https://docs.openclaw.ai/channels/nostr\\#non-interactive-setup)  Non-interactive setup
-
-```
-openclaw channels add --channel nostr --private-key \"$NOSTR_PRIVATE_KEY\"
-openclaw channels add --channel nostr --private-key \"$NOSTR_PRIVATE_KEY\" --relay-urls \"wss://relay.damus.io,wss://relay.primal.net\"
-```
-
-Use `--use-env` to keep `NOSTR_PRIVATE_KEY` in the environment instead of storing the key in config.
-
-## [​](https://docs.openclaw.ai/channels/nostr\\#quick-setup)  Quick setup
-
-1. Generate a Nostr keypair (if needed):
-
-```
-# Using nak
-nak key generate
-```
-
-2. Add to config:
-
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-  channels: {
-    nostr: {
-      privateKey: \"${NOSTR_PRIVATE_KEY}\",
+  accessGroups: {
+    operators: {
+      type: "message.senders",
+      members: {
+        "*": ["global-owner-id"],
+        discord: ["discord:123456789012345678"],
+        telegram: ["987654321"],
+        whatsapp: ["+15551234567"],
+      },
     },
   },
 }
 ```
 
-3. Export the key:
+Member lists are keyed by message-channel id:
 
+| Key        | Meaning                                                                 |
+| ---------- | ----------------------------------------------------------------------- |
+| `"*"`      | Shared entries checked for every message channel that references group. |
+| `discord`  | Entries checked only for Discord allowlist matching.                    |
+| `telegram` | Entries checked only for Telegram allowlist matching.                   |
+| `whatsapp` | Entries checked only for WhatsApp allowlist matching.                   |
+
+Entries are matched with the destination channel's normal `allowFrom` rules. OpenClaw does not translate sender ids between channels. If Alice has a Telegram id and a Discord id, list both ids under the appropriate keys.
+
+## Reference groups from allowlists
+
+Reference a group with `accessGroup:<name>` anywhere the message channel path supports sender allowlists.
+
+DM allowlist example:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  accessGroups: {
+    operators: {
+      type: "message.senders",
+      members: {
+        discord: ["discord:123456789012345678"],
+        telegram: ["987654321"],
+      },
+    },
+  },
+  channels: {
+    discord: {
+      dmPolicy: "allowlist",
+      allowFrom: ["accessGroup:operators"],
+    },
+    telegram: {
+      dmPolicy: "allowlist",
+      allowFrom: ["accessGroup:operators"],
+    },
+  },
+}
 ```
-export NOSTR_PRIVATE_KEY=\"nsec1...\"
+
+Group sender allowlist example:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  accessGroups: {
+    oncall: {
+      type: "message.senders",
+      members: {
+        whatsapp: ["+15551234567"],
+        googlechat: ["users/1234567890"],
+      },
+    },
+  },
+  channels: {
+    whatsapp: {
+      groupPolicy: "allowlist",
+      groupAllowFrom: ["accessGroup:oncall"],
+    },
+    googlechat: {
+      spaces: {
+        "spaces/AAA": {
+          users: ["accessGroup:oncall"],
+        },
+      },
+    },
+  },
+}
 ```
 
-4. Restart the Gateway.
+You can mix groups and direct entries:
 
-## [​](https://docs.openclaw.ai/channels/nostr\\#configuration-reference)  Configuration reference
-
-| Key | Type | Default | Description |
-| --- | --- | --- | --- |
-| `privateKey` | string | required | Private key in `nsec` or hex format |
-| `relays` | string\\[\\] | `["wss://relay.damus.io", "wss://nos.lol"]` | Relay URLs (WebSocket) |
-| `dmPolicy` | string | `pairing` | DM access policy |
-| `allowFrom` | string\\[\\] | `[]` | Allowed sender pubkeys |
-| `enabled` | boolean | `true` | Enable/disable channel |
-| `name` | string | - | Display name |
-| `profile` | object | - | NIP-01 profile metadata |
-
-## [​](https://docs.openclaw.ai/channels/nostr\\#profile-metadata)  Profile metadata
-
-Profile data is published as a NIP-01 `kind:0` event. You can manage it from the Control UI (Channels -> Nostr -> Profile) or set it directly in config.Example:
-
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    nostr: {
-      privateKey: \"${NOSTR_PRIVATE_KEY}\",
-      profile: {
-        name: \"openclaw\",
-        displayName: \"OpenClaw\",
-        about: \"Personal assistant DM bot\",
-        picture: \"https://example.com/avatar.png\",
-        banner: \"https://example.com/banner.png\",
-        website: \"https://example.com\",
-        nip05: \"openclaw@example.com\",
-        lud16: \"openclaw@example.com\",
+    discord: {
+      dmPolicy: "allowlist",
+      allowFrom: ["accessGroup:operators", "discord:123456789012345678"],
+    },
+  },
+}
+```
+
+## Supported message-channel paths
+
+Access groups are available in shared message-channel authorization paths, including:
+
+* DM sender allowlists such as `channels.<channel>.allowFrom`
+* group sender allowlists such as `channels.<channel>.groupAllowFrom`
+* channel-specific per-room sender allowlists that use the same sender matching rules
+* command authorization paths that reuse message-channel sender allowlists
+
+Channel support depends on whether that channel is wired through the shared OpenClaw sender-authorization helpers. Current bundled support includes Discord, Google Chat, Nostr, WhatsApp, Zalo, and Zalo Personal. Static `message.senders` groups are designed to be channel-agnostic, so new message channels should support them by using the shared plugin SDK helpers instead of custom allowlist expansion.
+
+## Discord channel audiences
+
+Discord also supports a dynamic access group type:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  accessGroups: {
+    maintainers: {
+      type: "discord.channelAudience",
+      guildId: "1456350064065904867",
+      channelId: "1456744319972282449",
+      membership: "canViewChannel",
+    },
+  },
+  channels: {
+    discord: {
+      dmPolicy: "allowlist",
+      allowFrom: ["accessGroup:maintainers"],
+    },
+  },
+}
+```
+
+`discord.channelAudience` means "allow Discord DM senders who can currently view this guild channel." OpenClaw resolves the sender through Discord at authorization time and applies Discord `ViewChannel` permission rules.
+
+Use this when a Discord channel is already the source of truth for a team, such as `#maintainers` or `#on-call`.
+
+Requirements and failure behavior:
+
+* The bot needs access to the guild and channel.
+* The bot needs the Discord Developer Portal **Server Members Intent**.
+* The access group fails closed when Discord returns `Missing Access`, the sender cannot be resolved as a guild member, or the channel belongs to another guild.
+
+More Discord-specific examples: [Discord access control](/channels/discord#access-control-and-routing)
+
+## Security notes
+
+* Access groups are allowlist aliases, not roles. They do not create owners, approve pairing requests, or grant tool permissions by themselves.
+* `dmPolicy: "open"` still requires `"*"` in the effective DM allowlist. Referencing an access group is not the same as public access.
+* Missing group names fail closed. If `allowFrom` contains `accessGroup:operators` and `accessGroups.operators` is absent, that entry authorizes nobody.
+* Keep channel ids stable. Prefer numeric/user ids over display names when the channel supports both.
+
+## Troubleshooting
+
+If a sender should match but is blocked:
+
+1. Confirm the allowlist field contains the exact `accessGroup:<name>` reference.
+2. Confirm `accessGroups.<name>.type` is correct.
+3. Confirm the sender id is listed under the matching channel key, or under `"*"`.
+4. Confirm the entry uses that channel's normal allowlist syntax.
+5. For Discord channel audiences, confirm the bot can see the guild channel and has Server Members Intent enabled.
+
+Run `openclaw doctor` after editing access-control config. It catches many invalid allowlist and policy combinations before runtime.
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Discord
+
+Ready for DMs and guild channels via the official Discord gateway.
+
+<CardGroup cols={3}>
+  <Card title="Pairing" icon="link" href="/channels/pairing">
+    Discord DMs default to pairing mode.
+  </Card>
+
+  <Card title="Slash commands" icon="terminal" href="/tools/slash-commands">
+    Native command behavior and command catalog.
+  </Card>
+
+  <Card title="Channel troubleshooting" icon="wrench" href="/channels/troubleshooting">
+    Cross-channel diagnostics and repair flow.
+  </Card>
+</CardGroup>
+
+## Quick setup
+
+You will need to create a new application with a bot, add the bot to your server, and pair it to OpenClaw. We recommend adding your bot to your own private server. If you don't have one yet, [create one first](https://support.discord.com/hc/en-us/articles/204849977-How-do-I-create-a-server) (choose **Create My Own > For me and my friends**).
+
+<Steps>
+  <Step title="Create a Discord application and bot">
+    Go to the [Discord Developer Portal](https://discord.com/developers/applications) and click **New Application**. Name it something like "OpenClaw".
+
+    Click **Bot** on the sidebar. Set the **Username** to whatever you call your OpenClaw agent.
+  </Step>
+
+  <Step title="Enable privileged intents">
+    Still on the **Bot** page, scroll down to **Privileged Gateway Intents** and enable:
+
+    * **Message Content Intent** (required)
+    * **Server Members Intent** (recommended; required for role allowlists and name-to-ID matching)
+    * **Presence Intent** (optional; only needed for presence updates)
+  </Step>
+
+  <Step title="Copy your bot token">
+    Scroll back up on the **Bot** page and click **Reset Token**.
+
+    <Note>
+      Despite the name, this generates your first token — nothing is being "reset."
+    </Note>
+
+    Copy the token and save it somewhere. This is your **Bot Token** and you will need it shortly.
+  </Step>
+
+  <Step title="Generate an invite URL and add the bot to your server">
+    Click **OAuth2** on the sidebar. You'll generate an invite URL with the right permissions to add the bot to your server.
+
+    Scroll down to **OAuth2 URL Generator** and enable:
+
+    * `bot`
+    * `applications.commands`
+
+    A **Bot Permissions** section will appear below. Enable at least:
+
+    **General Permissions**
+
+    * View Channels
+      **Text Permissions**
+    * Send Messages
+    * Read Message History
+    * Embed Links
+    * Attach Files
+    * Add Reactions (optional)
+
+    This is the baseline set for normal text channels. If you plan to post in Discord threads, including forum or media channel workflows that create or continue a thread, also enable **Send Messages in Threads**.
+    Copy the generated URL at the bottom, paste it into your browser, select your server, and click **Continue** to connect. You should now see your bot in the Discord server.
+  </Step>
+
+  <Step title="Enable Developer Mode and collect your IDs">
+    Back in the Discord app, you need to enable Developer Mode so you can copy internal IDs.
+
+    1. Click **User Settings** (gear icon next to your avatar) → **Advanced** → toggle on **Developer Mode**
+    2. Right-click your **server icon** in the sidebar → **Copy Server ID**
+    3. Right-click your **own avatar** → **Copy User ID**
+
+    Save your **Server ID** and **User ID** alongside your Bot Token — you'll send all three to OpenClaw in the next step.
+  </Step>
+
+  <Step title="Allow DMs from server members">
+    For pairing to work, Discord needs to allow your bot to DM you. Right-click your **server icon** → **Privacy Settings** → toggle on **Direct Messages**.
+
+    This lets server members (including bots) send you DMs. Keep this enabled if you want to use Discord DMs with OpenClaw. If you only plan to use guild channels, you can disable DMs after pairing.
+  </Step>
+
+  <Step title="Set your bot token securely (do not send it in chat)">
+    Your Discord bot token is a secret (like a password). Set it on the machine running OpenClaw before messaging your agent.
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
+    cat > discord.patch.json5 <<'JSON5'
+    {
+      channels: {
+        discord: {
+          enabled: true,
+          token: { source: "env", provider: "default", id: "DISCORD_BOT_TOKEN" },
+        },
+      },
+    }
+    JSON5
+    openclaw config patch --file ./discord.patch.json5 --dry-run
+    openclaw config patch --file ./discord.patch.json5
+    openclaw gateway
+    ```
+
+    If OpenClaw is already running as a background service, restart it via the OpenClaw Mac app or by stopping and restarting the `openclaw gateway run` process.
+    For managed service installs, run `openclaw gateway install` from a shell where `DISCORD_BOT_TOKEN` is present, or store the variable in `~/.openclaw/.env`, so the service can resolve the env SecretRef after restart.
+    If your host is blocked or rate-limited by Discord's startup application lookup, set the Discord application/client ID from the Developer Portal so startup can skip that REST call. Use `channels.discord.applicationId` for the default account, or `channels.discord.accounts.<accountId>.applicationId` when you run multiple Discord bots.
+  </Step>
+
+  <Step title="Configure OpenClaw and pair">
+    <Tabs>
+      <Tab title="Ask your agent">
+        Chat with your OpenClaw agent on any existing channel (e.g. Telegram) and tell it. If Discord is your first channel, use the CLI / config tab instead.
+
+        > "I already set my Discord bot token in config. Please finish Discord setup with User ID `<user_id>` and Server ID `<server_id>`."
+      </Tab>
+
+      <Tab title="CLI / config">
+        If you prefer file-based config, set:
+
+        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        {
+          channels: {
+            discord: {
+              enabled: true,
+              token: {
+                source: "env",
+                provider: "default",
+                id: "DISCORD_BOT_TOKEN",
+              },
+            },
+          },
+        }
+        ```
+
+        Env fallback for the default account:
+
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        DISCORD_BOT_TOKEN=...
+        ```
+
+        For scripted or remote setup, write the same JSON5 block with `openclaw config patch --file ./discord.patch.json5 --dry-run` and then rerun without `--dry-run`. Plaintext `token` values are supported. SecretRef values are also supported for `channels.discord.token` across env/file/exec providers. See [Secrets Management](/gateway/secrets).
+
+        For multiple Discord bots, keep each bot token and application ID under its account. A top-level `channels.discord.applicationId` is inherited by accounts, so only set it there when every account should use the same application ID.
+
+        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        {
+          channels: {
+            discord: {
+              enabled: true,
+              accounts: {
+                personal: {
+                  token: { source: "env", provider: "default", id: "DISCORD_PERSONAL_TOKEN" },
+                  applicationId: "111111111111111111",
+                },
+                work: {
+                  token: { source: "env", provider: "default", id: "DISCORD_WORK_TOKEN" },
+                  applicationId: "222222222222222222",
+                },
+              },
+            },
+          },
+        }
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Approve first DM pairing">
+    Wait until the gateway is running, then DM your bot in Discord. It will respond with a pairing code.
+
+    <Tabs>
+      <Tab title="Ask your agent">
+        Send the pairing code to your agent on your existing channel:
+
+        > "Approve this Discord pairing code: `<CODE>`"
+      </Tab>
+
+      <Tab title="CLI">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw pairing list discord
+        openclaw pairing approve discord <CODE>
+        ```
+      </Tab>
+    </Tabs>
+
+    Pairing codes expire after 1 hour.
+
+    You should now be able to chat with your agent in Discord via DM.
+  </Step>
+</Steps>
+
+<Note>
+  Token resolution is account-aware. Config token values win over env fallback. `DISCORD_BOT_TOKEN` is only used for the default account.
+  If two enabled Discord accounts resolve to the same bot token, OpenClaw starts only one gateway monitor for that token. A config-sourced token wins over the default env fallback; otherwise the first enabled account wins and the duplicate account is reported disabled.
+  For advanced outbound calls (message tool/channel actions), an explicit per-call `token` is used for that call. This applies to send and read/probe-style actions (for example read/search/fetch/thread/pins/permissions). Account policy/retry settings still come from the selected account in the active runtime snapshot.
+</Note>
+
+## Recommended: Set up a guild workspace
+
+Once DMs are working, you can set up your Discord server as a full workspace where each channel gets its own agent session with its own context. This is recommended for private servers where it's just you and your bot.
+
+<Steps>
+  <Step title="Add your server to the guild allowlist">
+    This enables your agent to respond in any channel on your server, not just DMs.
+
+    <Tabs>
+      <Tab title="Ask your agent">
+        > "Add my Discord Server ID `<server_id>` to the guild allowlist"
+      </Tab>
+
+      <Tab title="Config">
+        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        {
+          channels: {
+            discord: {
+              groupPolicy: "allowlist",
+              guilds: {
+                YOUR_SERVER_ID: {
+                  requireMention: true,
+                  users: ["YOUR_USER_ID"],
+                },
+              },
+            },
+          },
+        }
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Allow responses without @mention">
+    By default, your agent only responds in guild channels when @mentioned. For a private server, you probably want it to respond to every message.
+
+    In guild channels, normal assistant final replies stay private by default. Visible Discord output must be sent explicitly with the `message` tool, so the agent can lurk by default and only post when it decides a channel reply is useful.
+
+    This means the selected model must reliably call tools. If Discord shows typing and the logs show token usage but no posted message, check the session log for assistant text with `didSendViaMessagingTool: false`. That means the model produced a private final answer instead of calling `message(action=send)`. Switch to a stronger tool-calling model, or use the config below to restore legacy automatic final replies.
+
+    <Tabs>
+      <Tab title="Ask your agent">
+        > "Allow my agent to respond on this server without having to be @mentioned"
+      </Tab>
+
+      <Tab title="Config">
+        Set `requireMention: false` in your guild config:
+
+        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        {
+          channels: {
+            discord: {
+              guilds: {
+                YOUR_SERVER_ID: {
+                  requireMention: false,
+                },
+              },
+            },
+          },
+        }
+        ```
+
+        To restore legacy automatic final replies for group/channel rooms, set `messages.groupChat.visibleReplies: "automatic"`.
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Plan for memory in guild channels">
+    By default, long-term memory (MEMORY.md) only loads in DM sessions. Guild channels do not auto-load MEMORY.md.
+
+    <Tabs>
+      <Tab title="Ask your agent">
+        > "When I ask questions in Discord channels, use memory\_search or memory\_get if you need long-term context from MEMORY.md."
+      </Tab>
+
+      <Tab title="Manual">
+        If you need shared context in every channel, put the stable instructions in `AGENTS.md` or `USER.md` (they are injected for every session). Keep long-term notes in `MEMORY.md` and access them on demand with memory tools.
+      </Tab>
+    </Tabs>
+  </Step>
+</Steps>
+
+Now create some channels on your Discord server and start chatting. Your agent can see the channel name, and each channel gets its own isolated session — so you can set up `#coding`, `#home`, `#research`, or whatever fits your workflow.
+
+## Runtime model
+
+* Gateway owns the Discord connection.
+* Reply routing is deterministic: Discord inbound replies back to Discord.
+* Discord guild/channel metadata is added to the model prompt as untrusted
+  context, not as a user-visible reply prefix. If a model copies that envelope
+  back, OpenClaw strips the copied metadata from outbound replies and from
+  future replay context.
+* By default (`session.dmScope=main`), direct chats share the agent main session (`agent:main:main`).
+* Guild channels are isolated session keys (`agent:<agentId>:discord:channel:<channelId>`).
+* Group DMs are ignored by default (`channels.discord.dm.groupEnabled=false`).
+* Native slash commands run in isolated command sessions (`agent:<agentId>:discord:slash:<userId>`), while still carrying `CommandTargetSessionKey` to the routed conversation session.
+* Text-only cron/heartbeat announce delivery to Discord uses the final
+  assistant-visible answer once. Media and structured component payloads remain
+  multi-message when the agent emits multiple deliverable payloads.
+
+## Forum channels
+
+Discord forum and media channels only accept thread posts. OpenClaw supports two ways to create them:
+
+* Send a message to the forum parent (`channel:<forumId>`) to auto-create a thread. The thread title uses the first non-empty line of your message.
+* Use `openclaw message thread create` to create a thread directly. Do not pass `--message-id` for forum channels.
+
+Example: send to forum parent to create a thread
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw message send --channel discord --target channel:<forumId> \
+  --message "Topic title\nBody of the post"
+```
+
+Example: create a forum thread explicitly
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw message thread create --channel discord --target channel:<forumId> \
+  --thread-name "Topic title" --message "Body of the post"
+```
+
+Forum parents do not accept Discord components. If you need components, send to the thread itself (`channel:<threadId>`).
+
+## Interactive components
+
+OpenClaw supports Discord components v2 containers for agent messages. Use the message tool with a `components` payload. Interaction results are routed back to the agent as normal inbound messages and follow the existing Discord `replyToMode` settings.
+
+Supported blocks:
+
+* `text`, `section`, `separator`, `actions`, `media-gallery`, `file`
+* Action rows allow up to 5 buttons or a single select menu
+* Select types: `string`, `user`, `role`, `mentionable`, `channel`
+
+By default, components are single use. Set `components.reusable=true` to allow buttons, selects, and forms to be used multiple times until they expire.
+
+To restrict who can click a button, set `allowedUsers` on that button (Discord user IDs, tags, or `*`). When configured, unmatched users receive an ephemeral denial.
+
+The `/model` and `/models` slash commands open an interactive model picker with provider, model, and compatible runtime dropdowns plus a Submit step. `/models add` is deprecated and now returns a deprecation message instead of registering models from chat. The picker reply is ephemeral and only the invoking user can use it.
+
+File attachments:
+
+* `file` blocks must point to an attachment reference (`attachment://<filename>`)
+* Provide the attachment via `media`/`path`/`filePath` (single file); use `media-gallery` for multiple files
+* Use `filename` to override the upload name when it should match the attachment reference
+
+Modal forms:
+
+* Add `components.modal` with up to 5 fields
+* Field types: `text`, `checkbox`, `radio`, `select`, `role-select`, `user-select`
+* OpenClaw adds a trigger button automatically
+
+Example:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channel: "discord",
+  action: "send",
+  to: "channel:123456789012345678",
+  message: "Optional fallback text",
+  components: {
+    reusable: true,
+    text: "Choose a path",
+    blocks: [
+      {
+        type: "actions",
+        buttons: [
+          {
+            label: "Approve",
+            style: "success",
+            allowedUsers: ["123456789012345678"],
+          },
+          { label: "Decline", style: "danger" },
+        ],
+      },
+      {
+        type: "actions",
+        select: {
+          type: "string",
+          placeholder: "Pick an option",
+          options: [
+            { label: "Option A", value: "a" },
+            { label: "Option B", value: "b" },
+          ],
+        },
+      },
+    ],
+    modal: {
+      title: "Details",
+      triggerLabel: "Open form",
+      fields: [
+        { type: "text", label: "Requester" },
+        {
+          type: "select",
+          label: "Priority",
+          options: [
+            { label: "Low", value: "low" },
+            { label: "High", value: "high" },
+          ],
+        },
+      ],
+    },
+  },
+}
+```
+
+## Access control and routing
+
+<Tabs>
+  <Tab title="DM policy">
+    `channels.discord.dmPolicy` controls DM access. `channels.discord.allowFrom` is the canonical DM allowlist.
+
+    * `pairing` (default)
+    * `allowlist`
+    * `open` (requires `channels.discord.allowFrom` to include `"*"`)
+    * `disabled`
+
+    If DM policy is not open, unknown users are blocked (or prompted for pairing in `pairing` mode).
+
+    Multi-account precedence:
+
+    * `channels.discord.accounts.default.allowFrom` applies only to the `default` account.
+    * For one account, `allowFrom` takes precedence over legacy `dm.allowFrom`.
+    * Named accounts inherit `channels.discord.allowFrom` when their own `allowFrom` and legacy `dm.allowFrom` are unset.
+    * Named accounts do not inherit `channels.discord.accounts.default.allowFrom`.
+
+    Legacy `channels.discord.dm.policy` and `channels.discord.dm.allowFrom` still read for compatibility. `openclaw doctor --fix` migrates them to `dmPolicy` and `allowFrom` when it can do so without changing access.
+
+    DM target format for delivery:
+
+    * `user:<id>`
+    * `<@id>` mention
+
+    Bare numeric IDs normally resolve as channel IDs when a channel default is active, but IDs listed in the account's effective DM `allowFrom` are treated as user DM targets for compatibility.
+  </Tab>
+
+  <Tab title="DM access groups">
+    Discord DMs can use dynamic `accessGroup:<name>` entries in `channels.discord.allowFrom`.
+
+    Access group names are shared across message channels. Use `type: "message.senders"` for a static group whose members are expressed in each channel's normal `allowFrom` syntax, or `type: "discord.channelAudience"` when a Discord channel's current `ViewChannel` audience should define membership dynamically. Shared access-group behavior is documented here: [Access groups](/channels/access-groups).
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      accessGroups: {
+        operators: {
+          type: "message.senders",
+          members: {
+            "*": ["global-owner-id"],
+            discord: ["discord:123456789012345678"],
+            telegram: ["987654321"],
+          },
+        },
+      },
+      channels: {
+        discord: {
+          dmPolicy: "allowlist",
+          allowFrom: ["accessGroup:operators"],
+        },
+      },
+    }
+    ```
+
+    A Discord text channel has no separate member list. `type: "discord.channelAudience"` models membership as: the DM sender is a member of the configured guild and currently has effective `ViewChannel` permission on the configured channel after role and channel overwrites are applied.
+
+    Example: allow anyone who can see `#maintainers` to DM the bot, while keeping DMs closed to everyone else.
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      accessGroups: {
+        maintainers: {
+          type: "discord.channelAudience",
+          guildId: "1456350064065904867",
+          channelId: "1456744319972282449",
+          membership: "canViewChannel",
+        },
+      },
+      channels: {
+        discord: {
+          dmPolicy: "allowlist",
+          allowFrom: ["accessGroup:maintainers"],
+        },
+      },
+    }
+    ```
+
+    You can mix dynamic and static entries:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      accessGroups: {
+        maintainers: {
+          type: "discord.channelAudience",
+          guildId: "1456350064065904867",
+          channelId: "1456744319972282449",
+        },
+      },
+      channels: {
+        discord: {
+          dmPolicy: "allowlist",
+          allowFrom: ["accessGroup:maintainers", "discord:123456789012345678"],
+        },
+      },
+    }
+    ```
+
+    Lookups fail closed. If Discord returns `Missing Access`, the member lookup fails, or the channel belongs to a different guild, the DM sender is treated as unauthorized.
+
+    Enable the Discord Developer Portal **Server Members Intent** for the bot when using channel-audience access groups. DMs do not include guild member state, so OpenClaw resolves the member through Discord REST at authorization time.
+  </Tab>
+
+  <Tab title="Guild policy">
+    Guild handling is controlled by `channels.discord.groupPolicy`:
+
+    * `open`
+    * `allowlist`
+    * `disabled`
+
+    Secure baseline when `channels.discord` exists is `allowlist`.
+
+    `allowlist` behavior:
+
+    * guild must match `channels.discord.guilds` (`id` preferred, slug accepted)
+    * optional sender allowlists: `users` (stable IDs recommended) and `roles` (role IDs only); if either is configured, senders are allowed when they match `users` OR `roles`
+    * direct name/tag matching is disabled by default; enable `channels.discord.dangerouslyAllowNameMatching: true` only as break-glass compatibility mode
+    * names/tags are supported for `users`, but IDs are safer; `openclaw security audit` warns when name/tag entries are used
+    * if a guild has `channels` configured, non-listed channels are denied
+    * if a guild has no `channels` block, all channels in that allowlisted guild are allowed
+
+    Example:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        discord: {
+          groupPolicy: "allowlist",
+          guilds: {
+            "123456789012345678": {
+              requireMention: true,
+              ignoreOtherMentions: true,
+              users: ["987654321098765432"],
+              roles: ["123456789012345678"],
+              channels: {
+                general: { allow: true },
+                help: { allow: true, requireMention: true },
+              },
+            },
+          },
+        },
+      },
+    }
+    ```
+
+    If you only set `DISCORD_BOT_TOKEN` and do not create a `channels.discord` block, runtime fallback is `groupPolicy="allowlist"` (with a warning in logs), even if `channels.defaults.groupPolicy` is `open`.
+  </Tab>
+
+  <Tab title="Mentions and group DMs">
+    Guild messages are mention-gated by default.
+
+    Mention detection includes:
+
+    * explicit bot mention
+    * configured mention patterns (`agents.list[].groupChat.mentionPatterns`, fallback `messages.groupChat.mentionPatterns`)
+    * implicit reply-to-bot behavior in supported cases
+
+    When writing outbound Discord messages, use canonical mention syntax: `<@USER_ID>` for users, `<#CHANNEL_ID>` for channels, and `<@&ROLE_ID>` for roles. Do not use the legacy `<@!USER_ID>` nickname mention form.
+
+    `requireMention` is configured per guild/channel (`channels.discord.guilds...`).
+    `ignoreOtherMentions` optionally drops messages that mention another user/role but not the bot (excluding @everyone/@here).
+
+    Group DMs:
+
+    * default: ignored (`dm.groupEnabled=false`)
+    * optional allowlist via `dm.groupChannels` (channel IDs or slugs)
+  </Tab>
+</Tabs>
+
+### Role-based agent routing
+
+Use `bindings[].match.roles` to route Discord guild members to different agents by role ID. Role-based bindings accept role IDs only and are evaluated after peer or parent-peer bindings and before guild-only bindings. If a binding also sets other match fields (for example `peer` + `guildId` + `roles`), all configured fields must match.
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  bindings: [
+    {
+      agentId: "opus",
+      match: {
+        channel: "discord",
+        guildId: "123456789012345678",
+        roles: ["111111111111111111"],
+      },
+    },
+    {
+      agentId: "sonnet",
+      match: {
+        channel: "discord",
+        guildId: "123456789012345678",
+      },
+    },
+  ],
+}
+```
+
+## Native commands and command auth
+
+* `commands.native` defaults to `"auto"` and is enabled for Discord.
+* Per-channel override: `channels.discord.commands.native`.
+* `commands.native=false` skips Discord slash-command registration and cleanup during startup. Previously registered commands may remain visible in Discord until you remove them from the Discord app.
+* Native command auth uses the same Discord allowlists/policies as normal message handling.
+* Commands may still be visible in Discord UI for users who are not authorized; execution still enforces OpenClaw auth and returns "not authorized".
+
+See [Slash commands](/tools/slash-commands) for command catalog and behavior.
+
+Default slash command settings:
+
+* `ephemeral: true`
+
+## Feature details
+
+<AccordionGroup>
+  <Accordion title="Reply tags and native replies">
+    Discord supports reply tags in agent output:
+
+    * `[[reply_to_current]]`
+    * `[[reply_to:<id>]]`
+
+    Controlled by `channels.discord.replyToMode`:
+
+    * `off` (default)
+    * `first`
+    * `all`
+    * `batched`
+
+    Note: `off` disables implicit reply threading. Explicit `[[reply_to_*]]` tags are still honored.
+    `first` always attaches the implicit native reply reference to the first outbound Discord message for the turn.
+    `batched` only attaches Discord's implicit native reply reference when the
+    inbound turn was a debounced batch of multiple messages. This is useful
+    when you want native replies mainly for ambiguous bursty chats, not every
+    single-message turn.
+
+    Message IDs are surfaced in context/history so agents can target specific messages.
+  </Accordion>
+
+  <Accordion title="Live stream preview">
+    OpenClaw can stream draft replies by sending a temporary message and editing it as text arrives. `channels.discord.streaming` takes `off` (default) | `partial` | `block` | `progress`. `progress` keeps one editable status draft and updates it with tool progress until final delivery; `streamMode` is a legacy runtime alias. Run `openclaw doctor --fix` to rewrite persisted config to the canonical key.
+
+    Default stays `off` because Discord preview edits hit rate limits quickly when multiple bots or gateways share an account.
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        discord: {
+          streaming: "block",
+          draftChunk: {
+            minChars: 200,
+            maxChars: 800,
+            breakPreference: "paragraph",
+          },
+        },
+      },
+    }
+    ```
+
+    * `partial` edits a single preview message as tokens arrive.
+    * `block` emits draft-sized chunks (use `draftChunk` to tune size and breakpoints, clamped to `textChunkLimit`).
+    * Media, error, and explicit-reply finals cancel pending preview edits.
+    * `streaming.preview.toolProgress` (default `true`) controls whether tool/progress updates reuse the preview message.
+    * `streaming.preview.commandText` / `streaming.progress.commandText` controls command/exec detail in compact progress lines: `raw` (default) or `status` (tool label only).
+
+    Hide raw command/exec text while keeping compact progress lines:
+
+    ```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      "channels": {
+        "discord": {
+          "streaming": {
+            "mode": "progress",
+            "progress": {
+              "toolProgress": true,
+              "commandText": "status"
+            }
+          }
+        }
+      }
+    }
+    ```
+
+    Preview streaming is text-only; media replies fall back to normal delivery. When `block` streaming is explicitly enabled, OpenClaw skips the preview stream to avoid double-streaming.
+  </Accordion>
+
+  <Accordion title="History, context, and thread behavior">
+    Guild history context:
+
+    * `channels.discord.historyLimit` default `20`
+    * fallback: `messages.groupChat.historyLimit`
+    * `0` disables
+
+    DM history controls:
+
+    * `channels.discord.dmHistoryLimit`
+    * `channels.discord.dms["<user_id>"].historyLimit`
+
+    Thread behavior:
+
+    * Discord threads route as channel sessions and inherit parent channel config unless overridden.
+    * Thread sessions inherit the parent channel's session-level `/model` selection as a model-only fallback; thread-local `/model` selections still take precedence and parent transcript history is not copied unless transcript inheritance is enabled.
+    * `channels.discord.thread.inheritParent` (default `false`) opts new auto-threads into seeding from the parent transcript. Per-account overrides live under `channels.discord.accounts.<id>.thread.inheritParent`.
+    * Message-tool reactions can resolve `user:<id>` DM targets.
+    * `guilds.<guild>.channels.<channel>.requireMention: false` is preserved during reply-stage activation fallback.
+
+    Channel topics are injected as **untrusted** context. Allowlists gate who can trigger the agent, not a full supplemental-context redaction boundary.
+  </Accordion>
+
+  <Accordion title="Thread-bound sessions for subagents">
+    Discord can bind a thread to a session target so follow-up messages in that thread keep routing to the same session (including subagent sessions).
+
+    Commands:
+
+    * `/focus <target>` bind current/new thread to a subagent/session target
+    * `/unfocus` remove current thread binding
+    * `/agents` show active runs and binding state
+    * `/session idle <duration|off>` inspect/update inactivity auto-unfocus for focused bindings
+    * `/session max-age <duration|off>` inspect/update hard max age for focused bindings
+
+    Config:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      session: {
+        threadBindings: {
+          enabled: true,
+          idleHours: 24,
+          maxAgeHours: 0,
+        },
+      },
+      channels: {
+        discord: {
+          threadBindings: {
+            enabled: true,
+            idleHours: 24,
+            maxAgeHours: 0,
+            spawnSessions: true,
+            defaultSpawnContext: "fork",
+          },
+        },
+      },
+    }
+    ```
+
+    Notes:
+
+    * `session.threadBindings.*` sets global defaults.
+    * `channels.discord.threadBindings.*` overrides Discord behavior.
+    * `spawnSessions` controls auto-create/bind threads for `sessions_spawn({ thread: true })` and ACP thread spawns. Default: `true`.
+    * `defaultSpawnContext` controls native subagent context for thread-bound spawns. Default: `"fork"`.
+    * Deprecated `spawnSubagentSessions`/`spawnAcpSessions` keys are migrated by `openclaw doctor --fix`.
+    * If thread bindings are disabled for an account, `/focus` and related thread binding operations are unavailable.
+
+    See [Sub-agents](/tools/subagents), [ACP Agents](/tools/acp-agents), and [Configuration Reference](/gateway/configuration-reference).
+  </Accordion>
+
+  <Accordion title="Persistent ACP channel bindings">
+    For stable "always-on" ACP workspaces, configure top-level typed ACP bindings targeting Discord conversations.
+
+    Config path:
+
+    * `bindings[]` with `type: "acp"` and `match.channel: "discord"`
+
+    Example:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        list: [
+          {
+            id: "codex",
+            runtime: {
+              type: "acp",
+              acp: {
+                agent: "codex",
+                backend: "acpx",
+                mode: "persistent",
+                cwd: "/workspace/openclaw",
+              },
+            },
+          },
+        ],
+      },
+      bindings: [
+        {
+          type: "acp",
+          agentId: "codex",
+          match: {
+            channel: "discord",
+            accountId: "default",
+            peer: { kind: "channel", id: "222222222222222222" },
+          },
+          acp: { label: "codex-main" },
+        },
+      ],
+      channels: {
+        discord: {
+          guilds: {
+            "111111111111111111": {
+              channels: {
+                "222222222222222222": {
+                  requireMention: false,
+                },
+              },
+            },
+          },
+        },
+      },
+    }
+    ```
+
+    Notes:
+
+    * `/acp spawn codex --bind here` binds the current channel or thread in place and keeps future messages on the same ACP session. Thread messages inherit the parent channel binding.
+    * In a bound channel or thread, `/new` and `/reset` reset the same ACP session in place. Temporary thread bindings can override target resolution while active.
+    * `spawnSessions` gates child thread creation/binding via `--thread auto|here`.
+
+    See [ACP Agents](/tools/acp-agents) for binding behavior details.
+  </Accordion>
+
+  <Accordion title="Reaction notifications">
+    Per-guild reaction notification mode:
+
+    * `off`
+    * `own` (default)
+    * `all`
+    * `allowlist` (uses `guilds.<id>.users`)
+
+    Reaction events are turned into system events and attached to the routed Discord session.
+  </Accordion>
+
+  <Accordion title="Ack reactions">
+    `ackReaction` sends an acknowledgement emoji while OpenClaw is processing an inbound message.
+
+    Resolution order:
+
+    * `channels.discord.accounts.<accountId>.ackReaction`
+    * `channels.discord.ackReaction`
+    * `messages.ackReaction`
+    * agent identity emoji fallback (`agents.list[].identity.emoji`, else "👀")
+
+    Notes:
+
+    * Discord accepts unicode emoji or custom emoji names.
+    * Use `""` to disable the reaction for a channel or account.
+  </Accordion>
+
+  <Accordion title="Config writes">
+    Channel-initiated config writes are enabled by default.
+
+    This affects `/config set|unset` flows (when command features are enabled).
+
+    Disable:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        discord: {
+          configWrites: false,
+        },
+      },
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Gateway proxy">
+    Route Discord gateway WebSocket traffic and startup REST lookups (application ID + allowlist resolution) through an HTTP(S) proxy with `channels.discord.proxy`.
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        discord: {
+          proxy: "http://proxy.example:8080",
+        },
+      },
+    }
+    ```
+
+    Per-account override:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        discord: {
+          accounts: {
+            primary: {
+              proxy: "http://proxy.example:8080",
+            },
+          },
+        },
+      },
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="PluralKit support">
+    Enable PluralKit resolution to map proxied messages to system member identity:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        discord: {
+          pluralkit: {
+            enabled: true,
+            token: "pk_live_...", // optional; needed for private systems
+          },
+        },
+      },
+    }
+    ```
+
+    Notes:
+
+    * allowlists can use `pk:<memberId>`
+    * member display names are matched by name/slug only when `channels.discord.dangerouslyAllowNameMatching: true`
+    * lookups use original message ID and are time-window constrained
+    * if lookup fails, proxied messages are treated as bot messages and dropped unless `allowBots=true`
+  </Accordion>
+
+  <Accordion title="Outbound mention aliases">
+    Use `mentionAliases` when agents need deterministic outbound mentions for known Discord users. Keys are handles without the leading `@`; values are Discord user IDs. Unknown handles, `@everyone`, `@here`, and mentions inside Markdown code spans are left unchanged.
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        discord: {
+          mentionAliases: {
+            Vladislava: "123456789012345678",
+          },
+          accounts: {
+            ops: {
+              mentionAliases: {
+                OpsLead: "234567890123456789",
+              },
+            },
+          },
+        },
+      },
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Presence configuration">
+    Presence updates are applied when you set a status or activity field, or when you enable auto presence.
+
+    Status only example:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        discord: {
+          status: "idle",
+        },
+      },
+    }
+    ```
+
+    Activity example (custom status is the default activity type):
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        discord: {
+          activity: "Focus time",
+          activityType: 4,
+        },
+      },
+    }
+    ```
+
+    Streaming example:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        discord: {
+          activity: "Live coding",
+          activityType: 1,
+          activityUrl: "https://twitch.tv/openclaw",
+        },
+      },
+    }
+    ```
+
+    Activity type map:
+
+    * 0: Playing
+    * 1: Streaming (requires `activityUrl`)
+    * 2: Listening
+    * 3: Watching
+    * 4: Custom (uses the activity text as the status state; emoji is optional)
+    * 5: Competing
+
+    Auto presence example (runtime health signal):
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        discord: {
+          autoPresence: {
+            enabled: true,
+            intervalMs: 30000,
+            minUpdateIntervalMs: 15000,
+            exhaustedText: "token exhausted",
+          },
+        },
+      },
+    }
+    ```
+
+    Auto presence maps runtime availability to Discord status: healthy => online, degraded or unknown => idle, exhausted or unavailable => dnd. Optional text overrides:
+
+    * `autoPresence.healthyText`
+    * `autoPresence.degradedText`
+    * `autoPresence.exhaustedText` (supports `{reason}` placeholder)
+  </Accordion>
+
+  <Accordion title="Approvals in Discord">
+    Discord supports button-based approval handling in DMs and can optionally post approval prompts in the originating channel.
+
+    Config path:
+
+    * `channels.discord.execApprovals.enabled`
+    * `channels.discord.execApprovals.approvers` (optional; falls back to `commands.ownerAllowFrom` when possible)
+    * `channels.discord.execApprovals.target` (`dm` | `channel` | `both`, default: `dm`)
+    * `agentFilter`, `sessionFilter`, `cleanupAfterResolve`
+
+    Discord auto-enables native exec approvals when `enabled` is unset or `"auto"` and at least one approver can be resolved, either from `execApprovals.approvers` or from `commands.ownerAllowFrom`. Discord does not infer exec approvers from channel `allowFrom`, legacy `dm.allowFrom`, or direct-message `defaultTo`. Set `enabled: false` to disable Discord as a native approval client explicitly.
+
+    For sensitive owner-only group commands such as `/diagnostics` and `/export-trajectory`, OpenClaw sends approval prompts and final results privately. It tries Discord DM first when the invoking owner has a Discord owner route; if that is not available, it falls back to the first available owner route from `commands.ownerAllowFrom`, such as Telegram.
+
+    When `target` is `channel` or `both`, the approval prompt is visible in the channel. Only resolved approvers can use the buttons; other users receive an ephemeral denial. Approval prompts include the command text, so only enable channel delivery in trusted channels. If the channel ID cannot be derived from the session key, OpenClaw falls back to DM delivery.
+
+    Discord also renders the shared approval buttons used by other chat channels. The native Discord adapter mainly adds approver DM routing and channel fanout.
+    When those buttons are present, they are the primary approval UX; OpenClaw
+    should only include a manual `/approve` command when the tool result says
+    chat approvals are unavailable or manual approval is the only path.
+    If the Discord native approval runtime is not active, OpenClaw keeps the
+    local deterministic `/approve <id> <decision>` prompt visible. If the
+    runtime is active but a native card cannot be delivered to any target,
+    OpenClaw sends a same-chat fallback notice with the exact `/approve`
+    command from the pending approval.
+
+    Gateway auth and approval resolution follow the shared Gateway client contract (`plugin:` IDs resolve through `plugin.approval.resolve`; other IDs through `exec.approval.resolve`). Approvals expire after 30 minutes by default.
+
+    See [Exec approvals](/tools/exec-approvals).
+  </Accordion>
+</AccordionGroup>
+
+## Tools and action gates
+
+Discord message actions include messaging, channel admin, moderation, presence, and metadata actions.
+
+Core examples:
+
+* messaging: `sendMessage`, `readMessages`, `editMessage`, `deleteMessage`, `threadReply`
+* reactions: `react`, `reactions`, `emojiList`
+* moderation: `timeout`, `kick`, `ban`
+* presence: `setPresence`
+
+The `event-create` action accepts an optional `image` parameter (URL or local file path) to set the scheduled event cover image.
+
+Action gates live under `channels.discord.actions.*`.
+
+Default gate behavior:
+
+| Action group                                                                                                                                                             | Default  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| reactions, messages, threads, pins, polls, search, memberInfo, roleInfo, channelInfo, channels, voiceStatus, events, stickers, emojiUploads, stickerUploads, permissions | enabled  |
+| roles                                                                                                                                                                    | disabled |
+| moderation                                                                                                                                                               | disabled |
+| presence                                                                                                                                                                 | disabled |
+
+## Components v2 UI
+
+OpenClaw uses Discord components v2 for exec approvals and cross-context markers. Discord message actions can also accept `components` for custom UI (advanced; requires constructing a component payload via the discord tool), while legacy `embeds` remain available but are not recommended.
+
+* `channels.discord.ui.components.accentColor` sets the accent color used by Discord component containers (hex).
+* Set per account with `channels.discord.accounts.<id>.ui.components.accentColor`.
+* `embeds` are ignored when components v2 are present.
+
+Example:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    discord: {
+      ui: {
+        components: {
+          accentColor: "#5865F2",
+        },
+      },
+    },
+  },
+}
+```
+
+## Voice
+
+Discord has two distinct voice surfaces: realtime **voice channels** (continuous conversations) and **voice message attachments** (the waveform preview format). The gateway supports both.
+
+### Voice channels
+
+Setup checklist:
+
+1. Enable Message Content Intent in the Discord Developer Portal.
+2. Enable Server Members Intent when role/user allowlists are used.
+3. Invite the bot with `bot` and `applications.commands` scopes.
+4. Grant Connect, Speak, Send Messages, and Read Message History in the target voice channel.
+5. Enable native commands (`commands.native` or `channels.discord.commands.native`).
+6. Configure `channels.discord.voice`.
+
+Use `/vc join|leave|status` to control sessions. The command uses the account default agent and follows the same allowlist and group policy rules as other Discord commands.
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+/vc join channel:<voice-channel-id>
+/vc status
+/vc leave
+```
+
+Auto-join example:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    discord: {
+      voice: {
+        enabled: true,
+        model: "openai/gpt-5.4-mini",
+        autoJoin: [
+          {
+            guildId: "123456789012345678",
+            channelId: "234567890123456789",
+          },
+        ],
+        daveEncryption: true,
+        decryptionFailureTolerance: 24,
+        connectTimeoutMs: 30000,
+        reconnectGraceMs: 15000,
+        tts: {
+          provider: "openai",
+          openai: { voice: "onyx" },
+        },
       },
     },
   },
@@ -151,760 +1336,2135 @@ Profile data is published as a NIP-01 `kind:0` event. You can manage it from the
 
 Notes:
 
-- Profile URLs must use `https://`.
-- Importing from relays merges fields and preserves local overrides.
+* `voice.tts` overrides `messages.tts` for voice playback only.
+* `voice.model` overrides the LLM used for Discord voice channel responses only. Leave it unset to inherit the routed agent model.
+* STT uses `tools.media.audio`; `voice.model` does not affect transcription.
+* Per-channel Discord `systemPrompt` overrides apply to voice transcript turns for that voice channel.
+* Voice transcript turns derive owner status from Discord `allowFrom` (or `dm.allowFrom`); non-owner speakers cannot access owner-only tools (for example `gateway` and `cron`).
+* Discord voice is opt-in for text-only configs; set `channels.discord.voice.enabled=true` (or keep an existing `channels.discord.voice` block) to enable `/vc` commands, the voice runtime, and the `GuildVoiceStates` gateway intent.
+* `channels.discord.intents.voiceStates` can explicitly override voice-state intent subscription. Leave it unset for the intent to follow effective voice enablement.
+* `voice.daveEncryption` and `voice.decryptionFailureTolerance` pass through to `@discordjs/voice` join options.
+* `@discordjs/voice` defaults are `daveEncryption=true` and `decryptionFailureTolerance=24` if unset.
+* `voice.connectTimeoutMs` controls the initial `@discordjs/voice` Ready wait for `/vc join` and auto-join attempts. Default: `30000`.
+* `voice.reconnectGraceMs` controls how long OpenClaw waits for a disconnected voice session to begin reconnecting before destroying it. Default: `15000`.
+* OpenClaw also watches receive decrypt failures and auto-recovers by leaving/rejoining the voice channel after repeated failures in a short window.
+* If receive logs repeatedly show `DecryptionFailed(UnencryptedWhenPassthroughDisabled)` after updating, collect a dependency report and logs. The bundled `@discordjs/voice` line includes the upstream padding fix from discord.js PR #11449, which closed discord.js issue #11419.
 
-## [​](https://docs.openclaw.ai/channels/nostr\\#access-control)  Access control
+Voice channel pipeline:
 
-### [​](https://docs.openclaw.ai/channels/nostr\\#dm-policies)  DM policies
+* Discord PCM capture is converted to a WAV temp file.
+* `tools.media.audio` handles STT, for example `openai/gpt-4o-mini-transcribe`.
+* The transcript is sent through Discord ingress and routing while the response LLM runs with a voice-output policy that hides the agent `tts` tool and asks for returned text, because Discord voice owns final TTS playback.
+* `voice.model`, when set, overrides only the response LLM for this voice-channel turn.
+* `voice.tts` is merged over `messages.tts`; the resulting audio is played in the joined channel.
 
-- **pairing** (default): unknown senders get a pairing code.
-- **allowlist**: only pubkeys in `allowFrom` can DM.
-- **open**: public inbound DMs (requires `allowFrom: [\"*\"]`).
-- **disabled**: ignore inbound DMs.
+Credentials are resolved per component: LLM route auth for `voice.model`, STT auth for `tools.media.audio`, and TTS auth for `messages.tts`/`voice.tts`.
 
-Enforcement notes:
+### Voice messages
 
-- Inbound event signatures are verified before sender policy and NIP-04 decryption, so forged events are rejected early.
-- Pairing replies are sent without processing the original DM body.
-- Inbound DMs are rate-limited and oversized payloads are dropped before decrypt.
+Discord voice messages show a waveform preview and require OGG/Opus audio. OpenClaw generates the waveform automatically, but needs `ffmpeg` and `ffprobe` on the gateway host to inspect and convert.
 
-### [​](https://docs.openclaw.ai/channels/nostr\\#allowlist-example)  Allowlist example
+* Provide a **local file path** (URLs are rejected).
+* Omit text content (Discord rejects text + voice message in the same payload).
+* Any audio format is accepted; OpenClaw converts to OGG/Opus as needed.
 
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+message(action="send", channel="discord", target="channel:123", path="/path/to/audio.mp3", asVoice=true)
 ```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Used disallowed intents or bot sees no guild messages">
+    * enable Message Content Intent
+    * enable Server Members Intent when you depend on user/member resolution
+    * restart gateway after changing intents
+  </Accordion>
+
+  <Accordion title="Guild messages blocked unexpectedly">
+    * verify `groupPolicy`
+    * verify guild allowlist under `channels.discord.guilds`
+    * if guild `channels` map exists, only listed channels are allowed
+    * verify `requireMention` behavior and mention patterns
+
+    Useful checks:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw doctor
+    openclaw channels status --probe
+    openclaw logs --follow
+    ```
+  </Accordion>
+
+  <Accordion title="Require mention false but still blocked">
+    Common causes:
+
+    * `groupPolicy="allowlist"` without matching guild/channel allowlist
+    * `requireMention` configured in the wrong place (must be under `channels.discord.guilds` or channel entry)
+    * sender blocked by guild/channel `users` allowlist
+  </Accordion>
+
+  <Accordion title="Long-running Discord turns or duplicate replies">
+    Typical logs:
+
+    * `Slow listener detected ...`
+    * `stuck session: sessionKey=agent:...:discord:... state=processing ...`
+
+    Discord gateway queue knobs:
+
+    * single-account: `channels.discord.eventQueue.listenerTimeout`
+    * multi-account: `channels.discord.accounts.<accountId>.eventQueue.listenerTimeout`
+    * this only controls Discord gateway listener work, not agent turn lifetime
+
+    Discord does not apply a channel-owned timeout to queued agent turns. Message listeners hand off immediately, and queued Discord runs preserve per-session ordering until the session/tool/runtime lifecycle completes or aborts the work.
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        discord: {
+          accounts: {
+            default: {
+              eventQueue: {
+                listenerTimeout: 120000,
+              },
+            },
+          },
+        },
+      },
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Gateway metadata lookup timeout warnings">
+    OpenClaw fetches Discord `/gateway/bot` metadata before connecting. Transient failures fall back to Discord's default gateway URL and are rate-limited in logs.
+
+    Metadata timeout knobs:
+
+    * single-account: `channels.discord.gatewayInfoTimeoutMs`
+    * multi-account: `channels.discord.accounts.<accountId>.gatewayInfoTimeoutMs`
+    * env fallback when config is unset: `OPENCLAW_DISCORD_GATEWAY_INFO_TIMEOUT_MS`
+    * default: `30000` (30 seconds), max: `120000`
+  </Accordion>
+
+  <Accordion title="Gateway READY timeout restarts">
+    OpenClaw waits for Discord's gateway `READY` event during startup and after runtime reconnects. Multi-account setups with startup staggering can need a longer startup READY window than the default.
+
+    READY timeout knobs:
+
+    * startup single-account: `channels.discord.gatewayReadyTimeoutMs`
+    * startup multi-account: `channels.discord.accounts.<accountId>.gatewayReadyTimeoutMs`
+    * startup env fallback when config is unset: `OPENCLAW_DISCORD_READY_TIMEOUT_MS`
+    * startup default: `15000` (15 seconds), max: `120000`
+    * runtime single-account: `channels.discord.gatewayRuntimeReadyTimeoutMs`
+    * runtime multi-account: `channels.discord.accounts.<accountId>.gatewayRuntimeReadyTimeoutMs`
+    * runtime env fallback when config is unset: `OPENCLAW_DISCORD_RUNTIME_READY_TIMEOUT_MS`
+    * runtime default: `30000` (30 seconds), max: `120000`
+  </Accordion>
+
+  <Accordion title="Permissions audit mismatches">
+    `channels status --probe` permission checks only work for numeric channel IDs.
+
+    If you use slug keys, runtime matching can still work, but probe cannot fully verify permissions.
+  </Accordion>
+
+  <Accordion title="DM and pairing issues">
+    * DM disabled: `channels.discord.dm.enabled=false`
+    * DM policy disabled: `channels.discord.dmPolicy="disabled"` (legacy: `channels.discord.dm.policy`)
+    * awaiting pairing approval in `pairing` mode
+  </Accordion>
+
+  <Accordion title="Bot to bot loops">
+    By default bot-authored messages are ignored.
+
+    If you set `channels.discord.allowBots=true`, use strict mention and allowlist rules to avoid loop behavior.
+    Prefer `channels.discord.allowBots="mentions"` to only accept bot messages that mention the bot.
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        discord: {
+          accounts: {
+            mantis: {
+              // Mantis listens to other bots only when they mention her.
+              allowBots: "mentions",
+            },
+            molty: {
+              // Molty listens to all bot-authored Discord messages.
+              allowBots: true,
+              mentionAliases: {
+                // Lets Molty write "@Mantis" and send a real Discord mention.
+                Mantis: "MANTIS_DISCORD_USER_ID",
+              },
+            },
+          },
+        },
+      },
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Voice STT drops with DecryptionFailed(...)">
+    * keep OpenClaw current (`openclaw update`) so the Discord voice receive recovery logic is present
+    * confirm `channels.discord.voice.daveEncryption=true` (default)
+    * start from `channels.discord.voice.decryptionFailureTolerance=24` (upstream default) and tune only if needed
+    * watch logs for:
+      * `discord voice: DAVE decrypt failures detected`
+      * `discord voice: repeated decrypt failures; attempting rejoin`
+    * if failures continue after automatic rejoin, collect logs and compare against the upstream DAVE receive history in [discord.js #11419](https://github.com/discordjs/discord.js/issues/11419) and [discord.js #11449](https://github.com/discordjs/discord.js/pull/11449)
+  </Accordion>
+</AccordionGroup>
+
+## Configuration reference
+
+Primary reference: [Configuration reference - Discord](/gateway/config-channels#discord).
+
+<Accordion title="High-signal Discord fields">
+  * startup/auth: `enabled`, `token`, `accounts.*`, `allowBots`
+  * policy: `groupPolicy`, `dm.*`, `guilds.*`, `guilds.*.channels.*`
+  * command: `commands.native`, `commands.useAccessGroups`, `configWrites`, `slashCommand.*`
+  * event queue: `eventQueue.listenerTimeout` (listener budget), `eventQueue.maxQueueSize`, `eventQueue.maxConcurrency`
+  * gateway: `gatewayInfoTimeoutMs`, `gatewayReadyTimeoutMs`, `gatewayRuntimeReadyTimeoutMs`
+  * reply/history: `replyToMode`, `historyLimit`, `dmHistoryLimit`, `dms.*.historyLimit`
+  * delivery: `textChunkLimit`, `chunkMode`, `maxLinesPerMessage`
+  * streaming: `streaming` (legacy alias: `streamMode`), `streaming.preview.toolProgress`, `draftChunk`, `blockStreaming`, `blockStreamingCoalesce`
+  * media/retry: `mediaMaxMb` (caps outbound Discord uploads, default `100MB`), `retry`
+  * actions: `actions.*`
+  * presence: `activity`, `status`, `activityType`, `activityUrl`
+  * UI: `ui.components.accentColor`
+  * features: `threadBindings`, top-level `bindings[]` (`type: "acp"`), `pluralkit`, `execApprovals`, `intents`, `agentComponents`, `heartbeat`, `responsePrefix`
+</Accordion>
+
+## Safety and operations
+
+* Treat bot tokens as secrets (`DISCORD_BOT_TOKEN` preferred in supervised environments).
+* Grant least-privilege Discord permissions.
+* If command deploy/state is stale, restart gateway and re-check with `openclaw channels status --probe`.
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Pairing" icon="link" href="/channels/pairing">
+    Pair a Discord user to the gateway.
+  </Card>
+
+  <Card title="Groups" icon="users" href="/channels/groups">
+    Group chat and allowlist behavior.
+  </Card>
+
+  <Card title="Channel routing" icon="route" href="/channels/channel-routing">
+    Route inbound messages to agents.
+  </Card>
+
+  <Card title="Security" icon="shield" href="/gateway/security">
+    Threat model and hardening.
+  </Card>
+
+  <Card title="Multi-agent routing" icon="sitemap" href="/concepts/multi-agent">
+    Map guilds and channels to agents.
+  </Card>
+
+  <Card title="Slash commands" icon="terminal" href="/tools/slash-commands">
+    Native command behavior.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Feishu
+
+Feishu/Lark is an all-in-one collaboration platform where teams chat, share documents, manage calendars, and get work done together.
+
+**Status:** production-ready for bot DMs + group chats. WebSocket is the default mode; webhook mode is optional.
+
+***
+
+## Quick start
+
+<Note>
+  Requires OpenClaw 2026.4.25 or above. Run `openclaw --version` to check. Upgrade with `openclaw update`.
+</Note>
+
+<Steps>
+  <Step title="Run the channel setup wizard">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw channels login --channel feishu
+    ```
+
+    Scan the QR code with your Feishu/Lark mobile app to create a Feishu/Lark bot automatically.
+  </Step>
+
+  <Step title="After setup completes, restart the gateway to apply the changes">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw gateway restart
+    ```
+  </Step>
+</Steps>
+
+***
+
+## Access control
+
+### Direct messages
+
+Configure `dmPolicy` to control who can DM the bot:
+
+* `"pairing"` - unknown users receive a pairing code; approve via CLI
+* `"allowlist"` - only users listed in `allowFrom` can chat (default: bot owner only)
+* `"open"` - allow public DMs only when `allowFrom` includes `"*"`; with restrictive entries, only matching users can chat
+* `"disabled"` - disable all DMs
+
+**Approve a pairing request:**
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw pairing list feishu
+openclaw pairing approve feishu <CODE>
+```
+
+### Group chats
+
+**Group policy** (`channels.feishu.groupPolicy`):
+
+| Value         | Behavior                                                                                     |
+| ------------- | -------------------------------------------------------------------------------------------- |
+| `"open"`      | Respond to all messages in groups                                                            |
+| `"allowlist"` | Only respond to groups in `groupAllowFrom` or explicitly configured under `groups.<chat_id>` |
+| `"disabled"`  | Disable all group messages; explicit `groups.<chat_id>` entries do not override this         |
+
+Default: `allowlist`
+
+**Mention requirement** (`channels.feishu.requireMention`):
+
+* `true` - require @mention (default)
+* `false` - respond without @mention
+* Per-group override: `channels.feishu.groups.<chat_id>.requireMention`
+* Broadcast-only `@all` and `@_all` are not treated as bot mentions. A message that mentions both `@all` and the bot directly still counts as a bot mention.
+
+***
+
+## Group configuration examples
+
+### Allow all groups, no @mention required
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    nostr: {
-      privateKey: \"${NOSTR_PRIVATE_KEY}\",
-      dmPolicy: \"allowlist\",
-      allowFrom: [\"npub1abc...\", \"npub1xyz\"],
+    feishu: {
+      groupPolicy: "open",
     },
   },
 }
 ```
 
-## [​](https://docs.openclaw.ai/channels/nostr\\#key-formats)  Key formats
+### Allow all groups, still require @mention
 
-Accepted formats:
-
-- **Private key:**`nsec...` or 64-char hex
-- **Pubkeys (`allowFrom`):**`npub...` or hex
-
-## [​](https://docs.openclaw.ai/channels/nostr\\#relays)  Relays
-
-Defaults: `relay.damus.io` and `nos.lol`.
-
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    nostr: {
-      privateKey: \"${NOSTR_PRIVATE_KEY}\",
-      relays: [\"wss://relay.damus.io\", \"wss://relay.primal.net\", \"wss://nostr.wine\"],
+    feishu: {
+      groupPolicy: "open",
+      requireMention: true,
     },
   },
 }
 ```
 
-Tips:
+### Allow specific groups only
 
-- Use 2-3 relays for redundancy.
-- Avoid too many relays (latency, duplication).
-- Paid relays can improve reliability.
-- Local relays are fine for testing (`ws://localhost:7777`).
-
-## [​](https://docs.openclaw.ai/channels/nostr\\#protocol-support)  Protocol support
-
-| NIP | Status | Description |
-| --- | --- | --- |
-| NIP-01 | Supported | Basic event format + profile metadata |
-| NIP-04 | Supported | Encrypted DMs (`kind:4`) |
-| NIP-17 | Planned | Gift-wrapped DMs |
-| NIP-44 | Planned | Versioned encryption |
-
-## [​](https://docs.openclaw.ai/channels/nostr\\#testing)  Testing
-
-### [​](https://docs.openclaw.ai/channels/nostr\\#local-relay)  Local relay
-
-```
-# Start strfry
-docker run -p 7777:7777 ghcr.io/hoytech/strfry
-```
-
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    nostr: {
-      privateKey: \"${NOSTR_PRIVATE_KEY}\",
-      relays: [\"ws://localhost:7777\"],
+    feishu: {
+      groupPolicy: "allowlist",
+      // Group IDs look like: oc_xxx
+      groupAllowFrom: ["oc_xxx", "oc_yyy"],
     },
   },
 }
 ```
 
-### [​](https://docs.openclaw.ai/channels/nostr\\#manual-test)  Manual test
+In `allowlist` mode, you can also admit a group by adding an explicit `groups.<chat_id>` entry. Explicit entries do not override `groupPolicy: "disabled"`. Wildcard defaults under `groups.*` configure matching groups, but they do not admit groups by themselves.
 
-1. Note the bot pubkey (npub) from logs.
-2. Open a Nostr client (Damus, Amethyst, etc.).
-3. DM the bot pubkey.
-4. Verify the response.
-
-## [​](https://docs.openclaw.ai/channels/nostr\\#troubleshooting)  Troubleshooting
-
-### [​](https://docs.openclaw.ai/channels/nostr\\#not-receiving-messages)  Not receiving messages
-
-- Verify the private key is valid.
-- Ensure relay URLs are reachable and use `wss://` (or `ws://` for local).
-- Confirm `enabled` is not `false`.
-- Check Gateway logs for relay connection errors.
-
-### [​](https://openclaw.ai/channels/nostr\\#not-sending-responses)  Not sending responses
-
-- Check relay accepts writes.
-- Verify outbound connectivity.
-- Watch for relay rate limits.
-
-### [​](https://docs.openclaw.ai/channels/nostr\\#duplicate-responses)  Duplicate responses
-
-- Expected when using multiple relays.
-- Messages are deduplicated by event ID; only the first delivery triggers a response.
-
-## [​](https://docs.openclaw.ai/channels/nostr\\#security)  Security
-
-- Never commit private keys.
-- Use environment variables for keys.
-- Consider `allowlist` for production bots.
-- Signatures are verified before sender policy, and sender policy is enforced before decrypt, so forged events are rejected early and unknown senders cannot force full crypto work.
-
-## [​](https://docs.openclaw.ai/channels/nostr\\#limitations-mvp)  Limitations (MVP)
-
-- Direct messages only (no group chats).
-- No media attachments.
-- NIP-04 only (NIP-17 gift-wrap planned).
-
-## [​](https://docs.openclaw.ai/channels/nostr\\#related)  Related
-
-- [Channels Overview](https://docs.openclaw.ai/channels) — all supported channels
-- [Pairing](https://docs.openclaw.ai/channels/pairing) — DM authentication and pairing flow
-- [Groups](https://docs.openclaw.ai/channels/groups) — group chat behavior and mention gating
-- [Channel Routing](https://docs.openclaw.ai/channels/channel-routing) — session routing for messages
-- [Security](https://docs.openclaw.ai/gateway/security) — access model and hardening
-
-[Nextcloud Talk](https://docs.openclaw.ai/channels/nextcloud-talk) [Tlon](https://docs.openclaw.ai/channels/tlon)
-
----
-
-## Channel location parsing - OpenClaw
-**Source:** https://docs.openclaw.ai/channels/location
-
-[Skip to main content](https://docs.openclaw.ai/channels/location#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Configuration
-
-Channel location parsing
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Text formatting](https://docs.openclaw.ai/channels/location#text-formatting)
-- [Context fields](https://docs.openclaw.ai/channels/location#context-fields)
-- [Channel notes](https://docs.openclaw.ai/channels/location#channel-notes)
-- [Related](https://docs.openclaw.ai/channels/location#related)
-
-OpenClaw normalizes shared locations from chat channels into:
-
-- terse coordinate text appended to the inbound body, and
-- structured fields in the auto-reply context payload. Channel-provided labels, addresses, and captions/comments are rendered into the prompt by the shared untrusted metadata JSON block, not inline in the user body.
-
-Currently supported:
-
-- **Telegram** (location pins + venues + live locations)
-- **WhatsApp** (locationMessage + liveLocationMessage)
-- **Matrix** (`m.location` with `geo_uri`)
-
-## [​](https://docs.openclaw.ai/channels/location\\#text-formatting)  Text formatting
-
-Locations are rendered as friendly lines without brackets:
-
-- Pin:
-  - `📍 48.858844, 2.294351 ±12m`
-- Named place:
-  - `📍 48.858844, 2.294351 ±12m`
-- Live share:
-  - `🛰 Live location: 48.858844, 2.294351 ±12m`
-
-If the channel includes a label, address, or caption/comment, it is preserved in the context payload and appears in the prompt as fenced untrusted JSON:
-
-````
-Location (untrusted metadata):
-```json
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-\"latitude\": 48.858844,\n\"longitude\": 2.294351,\n\"name\": \"Eiffel Tower\",\n\"address\": \"Champ de Mars, Paris\",\n\"caption\": \"Meet here\"\n}
-```
-````
-
-## [​](https://docs.openclaw.ai/channels/location\\#context-fields)  Context fields
-
-When a location is present, these fields are added to `ctx`:
-
-- `LocationLat` (number)
-- `LocationLon` (number)
-- `LocationAccuracy` (number, meters; optional)
-- `LocationName` (string; optional)
-- `LocationAddress` (string; optional)
-- `LocationSource` (`pin | place | live`)
-- `LocationIsLive` (boolean)
-- `LocationCaption` (string; optional)
-
-The prompt renderer treats `LocationName`, `LocationAddress`, and `LocationCaption` as untrusted metadata and serializes them through the same bounded JSON path used for other channel context.
-
-## [​](https://docs.openclaw.ai/channels/location\\#channel-notes)  Channel notes
-
-- **Telegram**: venues map to `LocationName/LocationAddress`; live locations use `live_period`.
-- **WhatsApp**: `locationMessage.comment` and `liveLocationMessage.caption` populate `LocationCaption`.
-- **Matrix**: `geo_uri` is parsed as a pin location; altitude is ignored and `LocationIsLive` is always false.
-
-## [​](https://docs.openclaw.ai/channels/location\\#related)  Related
-
-- [Location command (nodes)](https://docs.openclaw.ai/nodes/location-command)
-- [Camera capture](https://docs.openclaw.ai/nodes/camera)
-- [Media understanding](https://docs.openclaw.ai/nodes/media-understanding)
-
-[Channel routing](https://docs.openclaw.ai/channels/channel-routing) [Channel troubleshooting](https://docs.openclaw.ai/channels/troubleshooting)
-
-Ctrl+I
-
----
-
-## QQ bot - OpenClaw
-**Source:** https://docs.openclaw.ai/channels/qqbot
-
-[Skip to main content](https://docs.openclaw.ai/channels/qqbot#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Regional platforms
-
-QQ bot
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Bundled plugin](https://docs.openclaw.ai/channels/qqbot#bundled-plugin)
-- [Setup](https://docs.openclaw.ai/channels/qqbot#setup)
-- [Configure](https://docs.openclaw.ai/channels/qqbot#configure)
-- [Multi-account setup](https://docs.openclaw.ai/channels/qqbot#multi-account-setup)
-- [Group chats](https://docs.openclaw.ai/channels/qqbot#group-chats)
-- [Voice (STT / TTS)](https://docs.openclaw.ai/channels/qqbot#voice-stt-%2F-tts)
-- [Target formats](https://docs.openclaw.ai/channels/qqbot#target-formats)
-- [Slash commands](https://docs.openclaw.ai/channels/qqbot#slash-commands)
-- [Engine architecture](https://docs.openclaw.ai/channels/qqbot#engine-architecture)
-- [QR-code onboarding](https://docs.openclaw.ai/channels/qqbot#qr-code-onboarding)
-- [Troubleshooting](https://docs.openclaw.ai/channels/qqbot#troubleshooting)
-- [Related](https://docs.openclaw.ai/channels/qqbot#related)
-
-QQ Bot connects to OpenClaw via the official QQ Bot API (WebSocket gateway). The
-plugin supports C2C private chat, group @messages, and guild channel messages with
-rich media (images, voice, video, files).Status: bundled plugin. Direct messages, group chats, guild channels, and
-media are supported. Reactions and threads are not supported.
-
-## [​](https://docs.openclaw.ai/channels/qqbot\\#bundled-plugin)  Bundled plugin
-
-Current OpenClaw releases bundle QQ Bot, so normal packaged builds do not need
-a separate `openclaw plugins install` step.
-
-## [​](https://docs.openclaw.ai/channels/qqbot\\#setup)  Setup
-
-1. Go to the [QQ Open Platform](https://q.qq.com/) and scan the QR code with your
-phone QQ to register / log in.
-2. Click **Create Bot** to create a new QQ bot.
-3. Find **AppID** and **AppSecret** on the bot’s settings page and copy them.
-
-> AppSecret is not stored in plaintext — if you leave the page without saving it,
-> you’ll have to regenerate a new one.
-
-4. Add the channel:
-
-```
-openclaw channels add --channel qqbot --token \"AppID:AppSecret\"
+  channels: {
+    feishu: {
+      groupPolicy: "allowlist",
+      groups: {
+        oc_xxx: {
+          requireMention: false,
+        },
+      },
+    },
+  },
+}
 ```
 
-5. Restart the Gateway.
+### Restrict senders within a group
 
-Interactive setup paths:
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    feishu: {
+      groupPolicy: "allowlist",
+      groupAllowFrom: ["oc_xxx"],
+      groups: {
+        oc_xxx: {
+          // User open_ids look like: ou_xxx
+          allowFrom: ["ou_user1", "ou_user2"],
+        },
+      },
+    },
+  },
+}
+```
+
+***
+
+<a id="get-groupuser-ids" />
+
+## Get group/user IDs
+
+### Group IDs (`chat_id`, format: `oc_xxx`)
+
+Open the group in Feishu/Lark, click the menu icon in the top-right corner, and go to **Settings**. The group ID (`chat_id`) is listed on the settings page.
+
+<img src="https://mintcdn.com/clawdhub/0NpU6wNaI7exeaOE/images/feishu-get-group-id.png?fit=max&auto=format&n=0NpU6wNaI7exeaOE&q=85&s=1c9b41e1f9743621dfdd3abf7e952405" alt="Get Group ID" width="1636" height="1764" data-path="images/feishu-get-group-id.png" />
+
+### User IDs (`open_id`, format: `ou_xxx`)
+
+Start the gateway, send a DM to the bot, then check the logs:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw logs --follow
+```
+
+Look for `open_id` in the log output. You can also check pending pairing requests:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw pairing list feishu
+```
+
+***
+
+## Common commands
+
+| Command   | Description                 |
+| --------- | --------------------------- |
+| `/status` | Show bot status             |
+| `/reset`  | Reset the current session   |
+| `/model`  | Show or switch the AI model |
+
+<Note>
+  Feishu/Lark does not support native slash-command menus, so send these as plain text messages.
+</Note>
+
+***
+
+## Troubleshooting
+
+### Bot does not respond in group chats
+
+1. Ensure the bot is added to the group
+2. Ensure you @mention the bot (required by default)
+3. Verify `groupPolicy` is not `"disabled"`
+4. Check logs: `openclaw logs --follow`
+
+### Bot does not receive messages
+
+1. Ensure the bot is published and approved in Feishu Open Platform / Lark Developer
+2. Ensure event subscription includes `im.message.receive_v1`
+3. Ensure **persistent connection** (WebSocket) is selected
+4. Ensure all required permission scopes are granted
+5. Ensure the gateway is running: `openclaw gateway status`
+6. Check logs: `openclaw logs --follow`
+
+### App Secret leaked
+
+1. Reset the App Secret in Feishu Open Platform / Lark Developer
+2. Update the value in your config
+3. Restart the gateway: `openclaw gateway restart`
+
+***
+
+## Advanced configuration
+
+### Multiple accounts
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    feishu: {
+      defaultAccount: "main",
+      accounts: {
+        main: {
+          appId: "cli_xxx",
+          appSecret: "xxx",
+          name: "Primary bot",
+          tts: {
+            providers: {
+              openai: { voice: "shimmer" },
+            },
+          },
+        },
+        backup: {
+          appId: "cli_yyy",
+          appSecret: "yyy",
+          name: "Backup bot",
+          enabled: false,
+        },
+      },
+    },
+  },
+}
+```
+
+`defaultAccount` controls which account is used when outbound APIs do not specify an `accountId`.
+`accounts.<id>.tts` uses the same shape as `messages.tts` and deep-merges over
+global TTS config, so multi-bot Feishu setups can keep shared provider
+credentials globally while overriding only voice, model, persona, or auto mode
+per account.
+
+### Message limits
+
+* `textChunkLimit` - outbound text chunk size (default: `2000` chars)
+* `mediaMaxMb` - media upload/download limit (default: `30` MB)
+
+### Streaming
+
+Feishu/Lark supports streaming replies via interactive cards. When enabled, the bot updates the card in real time as it generates text.
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    feishu: {
+      streaming: true, // enable streaming card output (default: true)
+      blockStreaming: true, // opt into completed-block streaming
+    },
+  },
+}
+```
+
+Set `streaming: false` to send the complete reply in one message. `blockStreaming` is off by default; enable it only when you want completed assistant blocks flushed before the final reply.
+
+### Quota optimization
+
+Reduce the number of Feishu/Lark API calls with two optional flags:
+
+* `typingIndicator` (default `true`): set `false` to skip typing reaction calls
+* `resolveSenderNames` (default `true`): set `false` to skip sender profile lookups
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    feishu: {
+      typingIndicator: false,
+      resolveSenderNames: false,
+    },
+  },
+}
+```
+
+### ACP sessions
+
+Feishu/Lark supports ACP for DMs and group thread messages. Feishu/Lark ACP is text-command driven - there are no native slash-command menus, so use `/acp ...` messages directly in the conversation.
+
+#### Persistent ACP binding
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  agents: {
+    list: [
+      {
+        id: "codex",
+        runtime: {
+          type: "acp",
+          acp: {
+            agent: "codex",
+            backend: "acpx",
+            mode: "persistent",
+            cwd: "/workspace/openclaw",
+          },
+        },
+      },
+    ],
+  },
+  bindings: [
+    {
+      type: "acp",
+      agentId: "codex",
+      match: {
+        channel: "feishu",
+        accountId: "default",
+        peer: { kind: "direct", id: "ou_1234567890" },
+      },
+    },
+    {
+      type: "acp",
+      agentId: "codex",
+      match: {
+        channel: "feishu",
+        accountId: "default",
+        peer: { kind: "group", id: "oc_group_chat:topic:om_topic_root" },
+      },
+      acp: { label: "codex-feishu-topic" },
+    },
+  ],
+}
+```
+
+#### Spawn ACP from chat
+
+In a Feishu/Lark DM or thread:
+
+```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+/acp spawn codex --thread here
+```
+
+`--thread here` works for DMs and Feishu/Lark thread messages. Follow-up messages in the bound conversation route directly to that ACP session.
+
+### Multi-agent routing
+
+Use `bindings` to route Feishu/Lark DMs or groups to different agents.
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  agents: {
+    list: [
+      { id: "main" },
+      { id: "agent-a", workspace: "/home/user/agent-a" },
+      { id: "agent-b", workspace: "/home/user/agent-b" },
+    ],
+  },
+  bindings: [
+    {
+      agentId: "agent-a",
+      match: {
+        channel: "feishu",
+        peer: { kind: "direct", id: "ou_xxx" },
+      },
+    },
+    {
+      agentId: "agent-b",
+      match: {
+        channel: "feishu",
+        peer: { kind: "group", id: "oc_zzz" },
+      },
+    },
+  ],
+}
+```
+
+Routing fields:
+
+* `match.channel`: `"feishu"`
+* `match.peer.kind`: `"direct"` (DM) or `"group"` (group chat)
+* `match.peer.id`: user Open ID (`ou_xxx`) or group ID (`oc_xxx`)
+
+See [Get group/user IDs](#get-groupuser-ids) for lookup tips.
+
+***
+
+## Configuration reference
+
+Full configuration: [Gateway configuration](/gateway/configuration)
+
+| Setting                                           | Description                                                                      | Default          |
+| ------------------------------------------------- | -------------------------------------------------------------------------------- | ---------------- |
+| `channels.feishu.enabled`                         | Enable/disable the channel                                                       | `true`           |
+| `channels.feishu.domain`                          | API domain (`feishu` or `lark`)                                                  | `feishu`         |
+| `channels.feishu.connectionMode`                  | Event transport (`websocket` or `webhook`)                                       | `websocket`      |
+| `channels.feishu.defaultAccount`                  | Default account for outbound routing                                             | `default`        |
+| `channels.feishu.verificationToken`               | Required for webhook mode                                                        | -                |
+| `channels.feishu.encryptKey`                      | Required for webhook mode                                                        | -                |
+| `channels.feishu.webhookPath`                     | Webhook route path                                                               | `/feishu/events` |
+| `channels.feishu.webhookHost`                     | Webhook bind host                                                                | `127.0.0.1`      |
+| `channels.feishu.webhookPort`                     | Webhook bind port                                                                | `3000`           |
+| `channels.feishu.accounts.<id>.appId`             | App ID                                                                           | -                |
+| `channels.feishu.accounts.<id>.appSecret`         | App Secret                                                                       | -                |
+| `channels.feishu.accounts.<id>.domain`            | Per-account domain override                                                      | `feishu`         |
+| `channels.feishu.accounts.<id>.tts`               | Per-account TTS override                                                         | `messages.tts`   |
+| `channels.feishu.dmPolicy`                        | DM policy                                                                        | `allowlist`      |
+| `channels.feishu.allowFrom`                       | DM allowlist (open\_id list)                                                     | \[BotOwnerId]    |
+| `channels.feishu.groupPolicy`                     | Group policy                                                                     | `allowlist`      |
+| `channels.feishu.groupAllowFrom`                  | Group allowlist                                                                  | -                |
+| `channels.feishu.requireMention`                  | Require @mention in groups                                                       | `true`           |
+| `channels.feishu.groups.<chat_id>.requireMention` | Per-group @mention override; explicit IDs also admit the group in allowlist mode | inherited        |
+| `channels.feishu.groups.<chat_id>.enabled`        | Enable/disable a specific group                                                  | `true`           |
+| `channels.feishu.textChunkLimit`                  | Message chunk size                                                               | `2000`           |
+| `channels.feishu.mediaMaxMb`                      | Media size limit                                                                 | `30`             |
+| `channels.feishu.streaming`                       | Streaming card output                                                            | `true`           |
+| `channels.feishu.blockStreaming`                  | Completed-block reply streaming                                                  | `false`          |
+| `channels.feishu.typingIndicator`                 | Send typing reactions                                                            | `true`           |
+| `channels.feishu.resolveSenderNames`              | Resolve sender display names                                                     | `true`           |
+
+***
+
+## Supported message types
+
+### Receive
+
+* ✅ Text
+* ✅ Rich text (post)
+* ✅ Images
+* ✅ Files
+* ✅ Audio
+* ✅ Video/media
+* ✅ Stickers
+
+Inbound Feishu/Lark audio messages are normalized as media placeholders instead
+of raw `file_key` JSON. When `tools.media.audio` is configured, OpenClaw
+downloads the voice-note resource and runs shared audio transcription before the
+agent turn, so the agent receives the spoken transcript. If Feishu includes
+transcript text directly in the audio payload, that text is used without another
+ASR call. Without an audio transcription provider, the agent still receives a
+`<media:audio>` placeholder plus the saved attachment, not the raw Feishu
+resource payload.
+
+### Send
+
+* ✅ Text
+* ✅ Images
+* ✅ Files
+* ✅ Audio
+* ✅ Video/media
+* ✅ Interactive cards (including streaming updates)
+* ⚠️ Rich text (post-style formatting; doesn't support full Feishu/Lark authoring capabilities)
+
+Native Feishu/Lark audio bubbles use the Feishu `audio` message type and require
+Ogg/Opus upload media (`file_type: "opus"`). Existing `.opus` and `.ogg` media
+is sent directly as native audio. MP3/WAV/M4A and other likely audio formats are
+transcoded to 48kHz Ogg/Opus with `ffmpeg` only when the reply requests voice
+delivery (`audioAsVoice` / message tool `asVoice`, including TTS voice-note
+replies). Ordinary MP3 attachments stay regular files. If `ffmpeg` is missing or
+conversion fails, OpenClaw falls back to a file attachment and logs the reason.
+
+### Threads and replies
+
+* ✅ Inline replies
+* ✅ Thread replies
+* ✅ Media replies stay thread-aware when replying to a thread message
+
+For `groupSessionScope: "group_topic"` and `"group_topic_sender"`, native
+Feishu/Lark topic groups use the event `thread_id` (`omt_*`) as the canonical
+topic session key. If a native topic starter event omits `thread_id`, OpenClaw
+hydrates it from Feishu before routing the turn. Normal group replies that
+OpenClaw turns into threads keep using the reply root message ID (`om_*`) so the
+first turn and follow-up turn stay in the same session.
+
+***
+
+## Related
+
+* [Channels Overview](/channels) - all supported channels
+* [Pairing](/channels/pairing) - DM authentication and pairing flow
+* [Groups](/channels/groups) - group chat behavior and mention gating
+* [Channel Routing](/channels/channel-routing) - session routing for messages
+* [Security](/gateway/security) - access model and hardening
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Groups
+
+OpenClaw treats group chats consistently across surfaces: Discord, iMessage, Matrix, Microsoft Teams, Signal, Slack, Telegram, WhatsApp, Zalo.
+
+## Beginner intro (2 minutes)
+
+OpenClaw "lives" on your own messaging accounts. There is no separate WhatsApp bot user. If **you** are in a group, OpenClaw can see that group and respond there.
+
+Default behavior:
+
+* Groups are restricted (`groupPolicy: "allowlist"`).
+* Replies require a mention unless you explicitly disable mention gating.
+* Normal final replies in groups/channels are private by default. Visible room output uses the `message` tool.
+
+Translation: allowlisted senders can trigger OpenClaw by mentioning it.
+
+<Note>
+  **TL;DR**
+
+  * **DM access** is controlled by `*.allowFrom`.
+  * **Group access** is controlled by `*.groupPolicy` + allowlists (`*.groups`, `*.groupAllowFrom`).
+  * **Reply triggering** is controlled by mention gating (`requireMention`, `/activation`).
+</Note>
+
+Quick flow (what happens to a group message):
 
 ```
-openclaw channels add
-openclaw configure --section channels
+groupPolicy? disabled -> drop
+groupPolicy? allowlist -> group allowed? no -> drop
+requireMention? yes -> mentioned? no -> store for context only
+otherwise -> reply
 ```
 
-## [​](https://docs.openclaw.ai/channels/qqbot\\#configure)  Configure
+## Visible replies
+
+For group/channel rooms, OpenClaw defaults to `messages.groupChat.visibleReplies: "message_tool"`.
+`openclaw doctor --fix` writes this default into configured-channel configs that omit it.
+That means the agent still processes the turn and can update memory/session state, but its normal final answer is not automatically posted back into the room. To speak visibly, the agent uses `message(action=send)`.
+
+This default depends on a model/runtime that reliably calls tools. If logs show
+assistant text but `didSendViaMessagingTool: false`, the model answered
+privately instead of calling the message tool. That is not a
+Discord/Slack/Telegram send failure. Use a tool-call-reliable model for
+group/channel sessions, or set
+`messages.groupChat.visibleReplies: "automatic"` to restore legacy visible
+final replies.
+
+If the message tool is unavailable under the active tool policy, OpenClaw falls
+back to automatic visible replies instead of silently suppressing the response.
+`openclaw doctor` warns about this mismatch.
+
+For direct chats and any other source turn, use `messages.visibleReplies: "message_tool"` to apply the same tool-only visible-reply behavior globally. Harnesses can also choose this as their unset default; the Codex harness does this for Codex-mode direct chats. `messages.groupChat.visibleReplies` remains the more specific override for group/channel rooms.
+
+This replaces the old pattern of forcing the model to answer `NO_REPLY` for most lurk-mode turns. In tool-only mode, doing nothing visible simply means not calling the message tool.
+
+Typing indicators are still sent while the agent works in tool-only mode. The default group typing mode is upgraded from "message" to "instant" for these turns because there may never be normal assistant message text before the agent decides whether to call the message tool. Explicit typing-mode config still wins.
+
+To restore legacy automatic final replies for group/channel rooms:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  messages: {
+    groupChat: {
+      visibleReplies: "automatic",
+    },
+  },
+}
+```
+
+The gateway hot-reloads `messages` config after the file is saved. Restart only
+when file watching or config reload is disabled in the deployment.
+
+To require visible output to go through the message tool for every source chat:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  messages: {
+    visibleReplies: "message_tool",
+  },
+}
+```
+
+Native slash commands (Discord, Telegram, and other surfaces with native command support) bypass `visibleReplies: "message_tool"` and always reply visibly so the channel-native command UI gets the response it expects. This applies to validated native command turns only; text-typed `/...` commands and ordinary chat turns still follow the configured group default.
+
+## Context visibility and allowlists
+
+Two different controls are involved in group safety:
+
+* **Trigger authorization**: who can trigger the agent (`groupPolicy`, `groups`, `groupAllowFrom`, channel-specific allowlists).
+* **Context visibility**: what supplemental context is injected into the model (reply text, quotes, thread history, forwarded metadata).
+
+By default, OpenClaw prioritizes normal chat behavior and keeps context mostly as received. This means allowlists primarily decide who can trigger actions, not a universal redaction boundary for every quoted or historical snippet.
+
+<AccordionGroup>
+  <Accordion title="Current behavior is channel-specific">
+    * Some channels already apply sender-based filtering for supplemental context in specific paths (for example Slack thread seeding, Matrix reply/thread lookups).
+    * Other channels still pass quote/reply/forward context through as received.
+  </Accordion>
+
+  <Accordion title="Hardening direction (planned)">
+    * `contextVisibility: "all"` (default) keeps current as-received behavior.
+    * `contextVisibility: "allowlist"` filters supplemental context to allowlisted senders.
+    * `contextVisibility: "allowlist_quote"` is `allowlist` plus one explicit quote/reply exception.
+
+    Until this hardening model is implemented consistently across channels, expect differences by surface.
+  </Accordion>
+</AccordionGroup>
+
+<img src="https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/images/groups-flow.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=eeb387df91a967fbbe8bf8f80ae41dd7" alt="Group message flow" width="960" height="260" data-path="images/groups-flow.svg" />
+
+If you want...
+
+| Goal                                         | What to set                                                |
+| -------------------------------------------- | ---------------------------------------------------------- |
+| Allow all groups but only reply on @mentions | `groups: { "*": { requireMention: true } }`                |
+| Disable all group replies                    | `groupPolicy: "disabled"`                                  |
+| Only specific groups                         | `groups: { "<group-id>": { ... } }` (no `"*"` key)         |
+| Only you can trigger in groups               | `groupPolicy: "allowlist"`, `groupAllowFrom: ["+1555..."]` |
+| Reuse one trusted sender set across channels | `groupAllowFrom: ["accessGroup:operators"]`                |
+
+For reusable sender allowlists, see [Access groups](/channels/access-groups).
+
+## Session keys
+
+* Group sessions use `agent:<agentId>:<channel>:group:<id>` session keys (rooms/channels use `agent:<agentId>:<channel>:channel:<id>`).
+* Telegram forum topics add `:topic:<threadId>` to the group id so each topic has its own session.
+* Direct chats use the main session (or per-sender if configured).
+* Heartbeats are skipped for group sessions.
+
+<a id="pattern-personal-dms-public-groups-single-agent" />
+
+## Pattern: personal DMs + public groups (single agent)
+
+Yes — this works well if your "personal" traffic is **DMs** and your "public" traffic is **groups**.
+
+Why: in single-agent mode, DMs typically land in the **main** session key (`agent:main:main`), while groups always use **non-main** session keys (`agent:main:<channel>:group:<id>`). If you enable sandboxing with `mode: "non-main"`, those group sessions run in the configured sandbox backend while your main DM session stays on-host. Docker is the default backend if you do not choose one.
+
+This gives you one agent "brain" (shared workspace + memory), but two execution postures:
+
+* **DMs**: full tools (host)
+* **Groups**: sandbox + restricted tools
+
+<Note>
+  If you need truly separate workspaces/personas ("personal" and "public" must never mix), use a second agent + bindings. See [Multi-Agent Routing](/concepts/multi-agent).
+</Note>
+
+<Tabs>
+  <Tab title="DMs on host, groups sandboxed">
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          sandbox: {
+            mode: "non-main", // groups/channels are non-main -> sandboxed
+            scope: "session", // strongest isolation (one container per group/channel)
+            workspaceAccess: "none",
+          },
+        },
+      },
+      tools: {
+        sandbox: {
+          tools: {
+            // If allow is non-empty, everything else is blocked (deny still wins).
+            allow: ["group:messaging", "group:sessions"],
+            deny: ["group:runtime", "group:fs", "group:ui", "nodes", "cron", "gateway"],
+          },
+        },
+      },
+    }
+    ```
+  </Tab>
+
+  <Tab title="Groups see only an allowlisted folder">
+    Want "groups can only see folder X" instead of "no host access"? Keep `workspaceAccess: "none"` and mount only allowlisted paths into the sandbox:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      agents: {
+        defaults: {
+          sandbox: {
+            mode: "non-main",
+            scope: "session",
+            workspaceAccess: "none",
+            docker: {
+              binds: [
+                // hostPath:containerPath:mode
+                "/home/user/FriendsShared:/data:ro",
+              ],
+            },
+          },
+        },
+      },
+    }
+    ```
+  </Tab>
+</Tabs>
+
+Related:
+
+* Configuration keys and defaults: [Gateway configuration](/gateway/config-agents#agentsdefaultssandbox)
+* Debugging why a tool is blocked: [Sandbox vs Tool Policy vs Elevated](/gateway/sandbox-vs-tool-policy-vs-elevated)
+* Bind mounts details: [Sandboxing](/gateway/sandboxing#custom-bind-mounts)
+
+## Display labels
+
+* UI labels use `displayName` when available, formatted as `<channel>:<token>`.
+* `#room` is reserved for rooms/channels; group chats use `g-<slug>` (lowercase, spaces -> `-`, keep `#@+._-`).
+
+## Group policy
+
+Control how group/room messages are handled per channel:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    whatsapp: {
+      groupPolicy: "disabled", // "open" | "disabled" | "allowlist"
+      groupAllowFrom: ["+15551234567"],
+    },
+    telegram: {
+      groupPolicy: "disabled",
+      groupAllowFrom: ["123456789"], // numeric Telegram user id (wizard can resolve @username)
+    },
+    signal: {
+      groupPolicy: "disabled",
+      groupAllowFrom: ["+15551234567"],
+    },
+    imessage: {
+      groupPolicy: "disabled",
+      groupAllowFrom: ["chat_id:123"],
+    },
+    msteams: {
+      groupPolicy: "disabled",
+      groupAllowFrom: ["user@org.com"],
+    },
+    discord: {
+      groupPolicy: "allowlist",
+      guilds: {
+        GUILD_ID: { channels: { help: { allow: true } } },
+      },
+    },
+    slack: {
+      groupPolicy: "allowlist",
+      channels: { "#general": { allow: true } },
+    },
+    matrix: {
+      groupPolicy: "allowlist",
+      groupAllowFrom: ["@owner:example.org"],
+      groups: {
+        "!roomId:example.org": { enabled: true },
+        "#alias:example.org": { enabled: true },
+      },
+    },
+  },
+}
+```
+
+| Policy        | Behavior                                                     |
+| ------------- | ------------------------------------------------------------ |
+| `"open"`      | Groups bypass allowlists; mention-gating still applies.      |
+| `"disabled"`  | Block all group messages entirely.                           |
+| `"allowlist"` | Only allow groups/rooms that match the configured allowlist. |
+
+<AccordionGroup>
+  <Accordion title="Per-channel notes">
+    * `groupPolicy` is separate from mention-gating (which requires @mentions).
+    * WhatsApp/Telegram/Signal/iMessage/Microsoft Teams/Zalo: use `groupAllowFrom` (fallback: explicit `allowFrom`).
+    * Signal: `groupAllowFrom` can match either the inbound Signal group id or the sender phone/UUID.
+    * DM pairing approvals (`*-allowFrom` store entries) apply to DM access only; group sender authorization stays explicit to group allowlists.
+    * Discord: allowlist uses `channels.discord.guilds.<id>.channels`.
+    * Slack: allowlist uses `channels.slack.channels`.
+    * Matrix: allowlist uses `channels.matrix.groups`. Prefer room IDs or aliases; joined-room name lookup is best-effort, and unresolved names are ignored at runtime. Use `channels.matrix.groupAllowFrom` to restrict senders; per-room `users` allowlists are also supported.
+    * Group DMs are controlled separately (`channels.discord.dm.*`, `channels.slack.dm.*`).
+    * Telegram allowlist can match user IDs (`"123456789"`, `"telegram:123456789"`, `"tg:123456789"`) or usernames (`"@alice"` or `"alice"`); prefixes are case-insensitive.
+    * Default is `groupPolicy: "allowlist"`; if your group allowlist is empty, group messages are blocked.
+    * Runtime safety: when a provider block is completely missing (`channels.<provider>` absent), group policy falls back to a fail-closed mode (typically `allowlist`) instead of inheriting `channels.defaults.groupPolicy`.
+  </Accordion>
+</AccordionGroup>
+
+Quick mental model (evaluation order for group messages):
+
+<Steps>
+  <Step title="groupPolicy">
+    `groupPolicy` (open/disabled/allowlist).
+  </Step>
+
+  <Step title="Group allowlists">
+    Group allowlists (`*.groups`, `*.groupAllowFrom`, channel-specific allowlist).
+  </Step>
+
+  <Step title="Mention gating">
+    Mention gating (`requireMention`, `/activation`).
+  </Step>
+</Steps>
+
+## Mention gating (default)
+
+Group messages require a mention unless overridden per group. Defaults live per subsystem under `*.groups."*"`.
+
+Replying to a bot message counts as an implicit mention when the channel supports reply metadata. Quoting a bot message can also count as an implicit mention on channels that expose quote metadata. Current built-in cases include Telegram, WhatsApp, Slack, Discord, Microsoft Teams, and ZaloUser.
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    whatsapp: {
+      groups: {
+        "*": { requireMention: true },
+        "123@g.us": { requireMention: false },
+      },
+    },
+    telegram: {
+      groups: {
+        "*": { requireMention: true },
+        "123456789": { requireMention: false },
+      },
+    },
+    imessage: {
+      groups: {
+        "*": { requireMention: true },
+        "123": { requireMention: false },
+      },
+    },
+  },
+  agents: {
+    list: [
+      {
+        id: "main",
+        groupChat: {
+          mentionPatterns: ["@openclaw", "openclaw", "\\+15555550123"],
+          historyLimit: 50,
+        },
+      },
+    ],
+  },
+}
+```
+
+<AccordionGroup>
+  <Accordion title="Mention gating notes">
+    * `mentionPatterns` are case-insensitive safe regex patterns; invalid patterns and unsafe nested-repetition forms are ignored.
+    * Surfaces that provide explicit mentions still pass; patterns are a fallback.
+    * Per-agent override: `agents.list[].groupChat.mentionPatterns` (useful when multiple agents share a group).
+    * Mention gating is only enforced when mention detection is possible (native mentions or `mentionPatterns` are configured).
+    * Allowlisting a group or sender does not disable mention gating; set that group's `requireMention` to `false` when all messages should trigger.
+    * Group chat prompt context carries the resolved silent-reply instruction every turn; workspace files should not duplicate `NO_REPLY` mechanics.
+    * Groups where silent replies are allowed treat clean empty or reasoning-only model turns as silent, equivalent to `NO_REPLY`. Direct chats do the same only when direct silent replies are explicitly allowed; otherwise empty replies remain failed agent turns.
+    * Discord defaults live in `channels.discord.guilds."*"` (overridable per guild/channel).
+    * Group history context is wrapped uniformly across channels and is **pending-only** (messages skipped due to mention gating); use `messages.groupChat.historyLimit` for the global default and `channels.<channel>.historyLimit` (or `channels.<channel>.accounts.*.historyLimit`) for overrides. Set `0` to disable.
+  </Accordion>
+</AccordionGroup>
+
+## Group/channel tool restrictions (optional)
+
+Some channel configs support restricting which tools are available **inside a specific group/room/channel**.
+
+* `tools`: allow/deny tools for the whole group.
+* `toolsBySender`: per-sender overrides within the group. Use explicit key prefixes: `id:<senderId>`, `e164:<phone>`, `username:<handle>`, `name:<displayName>`, and `"*"` wildcard. Legacy unprefixed keys are still accepted and matched as `id:` only.
+
+Resolution order (most specific wins):
+
+<Steps>
+  <Step title="Group toolsBySender">
+    Group/channel `toolsBySender` match.
+  </Step>
+
+  <Step title="Group tools">
+    Group/channel `tools`.
+  </Step>
+
+  <Step title="Default toolsBySender">
+    Default (`"*"`) `toolsBySender` match.
+  </Step>
+
+  <Step title="Default tools">
+    Default (`"*"`) `tools`.
+  </Step>
+</Steps>
+
+Example (Telegram):
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    telegram: {
+      groups: {
+        "*": { tools: { deny: ["exec"] } },
+        "-1001234567890": {
+          tools: { deny: ["exec", "read", "write"] },
+          toolsBySender: {
+            "id:123456789": { alsoAllow: ["exec"] },
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+<Note>
+  Group/channel tool restrictions are applied in addition to global/agent tool policy (deny still wins). Some channels use different nesting for rooms/channels (e.g., Discord `guilds.*.channels.*`, Slack `channels.*`, Microsoft Teams `teams.*.channels.*`).
+</Note>
+
+## Group allowlists
+
+When `channels.whatsapp.groups`, `channels.telegram.groups`, or `channels.imessage.groups` is configured, the keys act as a group allowlist. Use `"*"` to allow all groups while still setting default mention behavior.
+
+<Warning>
+  Common confusion: DM pairing approval is not the same as group authorization. For channels that support DM pairing, the pairing store unlocks DMs only. Group commands still require explicit group sender authorization from config allowlists such as `groupAllowFrom` or the documented config fallback for that channel.
+</Warning>
+
+Common intents (copy/paste):
+
+<Tabs>
+  <Tab title="Disable all group replies">
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: { whatsapp: { groupPolicy: "disabled" } },
+    }
+    ```
+  </Tab>
+
+  <Tab title="Allow only specific groups (WhatsApp)">
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        whatsapp: {
+          groups: {
+            "123@g.us": { requireMention: true },
+            "456@g.us": { requireMention: false },
+          },
+        },
+      },
+    }
+    ```
+  </Tab>
+
+  <Tab title="Allow all groups but require mention">
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        whatsapp: {
+          groups: { "*": { requireMention: true } },
+        },
+      },
+    }
+    ```
+  </Tab>
+
+  <Tab title="Owner-only triggers (WhatsApp)">
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        whatsapp: {
+          groupPolicy: "allowlist",
+          groupAllowFrom: ["+15551234567"],
+          groups: { "*": { requireMention: true } },
+        },
+      },
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Activation (owner-only)
+
+Group owners can toggle per-group activation:
+
+* `/activation mention`
+* `/activation always`
+
+Owner is determined by `channels.whatsapp.allowFrom` (or the bot's self E.164 when unset). Send the command as a standalone message. Other surfaces currently ignore `/activation`.
+
+## Context fields
+
+Group inbound payloads set:
+
+* `ChatType=group`
+* `GroupSubject` (if known)
+* `GroupMembers` (if known)
+* `WasMentioned` (mention gating result)
+* Telegram forum topics also include `MessageThreadId` and `IsForum`.
+
+Channel-specific notes:
+
+* BlueBubbles can optionally enrich unnamed macOS group participants from the local Contacts database before populating `GroupMembers`. This is off by default and only runs after normal group gating passes.
+
+The agent system prompt includes a group intro on the first turn of a new group session. It reminds the model to respond like a human, avoid Markdown tables, minimize empty lines and follow normal chat spacing, and avoid typing literal `\n` sequences. Channel-sourced group names and participant labels are rendered as fenced untrusted metadata, not inline system instructions.
+
+## iMessage specifics
+
+* Prefer `chat_id:<id>` when routing or allowlisting.
+* List chats: `imsg chats --limit 20`.
+* Group replies always go back to the same `chat_id`.
+
+## WhatsApp system prompts
+
+See [WhatsApp](/channels/whatsapp#system-prompts) for the canonical WhatsApp system prompt rules, including group and direct prompt resolution, wildcard behavior, and account override semantics.
+
+## WhatsApp specifics
+
+See [Group messages](/channels/group-messages) for WhatsApp-only behavior (history injection, mention handling details).
+
+## Related
+
+* [Broadcast groups](/channels/broadcast-groups)
+* [Channel routing](/channels/channel-routing)
+* [Group messages](/channels/group-messages)
+* [Pairing](/channels/pairing)
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# iMessage
+
+<Warning>
+  For new iMessage deployments, use <a href="/channels/bluebubbles">BlueBubbles</a>.
+
+  The `imsg` integration is legacy and may be removed in a future release.
+</Warning>
+
+Status: legacy external CLI integration. Gateway spawns `imsg rpc` and communicates over JSON-RPC on stdio (no separate daemon/port).
+
+<CardGroup cols={3}>
+  <Card title="BlueBubbles (recommended)" icon="message-circle" href="/channels/bluebubbles">
+    Preferred iMessage path for new setups.
+  </Card>
+
+  <Card title="Pairing" icon="link" href="/channels/pairing">
+    iMessage DMs default to pairing mode.
+  </Card>
+
+  <Card title="Configuration reference" icon="settings" href="/gateway/config-channels#imessage">
+    Full iMessage field reference.
+  </Card>
+</CardGroup>
+
+## Quick setup
+
+<Tabs>
+  <Tab title="Local Mac (fast path)">
+    <Steps>
+      <Step title="Install and verify imsg">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        brew install steipete/tap/imsg
+        imsg rpc --help
+        ```
+      </Step>
+
+      <Step title="Configure OpenClaw">
+        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        {
+          channels: {
+            imessage: {
+              enabled: true,
+              cliPath: "/usr/local/bin/imsg",
+              dbPath: "/Users/user/Library/Messages/chat.db",
+            },
+          },
+        }
+        ```
+      </Step>
+
+      <Step title="Start gateway">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw gateway
+        ```
+      </Step>
+
+      <Step title="Approve first DM pairing (default dmPolicy)">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw pairing list imessage
+        openclaw pairing approve imessage <CODE>
+        ```
+
+        Pairing requests expire after 1 hour.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Remote Mac over SSH">
+    OpenClaw only requires a stdio-compatible `cliPath`, so you can point `cliPath` at a wrapper script that SSHes to a remote Mac and runs `imsg`.
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    #!/usr/bin/env bash
+    exec ssh -T gateway-host imsg "$@"
+    ```
+
+    Recommended config when attachments are enabled:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        imessage: {
+          enabled: true,
+          cliPath: "~/.openclaw/scripts/imsg-ssh",
+          remoteHost: "user@gateway-host", // used for SCP attachment fetches
+          includeAttachments: true,
+          // Optional: override allowed attachment roots.
+          // Defaults include /Users/*/Library/Messages/Attachments
+          attachmentRoots: ["/Users/*/Library/Messages/Attachments"],
+          remoteAttachmentRoots: ["/Users/*/Library/Messages/Attachments"],
+        },
+      },
+    }
+    ```
+
+    If `remoteHost` is not set, OpenClaw attempts to auto-detect it by parsing the SSH wrapper script.
+    `remoteHost` must be `host` or `user@host` (no spaces or SSH options).
+    OpenClaw uses strict host-key checking for SCP, so the relay host key must already exist in `~/.ssh/known_hosts`.
+    Attachment paths are validated against allowed roots (`attachmentRoots` / `remoteAttachmentRoots`).
+  </Tab>
+</Tabs>
+
+## Requirements and permissions (macOS)
+
+* Messages must be signed in on the Mac running `imsg`.
+* Full Disk Access is required for the process context running OpenClaw/`imsg` (Messages DB access).
+* Automation permission is required to send messages through Messages.app.
+
+<Tip>
+  Permissions are granted per process context. If gateway runs headless (LaunchAgent/SSH), run a one-time interactive command in that same context to trigger prompts:
+
+  ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+  imsg chats --limit 1
+  # or
+  imsg send <handle> "test"
+  ```
+</Tip>
+
+## Access control and routing
+
+<Tabs>
+  <Tab title="DM policy">
+    `channels.imessage.dmPolicy` controls direct messages:
+
+    * `pairing` (default)
+    * `allowlist`
+    * `open` (requires `allowFrom` to include `"*"`)
+    * `disabled`
+
+    Allowlist field: `channels.imessage.allowFrom`.
+
+    Allowlist entries can be handles or chat targets (`chat_id:*`, `chat_guid:*`, `chat_identifier:*`).
+  </Tab>
+
+  <Tab title="Group policy + mentions">
+    `channels.imessage.groupPolicy` controls group handling:
+
+    * `allowlist` (default when configured)
+    * `open`
+    * `disabled`
+
+    Group sender allowlist: `channels.imessage.groupAllowFrom`.
+
+    Runtime fallback: if `groupAllowFrom` is unset, iMessage group sender checks fall back to `allowFrom` when available.
+    Runtime note: if `channels.imessage` is completely missing, runtime falls back to `groupPolicy="allowlist"` and logs a warning (even if `channels.defaults.groupPolicy` is set).
+
+    Mention gating for groups:
+
+    * iMessage has no native mention metadata
+    * mention detection uses regex patterns (`agents.list[].groupChat.mentionPatterns`, fallback `messages.groupChat.mentionPatterns`)
+    * with no configured patterns, mention gating cannot be enforced
+
+    Control commands from authorized senders can bypass mention gating in groups.
+  </Tab>
+
+  <Tab title="Sessions and deterministic replies">
+    * DMs use direct routing; groups use group routing.
+    * With default `session.dmScope=main`, iMessage DMs collapse into the agent main session.
+    * Group sessions are isolated (`agent:<agentId>:imessage:group:<chat_id>`).
+    * Replies route back to iMessage using originating channel/target metadata.
+
+    Group-ish thread behavior:
+
+    Some multi-participant iMessage threads can arrive with `is_group=false`.
+    If that `chat_id` is explicitly configured under `channels.imessage.groups`, OpenClaw treats it as group traffic (group gating + group session isolation).
+  </Tab>
+</Tabs>
+
+## ACP conversation bindings
+
+Legacy iMessage chats can also be bound to ACP sessions.
+
+Fast operator flow:
+
+* Run `/acp spawn codex --bind here` inside the DM or allowed group chat.
+* Future messages in that same iMessage conversation route to the spawned ACP session.
+* `/new` and `/reset` reset the same bound ACP session in place.
+* `/acp close` closes the ACP session and removes the binding.
+
+Configured persistent bindings are supported through top-level `bindings[]` entries with `type: "acp"` and `match.channel: "imessage"`.
+
+`match.peer.id` can use:
+
+* normalized DM handle such as `+15555550123` or `user@example.com`
+* `chat_id:<id>` (recommended for stable group bindings)
+* `chat_guid:<guid>`
+* `chat_identifier:<identifier>`
+
+Example:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  agents: {
+    list: [
+      {
+        id: "codex",
+        runtime: {
+          type: "acp",
+          acp: { agent: "codex", backend: "acpx", mode: "persistent" },
+        },
+      },
+    ],
+  },
+  bindings: [
+    {
+      type: "acp",
+      agentId: "codex",
+      match: {
+        channel: "imessage",
+        accountId: "default",
+        peer: { kind: "group", id: "chat_id:123" },
+      },
+      acp: { label: "codex-group" },
+    },
+  ],
+}
+```
+
+See [ACP Agents](/tools/acp-agents) for shared ACP binding behavior.
+
+## Deployment patterns
+
+<AccordionGroup>
+  <Accordion title="Dedicated bot macOS user (separate iMessage identity)">
+    Use a dedicated Apple ID and macOS user so bot traffic is isolated from your personal Messages profile.
+
+    Typical flow:
+
+    1. Create/sign in a dedicated macOS user.
+    2. Sign into Messages with the bot Apple ID in that user.
+    3. Install `imsg` in that user.
+    4. Create SSH wrapper so OpenClaw can run `imsg` in that user context.
+    5. Point `channels.imessage.accounts.<id>.cliPath` and `.dbPath` to that user profile.
+
+    First run may require GUI approvals (Automation + Full Disk Access) in that bot user session.
+  </Accordion>
+
+  <Accordion title="Remote Mac over Tailscale (example)">
+    Common topology:
+
+    * gateway runs on Linux/VM
+    * iMessage + `imsg` runs on a Mac in your tailnet
+    * `cliPath` wrapper uses SSH to run `imsg`
+    * `remoteHost` enables SCP attachment fetches
+
+    Example:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        imessage: {
+          enabled: true,
+          cliPath: "~/.openclaw/scripts/imsg-ssh",
+          remoteHost: "bot@mac-mini.tailnet-1234.ts.net",
+          includeAttachments: true,
+          dbPath: "/Users/bot/Library/Messages/chat.db",
+        },
+      },
+    }
+    ```
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    #!/usr/bin/env bash
+    exec ssh -T bot@mac-mini.tailnet-1234.ts.net imsg "$@"
+    ```
+
+    Use SSH keys so both SSH and SCP are non-interactive.
+    Ensure the host key is trusted first (for example `ssh bot@mac-mini.tailnet-1234.ts.net`) so `known_hosts` is populated.
+  </Accordion>
+
+  <Accordion title="Multi-account pattern">
+    iMessage supports per-account config under `channels.imessage.accounts`.
+
+    Each account can override fields such as `cliPath`, `dbPath`, `allowFrom`, `groupPolicy`, `mediaMaxMb`, history settings, and attachment root allowlists.
+  </Accordion>
+</AccordionGroup>
+
+## Media, chunking, and delivery targets
+
+<AccordionGroup>
+  <Accordion title="Attachments and media">
+    * inbound attachment ingestion is optional: `channels.imessage.includeAttachments`
+    * remote attachment paths can be fetched via SCP when `remoteHost` is set
+    * attachment paths must match allowed roots:
+      * `channels.imessage.attachmentRoots` (local)
+      * `channels.imessage.remoteAttachmentRoots` (remote SCP mode)
+      * default root pattern: `/Users/*/Library/Messages/Attachments`
+    * SCP uses strict host-key checking (`StrictHostKeyChecking=yes`)
+    * outbound media size uses `channels.imessage.mediaMaxMb` (default 16 MB)
+  </Accordion>
+
+  <Accordion title="Outbound chunking">
+    * text chunk limit: `channels.imessage.textChunkLimit` (default 4000)
+    * chunk mode: `channels.imessage.chunkMode`
+      * `length` (default)
+      * `newline` (paragraph-first splitting)
+  </Accordion>
+
+  <Accordion title="Addressing formats">
+    Preferred explicit targets:
+
+    * `chat_id:123` (recommended for stable routing)
+    * `chat_guid:...`
+    * `chat_identifier:...`
+
+    Handle targets are also supported:
+
+    * `imessage:+1555...`
+    * `sms:+1555...`
+    * `user@example.com`
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    imsg chats --limit 20
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Config writes
+
+iMessage allows channel-initiated config writes by default (for `/config set|unset` when `commands.config: true`).
+
+Disable:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    imessage: {
+      configWrites: false,
+    },
+  },
+}
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="imsg not found or RPC unsupported">
+    Validate the binary and RPC support:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    imsg rpc --help
+    openclaw channels status --probe
+    ```
+
+    If probe reports RPC unsupported, update `imsg`.
+  </Accordion>
+
+  <Accordion title="DMs are ignored">
+    Check:
+
+    * `channels.imessage.dmPolicy`
+    * `channels.imessage.allowFrom`
+    * pairing approvals (`openclaw pairing list imessage`)
+  </Accordion>
+
+  <Accordion title="Group messages are ignored">
+    Check:
+
+    * `channels.imessage.groupPolicy`
+    * `channels.imessage.groupAllowFrom`
+    * `channels.imessage.groups` allowlist behavior
+    * mention pattern configuration (`agents.list[].groupChat.mentionPatterns`)
+  </Accordion>
+
+  <Accordion title="Remote attachments fail">
+    Check:
+
+    * `channels.imessage.remoteHost`
+    * `channels.imessage.remoteAttachmentRoots`
+    * SSH/SCP key auth from the gateway host
+    * host key exists in `~/.ssh/known_hosts` on the gateway host
+    * remote path readability on the Mac running Messages
+  </Accordion>
+
+  <Accordion title="macOS permission prompts were missed">
+    Re-run in an interactive GUI terminal in the same user/session context and approve prompts:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    imsg chats --limit 1
+    imsg send <handle> "test"
+    ```
+
+    Confirm Full Disk Access + Automation are granted for the process context that runs OpenClaw/`imsg`.
+  </Accordion>
+</AccordionGroup>
+
+## Configuration reference pointers
+
+* [Configuration reference - iMessage](/gateway/config-channels#imessage)
+* [Gateway configuration](/gateway/configuration)
+* [Pairing](/channels/pairing)
+* [BlueBubbles](/channels/bluebubbles)
+
+## Related
+
+* [Channels Overview](/channels) — all supported channels
+* [Pairing](/channels/pairing) — DM authentication and pairing flow
+* [Groups](/channels/groups) — group chat behavior and mention gating
+* [Channel Routing](/channels/channel-routing) — session routing for messages
+* [Security](/gateway/security) — access model and hardening
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# LINE
+
+LINE connects to OpenClaw via the LINE Messaging API. The plugin runs as a webhook
+receiver on the gateway and uses your channel access token + channel secret for
+authentication.
+
+Status: downloadable plugin. Direct messages, group chats, media, locations, Flex
+messages, template messages, and quick replies are supported. Reactions and threads
+are not supported.
+
+## Install
+
+Install LINE before configuring the channel:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw plugins install @openclaw/line
+```
+
+Local checkout (when running from a git repo):
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw plugins install ./path/to/local/line-plugin
+```
+
+## Setup
+
+1. Create a LINE Developers account and open the Console:
+   [https://developers.line.biz/console/](https://developers.line.biz/console/)
+2. Create (or pick) a Provider and add a **Messaging API** channel.
+3. Copy the **Channel access token** and **Channel secret** from the channel settings.
+4. Enable **Use webhook** in the Messaging API settings.
+5. Set the webhook URL to your gateway endpoint (HTTPS required):
+
+```
+https://gateway-host/line/webhook
+```
+
+The gateway responds to LINE's webhook verification (GET) and inbound events (POST).
+If you need a custom path, set `channels.line.webhookPath` or
+`channels.line.accounts.<id>.webhookPath` and update the URL accordingly.
+
+Security note:
+
+* LINE signature verification is body-dependent (HMAC over the raw body), so OpenClaw applies strict pre-auth body limits and timeout before verification.
+* OpenClaw processes webhook events from the verified raw request bytes. Upstream middleware-transformed `req.body` values are ignored for signature-integrity safety.
+
+## Configure
 
 Minimal config:
 
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    qqbot: {
+    line: {
       enabled: true,
-      appId: \"YOUR_APP_ID\",
-      clientSecret: \"YOUR_APP_SECRET\",
+      channelAccessToken: "LINE_CHANNEL_ACCESS_TOKEN",
+      channelSecret: "LINE_CHANNEL_SECRET",
+      dmPolicy: "pairing",
     },
   },
 }
 ```
 
-Default-account env vars:
+Public DM config:
 
-- `QQBOT_APP_ID`
-- `QQBOT_CLIENT_SECRET`
-
-File-backed AppSecret:
-
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    qqbot: {
+    line: {
       enabled: true,
-      appId: \"YOUR_APP_ID\",
-      clientSecretFile: \"/path/to/qqbot-secret.txt\",
+      channelAccessToken: "LINE_CHANNEL_ACCESS_TOKEN",
+      channelSecret: "LINE_CHANNEL_SECRET",
+      dmPolicy: "open",
+      allowFrom: ["*"],
     },
   },
 }
 ```
 
-Notes:
+Env vars (default account only):
 
-- Env fallback applies to the default QQ Bot account only.
-- `openclaw channels add --channel qqbot --token-file ...` provides the
-AppSecret only; the AppID must already be set in config or `QQBOT_APP_ID`.
-- `clientSecret` also accepts SecretRef input, not just a plaintext string.
+* `LINE_CHANNEL_ACCESS_TOKEN`
+* `LINE_CHANNEL_SECRET`
 
-### [​](https://docs.openclaw.ai/channels/qqbot\\#multi-account-setup)  Multi-account setup
+Token/secret files:
 
-Run multiple QQ bots under a single OpenClaw instance:
-
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    qqbot: {
-      enabled: true,
-      appId: \"111111111\",
-      clientSecret: \"secret-of-bot-1\",
+    line: {
+      tokenFile: "/path/to/line-token.txt",
+      secretFile: "/path/to/line-secret.txt",
+    },
+  },
+}
+```
+
+`tokenFile` and `secretFile` must point to regular files. Symlinks are rejected.
+
+Multiple accounts:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    line: {
       accounts: {
-        bot2: {
+        marketing: {
+          channelAccessToken: "...",
+          channelSecret: "...",
+          webhookPath: "/line/marketing",
+        },
+      },
+    },
+  },
+}
+```
+
+## Access control
+
+Direct messages default to pairing. Unknown senders get a pairing code and their
+messages are ignored until approved.
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw pairing list line
+openclaw pairing approve line <CODE>
+```
+
+Allowlists and policies:
+
+* `channels.line.dmPolicy`: `pairing | allowlist | open | disabled`
+* `channels.line.allowFrom`: allowlisted LINE user IDs for DMs; `dmPolicy: "open"` requires `["*"]`
+* `channels.line.groupPolicy`: `allowlist | open | disabled`
+* `channels.line.groupAllowFrom`: allowlisted LINE user IDs for groups
+* Per-group overrides: `channels.line.groups.<groupId>.allowFrom`
+* Runtime note: if `channels.line` is completely missing, runtime falls back to `groupPolicy="allowlist"` for group checks (even if `channels.defaults.groupPolicy` is set).
+
+LINE IDs are case-sensitive. Valid IDs look like:
+
+* User: `U` + 32 hex chars
+* Group: `C` + 32 hex chars
+* Room: `R` + 32 hex chars
+
+## Message behavior
+
+* Text is chunked at 5000 characters.
+* Markdown formatting is stripped; code blocks and tables are converted into Flex
+  cards when possible.
+* Streaming responses are buffered; LINE receives full chunks with a loading
+  animation while the agent works.
+* Media downloads are capped by `channels.line.mediaMaxMb` (default 10).
+* Inbound media is saved under `~/.openclaw/media/inbound/` before it is passed
+  to the agent, matching the shared media store used by other bundled channel
+  plugins.
+
+## Channel data (rich messages)
+
+Use `channelData.line` to send quick replies, locations, Flex cards, or template
+messages.
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  text: "Here you go",
+  channelData: {
+    line: {
+      quickReplies: ["Status", "Help"],
+      location: {
+        title: "Office",
+        address: "123 Main St",
+        latitude: 35.681236,
+        longitude: 139.767125,
+      },
+      flexMessage: {
+        altText: "Status card",
+        contents: {
+          /* Flex payload */
+        },
+      },
+      templateMessage: {
+        type: "confirm",
+        text: "Proceed?",
+        confirmLabel: "Yes",
+        confirmData: "yes",
+        cancelLabel: "No",
+        cancelData: "no",
+      },
+    },
+  },
+}
+```
+
+The LINE plugin also ships a `/card` command for Flex message presets:
+
+```
+/card info "Welcome" "Thanks for joining!"
+```
+
+## ACP support
+
+LINE supports ACP (Agent Communication Protocol) conversation bindings:
+
+* `/acp spawn <agent> --bind here` binds the current LINE chat to an ACP session without creating a child thread.
+* Configured ACP bindings and active conversation-bound ACP sessions work on LINE like other conversation channels.
+
+See [ACP agents](/tools/acp-agents) for details.
+
+## Outbound media
+
+The LINE plugin supports sending images, videos, and audio files through the agent message tool. Media is sent via the LINE-specific delivery path with appropriate preview and tracking handling:
+
+* **Images**: sent as LINE image messages with automatic preview generation.
+* **Videos**: sent with explicit preview and content-type handling.
+* **Audio**: sent as LINE audio messages.
+
+Outbound media URLs must be public HTTPS URLs. OpenClaw validates the target hostname before handing the URL to LINE and rejects loopback, link-local, and private-network targets.
+
+Generic media sends fall back to the existing image-only route when a LINE-specific path is not available.
+
+## Troubleshooting
+
+* **Webhook verification fails:** ensure the webhook URL is HTTPS and the
+  `channelSecret` matches the LINE console.
+* **No inbound events:** confirm the webhook path matches `channels.line.webhookPath`
+  and that the gateway is reachable from LINE.
+* **Media download errors:** raise `channels.line.mediaMaxMb` if media exceeds the
+  default limit.
+
+## Related
+
+* [Channels Overview](/channels) — all supported channels
+* [Pairing](/channels/pairing) — DM authentication and pairing flow
+* [Groups](/channels/groups) — group chat behavior and mention gating
+* [Channel Routing](/channels/channel-routing) — session routing for messages
+* [Security](/gateway/security) — access model and hardening
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Mattermost
+
+Status: downloadable plugin (bot token + WebSocket events). Channels, groups, and DMs are supported. Mattermost is a self-hostable team messaging platform; see the official site at [mattermost.com](https://mattermost.com) for product details and downloads.
+
+## Install
+
+Install Mattermost before configuring the channel:
+
+<Tabs>
+  <Tab title="npm registry">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw plugins install @openclaw/mattermost
+    ```
+  </Tab>
+
+  <Tab title="Local checkout">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw plugins install ./path/to/local/mattermost-plugin
+    ```
+  </Tab>
+</Tabs>
+
+Details: [Plugins](/tools/plugin)
+
+## Quick setup
+
+<Steps>
+  <Step title="Ensure plugin is available">
+    Current packaged OpenClaw releases already bundle it. Older/custom installs can add it manually with the commands above.
+  </Step>
+
+  <Step title="Create a Mattermost bot">
+    Create a Mattermost bot account and copy the **bot token**.
+  </Step>
+
+  <Step title="Copy the base URL">
+    Copy the Mattermost **base URL** (e.g., `https://chat.example.com`).
+  </Step>
+
+  <Step title="Configure OpenClaw and start the gateway">
+    Minimal config:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        mattermost: {
           enabled: true,
-          appId: \"222222222\",
-          clientSecret: \"secret-of-bot-2\",
+          botToken: "mm-token",
+          baseUrl: "https://chat.example.com",
+          dmPolicy: "pairing",
         },
+      },
+    }
+    ```
+  </Step>
+</Steps>
+
+## Native slash commands
+
+Native slash commands are opt-in. When enabled, OpenClaw registers `oc_*` slash commands via the Mattermost API and receives callback POSTs on the gateway HTTP server.
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    mattermost: {
+      commands: {
+        native: true,
+        nativeSkills: true,
+        callbackPath: "/api/channels/mattermost/command",
+        // Use when Mattermost cannot reach the gateway directly (reverse proxy/public URL).
+        callbackUrl: "https://gateway.example.com/api/channels/mattermost/command",
       },
     },
   },
 }
 ```
 
-Each account launches its own WebSocket connection and maintains an independent
-token cache (isolated by `appId`).Add a second bot via CLI:
+<AccordionGroup>
+  <Accordion title="Behavior notes">
+    * `native: "auto"` defaults to disabled for Mattermost. Set `native: true` to enable.
+    * If `callbackUrl` is omitted, OpenClaw derives one from gateway host/port + `callbackPath`.
+    * For multi-account setups, `commands` can be set at the top level or under `channels.mattermost.accounts.<id>.commands` (account values override top-level fields).
+    * Command callbacks are validated with the per-command tokens returned by Mattermost when OpenClaw registers `oc_*` commands.
+    * OpenClaw refreshes current Mattermost command registration before accepting each callback so stale tokens from deleted or regenerated slash commands stop being accepted without a gateway restart.
+    * Callback validation fails closed if the Mattermost API cannot confirm the command is still current; failed validations are cached briefly, concurrent lookups are coalesced, and fresh lookup starts are rate-limited per command to bound replay pressure.
+    * Slash callbacks fail closed when registration failed, startup was partial, or the callback token does not match the resolved command's registered token (a token valid for one command cannot reach upstream validation for a different command).
+  </Accordion>
 
-```
-openclaw channels add --channel qqbot --account bot2 --token \"222222222:secret-of-bot-2\"
-```
+  <Accordion title="Reachability requirement">
+    The callback endpoint must be reachable from the Mattermost server.
 
-### [​](https://docs.openclaw.ai/channels/qqbot\\#group-chats)  Group chats
+    * Do not set `callbackUrl` to `localhost` unless Mattermost runs on the same host/network namespace as OpenClaw.
+    * Do not set `callbackUrl` to your Mattermost base URL unless that URL reverse-proxies `/api/channels/mattermost/command` to OpenClaw.
+    * A quick check is `curl https://<gateway-host>/api/channels/mattermost/command`; a GET should return `405 Method Not Allowed` from OpenClaw, not `404`.
+  </Accordion>
 
-QQ Bot group chat support uses QQ group OpenIDs, not display names. Add the bot
-to a group, then mention it or configure the group to run without a mention.
+  <Accordion title="Mattermost egress allowlist">
+    If your callback targets private/tailnet/internal addresses, set Mattermost `ServiceSettings.AllowedUntrustedInternalConnections` to include the callback host/domain.
 
-```
+    Use host/domain entries, not full URLs.
+
+    * Good: `gateway.tailnet-name.ts.net`
+    * Bad: `https://gateway.tailnet-name.ts.net`
+  </Accordion>
+</AccordionGroup>
+
+## Environment variables (default account)
+
+Set these on the gateway host if you prefer env vars:
+
+* `MATTERMOST_BOT_TOKEN=...`
+* `MATTERMOST_URL=https://chat.example.com`
+
+<Note>
+  Env vars apply only to the **default** account (`default`). Other accounts must use config values.
+
+  `MATTERMOST_URL` cannot be set from a workspace `.env`; see [Workspace `.env` files](/gateway/security).
+</Note>
+
+## Chat modes
+
+Mattermost responds to DMs automatically. Channel behavior is controlled by `chatmode`:
+
+<Tabs>
+  <Tab title="oncall (default)">
+    Respond only when @mentioned in channels.
+  </Tab>
+
+  <Tab title="onmessage">
+    Respond to every channel message.
+  </Tab>
+
+  <Tab title="onchar">
+    Respond when a message starts with a trigger prefix.
+  </Tab>
+</Tabs>
+
+Config example:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    qqbot: {
-      groupPolicy: \"allowlist\",
-      groupAllowFrom: [\"member_openid\"],
+    mattermost: {
+      chatmode: "onchar",
+      oncharPrefixes: [">", "!"],
+    },
+  },
+}
+```
+
+Notes:
+
+* `onchar` still responds to explicit @mentions.
+* `channels.mattermost.requireMention` is honored for legacy configs but `chatmode` is preferred.
+
+## Threading and sessions
+
+Use `channels.mattermost.replyToMode` to control whether channel and group replies stay in the main channel or start a thread under the triggering post.
+
+* `off` (default): only reply in a thread when the inbound post is already in one.
+* `first`: for top-level channel/group posts, start a thread under that post and route the conversation to a thread-scoped session.
+* `all`: same behavior as `first` for Mattermost today.
+* Direct messages ignore this setting and stay non-threaded.
+
+Config example:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    mattermost: {
+      replyToMode: "all",
+    },
+  },
+}
+```
+
+Notes:
+
+* Thread-scoped sessions use the triggering post id as the thread root.
+* `first` and `all` are currently equivalent because once Mattermost has a thread root, follow-up chunks and media continue in that same thread.
+
+## Access control (DMs)
+
+* Default: `channels.mattermost.dmPolicy = "pairing"` (unknown senders get a pairing code).
+* Approve via:
+  * `openclaw pairing list mattermost`
+  * `openclaw pairing approve mattermost <CODE>`
+* Public DMs: `channels.mattermost.dmPolicy="open"` plus `channels.mattermost.allowFrom=["*"]`.
+
+## Channels (groups)
+
+* Default: `channels.mattermost.groupPolicy = "allowlist"` (mention-gated).
+* Allowlist senders with `channels.mattermost.groupAllowFrom` (user IDs recommended).
+* Per-channel mention overrides live under `channels.mattermost.groups.<channelId>.requireMention` or `channels.mattermost.groups["*"].requireMention` for a default.
+* `@username` matching is mutable and only enabled when `channels.mattermost.dangerouslyAllowNameMatching: true`.
+* Open channels: `channels.mattermost.groupPolicy="open"` (mention-gated).
+* Runtime note: if `channels.mattermost` is completely missing, runtime falls back to `groupPolicy="allowlist"` for group checks (even if `channels.defaults.groupPolicy` is set).
+
+Example:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    mattermost: {
+      groupPolicy: "open",
       groups: {
-        \"*\": {
-          requireMention: true,
-          historyLimit: 50,
-          toolPolicy: \"restricted\",
-        },
-        GROUP_OPENID: {
-          name: \"Release room\",
-          requireMention: false,
-          ignoreOtherMentions: true,
-          historyLimit: 20,
-          prompt: \"Keep replies short and operational.\",
-        },
+        "*": { requireMention: true },
+        "team-channel-id": { requireMention: false },
       },
     },
   },
 }
 ```
 
-`groups[\"*\"]` sets defaults for every group, and a concrete
-`groups.GROUP_OPENID` entry overrides those defaults for one group. Group
-settings include:
+## Targets for outbound delivery
 
-- `requireMention`: require an @mention before the bot replies. Default: `true`.
-- `ignoreOtherMentions`: drop messages that mention someone else but not the bot.
-- `historyLimit`: keep recent non-mention group messages as context for the next mentioned turn. Set `0` to disable.
-- `toolPolicy`: `full`, `restricted`, or `none` for group-scoped tools.
-- `name`: friendly label used in logs and group context.
-- `prompt`: per-group behavior prompt appended to the agent context.
+Use these target formats with `openclaw message send` or cron/webhooks:
 
-Activation modes are `mention` and `always`. `requireMention: true` maps to
-`mention`; `requireMention: false` maps to `always`. A session-level activation
-override, when present, wins over config.The inbound queue is per peer. Group peers get a larger queue cap, keep human
-messages ahead of bot-authored chatter when full, and merge bursts of normal
-group messages into one attributed turn. Slash commands still run one by one.
+* `channel:<id>` for a channel
+* `user:<id>` for a DM
+* `@username` for a DM (resolved via the Mattermost API)
 
-### [​](https://docs.openclaw.ai/channels/qqbot\\#voice-stt-/-tts)  Voice (STT / TTS)
+<Warning>
+  Bare opaque IDs (like `64ifufp...`) are **ambiguous** in Mattermost (user ID vs channel ID).
 
-STT and TTS support two-level configuration with priority fallback:
+  OpenClaw resolves them **user-first**:
 
-| Setting | Plugin-specific | Framework fallback |
-| --- | --- | --- |
-| STT | `channels.qqbot.stt` | `tools.media.audio.models[0]` |
-| TTS | `channels.qqbot.tts`, `channels.qqbot.accounts.<id>.tts` | `messages.tts` |
+  * If the ID exists as a user (`GET /api/v4/users/<id>` succeeds), OpenClaw sends a **DM** by resolving the direct channel via `/api/v4/channels/direct`.
+  * Otherwise the ID is treated as a **channel ID**.
 
-```
+  If you need deterministic behavior, always use the explicit prefixes (`user:<id>` / `channel:<id>`).
+</Warning>
+
+## DM channel retry
+
+When OpenClaw sends to a Mattermost DM target and needs to resolve the direct channel first, it retries transient direct-channel creation failures by default.
+
+Use `channels.mattermost.dmChannelRetry` to tune that behavior globally for the Mattermost plugin, or `channels.mattermost.accounts.<id>.dmChannelRetry` for one account.
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    qqbot: {
-      stt: {
-        provider: \"your-provider\",
-        model: \"your-stt-model\",
-      },
-      tts: {
-        provider: \"your-provider\",
-        model: \"your-tts-model\",
-        voice: \"your-voice\",
-      },
-      accounts: {
-        qq-main: {
-          tts: {
-            providers: {
-              openai: { voice: \"shimmer\" },
-            },
-          },
-        },
-      },
-    },
-  },
-}
-```
-
-Set `enabled: false` on either to disable.
-Account-level TTS overrides use the same shape as `messages.tts` and deep-merge
-over the channel/global TTS config.Inbound QQ voice attachments are exposed to agents as audio media metadata while
-keeping raw voice files out of generic `MediaPaths`. `[[audio_as_voice]]` plain
-text replies synthesize TTS and send a native QQ voice message when TTS is
-configured.Outbound audio upload/transcode behavior can also be tuned with
-`channels.qqbot.audioFormatPolicy`:
-
-- `sttDirectFormats`
-- `uploadDirectFormats`
-- `transcodeEnabled`
-
-## [​](https://docs.openclaw.ai/channels/qqbot\\#target-formats)  Target formats
-
-| Format | Description |
-| --- | --- |
-| `qqbot:c2c:OPENID` | Private chat (C2C) |
-| `qqbot:group:GROUP_OPENID` | Group chat |
-| `qqbot:channel:CHANNEL_ID` | Guild channel |
-
-> Each bot has its own set of user OpenIDs. An OpenID received by Bot A **cannot**
-> be used to send messages via Bot B.
-
-## [​](https://docs.openclaw.ai/channels/qqbot\\#slash-commands)  Slash commands
-
-Built-in commands intercepted before the AI queue:
-
-| Command | Description |
-| --- | --- |
-| `/bot-ping` | Latency test |
-| `/bot-version` | Show the OpenClaw framework version |
-| `/bot-help` | List all commands |
-| `/bot-upgrade` | Show the QQBot upgrade guide link |
-| `/bot-logs` | Export recent gateway logs as a file |
-| `/bot-approve` | Approve a pending QQ Bot action (for example, confirming a C2C or group upload) through the native flow. |
-
-Append `?` to any command for usage help (for example `/bot-upgrade ?`).
-
-## [​](https://docs.openclaw.ai/channels/qqbot\\#engine-architecture)  Engine architecture
-
-QQ Bot ships as a self-contained engine inside the plugin:
-
-- Each account owns an isolated resource stack (WebSocket connection, API client, token cache, media storage root) keyed by `appId`. Accounts never share inbound/outbound state.
-- The multi-account logger tags log lines with the owning account so diagnostics stay separable when you run several bots under one gateway.
-- Inbound, outbound, and gateway bridge paths share a single media payload root under `~/.openclaw/media`, so uploads, downloads, and transcode caches land under one guarded directory instead of a per-subsystem tree.
-- Rich media delivery goes through one `sendMedia` path for C2C and group targets. Local files and buffers above the large-file threshold use QQ’s chunked upload endpoints, while smaller payloads use the one-shot media API.
-- Credentials can be backed up and restored as part of standard OpenClaw credential snapshots; the engine re-attaches each account’s resource stack on restore without requiring a fresh QR-code pair.
-
-## [​](https://docs.openclaw.ai/channels/qqbot\\#qr-code-onboarding)  QR-code onboarding
-
-As an alternative to pasting `AppID:AppSecret` manually, the engine supports a QR-code onboarding flow for linking a QQ Bot to OpenClaw:
-
-1. Run the QQ Bot setup path (for example `openclaw channels add --channel qqbot`) and pick the QR-code flow when prompted.
-2. Scan the generated QR code with the phone app tied to the target QQ Bot.
-3. Approve the pairing on the phone. OpenClaw persists the returned credentials into `credentials/` under the right account scope.
-
-Approval prompts generated by the bot itself (for example, “allow this action?” flows exposed by the QQ Bot API) surface as native OpenClaw prompts that you can accept with `/bot-approve` rather than replying through the raw QQ client.
-
-## [​](https://docs.openclaw.ai/channels/qqbot\\#troubleshooting)  Troubleshooting
-
-- **Bot replies “gone to Mars”:** credentials not configured or Gateway not started.
-- **No inbound messages:** verify `appId` and `clientSecret` are correct, and the
-bot is enabled on the QQ Open Platform.
-- **Repeated self-replies:** OpenClaw records QQ outbound ref indexes as
-bot-authored and ignores inbound events whose current `msgIdx` matches that
-same bot account. This prevents platform echo loops while still allowing users
-to quote or reply to previous bot messages.
-- **Setup with `--token-file` still shows unconfigured:**`--token-file` only sets
-the AppSecret. You still need `appId` in config or `QQBOT_APP_ID`.
-- **Proactive messages not arriving:** QQ may intercept bot-initiated messages if
-the user hasn’t interacted recently.
-- **Voice not transcribed:** ensure STT is configured and the provider is reachable.
-
-## [​](https://docs.openclaw.ai/channels/qqbot\\#related)  Related
-
-- [Pairing](https://docs.openclaw.ai/channels/pairing)
-- [Groups](https://docs.openclaw.ai/channels/groups)
-- [Channel troubleshooting](https://docs.openclaw.ai/channels/troubleshooting)
-
-[WeChat](https://docs.openclaw.ai/channels/wechat) [Feishu](https://docs.openclaw.ai/channels/feishu)
-
-Ctrl+I
-
----
-
-## IRC - OpenClaw
-**Source:** https://docs.openclaw.ai/channels/irc
-
-[Skip to main content](https://docs.openclaw.ai/channels/irc#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Developer and self-hosted
-
-IRC
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Quick start](https://docs.openclaw.ai/channels/irc#quick-start)
-- [Security defaults](https://docs.openclaw.ai/channels/irc#security-defaults)
-- [Access control](https://docs.openclaw.ai/channels/irc#access-control)
-- [Common gotcha: allowFrom is for DMs, not channels](https://docs.openclaw.ai/channels/irc#common-gotcha-allowfrom-is-for-dms-not-channels)
-- [Reply triggering (mentions)](https://docs.openclaw.ai/channels/irc#reply-triggering-mentions)
-- [Security note (recommended for public channels)](https://docs.openclaw.ai/channels/irc#security-note-recommended-for-public-channels)
-- [Same tools for everyone in the channel](https://docs.openclaw.ai/channels/irc#same-tools-for-everyone-in-the-channel)
-- [Different tools per sender (owner gets more power)](https://docs.openclaw.ai/channels/irc#different-tools-per-sender-owner-gets-more-power)
-- [NickServ](https://docs.openclaw.ai/channels/irc#nickserv)
-- [Environment variables](https://docs.openclaw.ai/channels/irc#environment-variables)
-- [Troubleshooting](https://docs.openclaw.ai/channels/irc#troubleshooting)
-- [Related](https://docs.openclaw.ai/channels/irc#related)
-
-Use IRC when you want OpenClaw in classic channels (`#room`) and direct messages.
-IRC ships as a bundled plugin, but it is configured in the main config under `channels.irc`.
-
-## [​](https://docs.openclaw.ai/channels/irc\\#quick-start)  Quick start
-
-1. Enable IRC config in `~/.openclaw/openclaw.json`.
-2. Set at least:
-
-```
-{
-  channels: {
-    irc: {
-      enabled: true,
-      host: \"irc.example.com\",
-      port: 6697,
-      tls: true,
-      nick: \"openclaw-bot\",
-      channels: [\"#openclaw\"],
-    },
-  },
-}
-```
-
-Prefer a private IRC server for bot coordination. If you intentionally use a public IRC network, common choices include Libera.Chat, OFTC, and Snoonet. Avoid predictable public channels for bot or swarm backchannel traffic.
-
-3. Start/restart gateway:
-
-```
-openclaw gateway run
-```
-
-## [​](https://docs.openclaw.ai/channels/irc\\#security-defaults)  Security defaults
-
-- `channels.irc.dmPolicy` defaults to `\"pairing\"`.
-- `channels.irc.groupPolicy` defaults to `\"allowlist\"`.
-- With `groupPolicy=\"allowlist\"`, set `channels.irc.groups` to define allowed channels.
-- Use TLS (`channels.irc.tls=true`) unless you intentionally accept plaintext transport.
-
-## [​](https://docs.openclaw.ai/channels/irc\\#access-control)  Access control
-
-There are two separate “gates” for IRC channels:
-
-1. **Channel access** (`groupPolicy` \\+ `groups`): whether the bot accepts messages from a channel at all.
-2. **Sender access** (`groupAllowFrom` / per-channel `groups[\"#channel\"].allowFrom`): who is allowed to trigger the bot inside that channel.
-
-Config keys:
-
-- DM allowlist (DM sender access): `channels.irc.allowFrom`
-- Group sender allowlist (channel sender access): `channels.irc.groupAllowFrom`
-- Per-channel controls (channel + sender + mention rules): `channels.irc.groups[\"#channel\"]`
-- `channels.irc.groupPolicy=\"open\"` allows unconfigured channels ( **still mention-gated by default**)
-
-Allowlist entries should use stable sender identities (`nick!user@host`).
-Bare nick matching is mutable and only enabled when `channels.irc.dangerouslyAllowNameMatching: true`.
-
-### [​](https://docs.openclaw.ai/channels/irc\\#common-gotcha-allowfrom-is-for-dms-not-channels)  Common gotcha: `allowFrom` is for DMs, not channels
-
-If you see logs like:
-
-- `irc: drop group sender alice!ident@host (policy=allowlist)`
-
-…it means the sender wasn’t allowed for **group/channel** messages. Fix it by either:
-
-- setting `channels.irc.groupAllowFrom` (global for all channels), or
-- setting per-channel sender allowlists: `channels.irc.groups[\"#channel\"].allowFrom`
-
-Example (allow anyone in `#tuirc-dev` to talk to the bot):
-
-```
-{
-  channels: {
-    irc: {
-      groupPolicy: \"allowlist\",
-      groups: {
-        \"#tuirc-dev\": { allowFrom: [\"*\"] },
-      },
-    },
-  },
-}
-```
-
-## [​](https://docs.openclaw.ai/channels/irc\\#reply-triggering-mentions)  Reply triggering (mentions)
-
-Even if a channel is allowed (via `groupPolicy` \\+ `groups`) and the sender is allowed, OpenClaw defaults to **mention-gating** in group contexts.That means you may see logs like `drop channel … (missing-mention)` unless the message includes a mention pattern that matches the bot.To make the bot reply in an IRC channel **without needing a mention**, disable mention gating for that channel:
-
-```
-{
-  channels: {
-    irc: {
-      groupPolicy: \"allowlist\",
-      groups: {
-        \"#tuirc-dev\": {
-          requireMention: false,
-          allowFrom: [\"*\"],
-        },
-      },
-    },
-  },
-}
-```
-
-Or to allow **all** IRC channels (no per-channel allowlist) and still reply without mentions:
-
-```
-{
-  channels: {
-    irc: {
-      groupPolicy: \"open\",
-      groups: {
-        \"*\": { requireMention: false, allowFrom: [\"*\"] },
-      },
-    },
-  },
-}
-```
-
-## [​](https://docs.openclaw.ai/channels/irc\\#security-note-recommended-for-public-channels)  Security note (recommended for public channels)
-
-If you allow `allowFrom: [\"*\"]` in a public channel, anyone can prompt the bot.
-To reduce risk, restrict tools for that channel.
-
-### [​](https://docs.openclaw.ai/channels/irc\\#same-tools-for-everyone-in-the-channel)  Same tools for everyone in the channel
-
-```
-{
-  channels: {
-    irc: {
-      groups: {
-        \"#tuirc-dev\": {
-          allowFrom: [\"*\"],
-          tools: {
-            deny: [\"group:runtime\", \"group:fs\", \"gateway\", \"nodes\", \"cron\", \"browser\"],
-          },
-        },
-      },
-    },
-  },
-}
-```
-
-### [​](https://docs.openclaw.ai/channels/irc\\#different-tools-per-sender-owner-gets-more-power)  Different tools per sender (owner gets more power)
-
-Use `toolsBySender` to apply a stricter policy to `\"*\"` and a looser one to your nick:
-
-```
-{
-  channels: {
-    irc: {
-      groups: {
-        \"#tuirc-dev\": {
-          allowFrom: [\"*\"],
-          toolsBySender: {
-            \"*\": {
-              deny: [\"group:runtime\", \"group:fs\", \"gateway\", \"nodes\", \"cron\", \"browser\"],
-            },
-            \"id:eigen\": {
-              deny: [\"gateway\", \"nodes\", \"cron\"],
-            },
-          },
-        },
+    mattermost: {
+      dmChannelRetry: {
+        maxRetries: 3,
+        initialDelayMs: 1000,
+        maxDelayMs: 10000,
+        timeoutMs: 30000,
       },
     },
   },
@@ -913,806 +3473,2804 @@ Use `toolsBySender` to apply a stricter policy to `\"*\"` and a looser one to yo
 
 Notes:
 
-- `toolsBySender` keys should use `id:` for IRC sender identity values:
-`id:eigen` or `id:eigen!~eigen@174.127.248.171` for stronger matching.
-- Legacy unprefixed keys are still accepted and matched as `id:` only.
-- The first matching sender policy wins; `\"*\"` is the wildcard fallback.
+* This applies only to DM channel creation (`/api/v4/channels/direct`), not every Mattermost API call.
+* Retries apply to transient failures such as rate limits, 5xx responses, and network or timeout errors.
+* 4xx client errors other than `429` are treated as permanent and are not retried.
 
-For more on group access vs mention-gating (and how they interact), see: [/channels/groups](https://docs.openclaw.ai/channels/groups).
+## Preview streaming
 
-## [​](https://docs.openclaw.ai/channels/irc\\#nickserv)  NickServ
+Mattermost streams thinking, tool activity, and partial reply text into a single **draft preview post** that finalizes in place when the final answer is safe to send. The preview updates on the same post id instead of spamming the channel with per-chunk messages. Media/error finals cancel pending preview edits and use normal delivery instead of flushing a throwaway preview post.
 
-To identify with NickServ after connect:
+Enable via `channels.mattermost.streaming`:
 
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    irc: {
-      nickserv: {
+    mattermost: {
+      streaming: "partial", // off | partial | block | progress
+    },
+  },
+}
+```
+
+<AccordionGroup>
+  <Accordion title="Streaming modes">
+    * `partial` is the usual choice: one preview post that is edited as the reply grows, then finalized with the complete answer.
+    * `block` uses append-style draft chunks inside the preview post.
+    * `progress` shows a status preview while generating and only posts the final answer at completion.
+    * `off` disables preview streaming.
+  </Accordion>
+
+  <Accordion title="Streaming behavior notes">
+    * If the stream cannot be finalized in place (for example the post was deleted mid-stream), OpenClaw falls back to sending a fresh final post so the reply is never lost.
+    * Reasoning-only payloads are suppressed from channel posts, including text that arrives as a `> Reasoning:` blockquote. Set `/reasoning on` to see thinking in other surfaces; the Mattermost final post keeps the answer only.
+    * See [Streaming](/concepts/streaming#preview-streaming-modes) for the channel-mapping matrix.
+  </Accordion>
+</AccordionGroup>
+
+## Reactions (message tool)
+
+* Use `message action=react` with `channel=mattermost`.
+* `messageId` is the Mattermost post id.
+* `emoji` accepts names like `thumbsup` or `:+1:` (colons are optional).
+* Set `remove=true` (boolean) to remove a reaction.
+* Reaction add/remove events are forwarded as system events to the routed agent session.
+
+Examples:
+
+```
+message action=react channel=mattermost target=channel:<channelId> messageId=<postId> emoji=thumbsup
+message action=react channel=mattermost target=channel:<channelId> messageId=<postId> emoji=thumbsup remove=true
+```
+
+Config:
+
+* `channels.mattermost.actions.reactions`: enable/disable reaction actions (default true).
+* Per-account override: `channels.mattermost.accounts.<id>.actions.reactions`.
+
+## Interactive buttons (message tool)
+
+Send messages with clickable buttons. When a user clicks a button, the agent receives the selection and can respond.
+
+Enable buttons by adding `inlineButtons` to the channel capabilities:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    mattermost: {
+      capabilities: ["inlineButtons"],
+    },
+  },
+}
+```
+
+Use `message action=send` with a `buttons` parameter. Buttons are a 2D array (rows of buttons):
+
+```
+message action=send channel=mattermost target=channel:<channelId> buttons=[[{"text":"Yes","callback_data":"yes"},{"text":"No","callback_data":"no"}]]
+```
+
+Button fields:
+
+<ParamField path="text" type="string" required>
+  Display label.
+</ParamField>
+
+<ParamField path="callback_data" type="string" required>
+  Value sent back on click (used as the action ID).
+</ParamField>
+
+<ParamField path="style" type="&#x22;default&#x22; | &#x22;primary&#x22; | &#x22;danger&#x22;">
+  Button style.
+</ParamField>
+
+When a user clicks a button:
+
+<Steps>
+  <Step title="Buttons replaced with confirmation">
+    All buttons are replaced with a confirmation line (e.g., "✓ **Yes** selected by @user").
+  </Step>
+
+  <Step title="Agent receives the selection">
+    The agent receives the selection as an inbound message and responds.
+  </Step>
+</Steps>
+
+<AccordionGroup>
+  <Accordion title="Implementation notes">
+    * Button callbacks use HMAC-SHA256 verification (automatic, no config needed).
+    * Mattermost strips callback data from its API responses (security feature), so all buttons are removed on click - partial removal is not possible.
+    * Action IDs containing hyphens or underscores are sanitized automatically (Mattermost routing limitation).
+  </Accordion>
+
+  <Accordion title="Config and reachability">
+    * `channels.mattermost.capabilities`: array of capability strings. Add `"inlineButtons"` to enable the buttons tool description in the agent system prompt.
+    * `channels.mattermost.interactions.callbackBaseUrl`: optional external base URL for button callbacks (for example `https://gateway.example.com`). Use this when Mattermost cannot reach the gateway at its bind host directly.
+    * In multi-account setups, you can also set the same field under `channels.mattermost.accounts.<id>.interactions.callbackBaseUrl`.
+    * If `interactions.callbackBaseUrl` is omitted, OpenClaw derives the callback URL from `gateway.customBindHost` + `gateway.port`, then falls back to `http://localhost:<port>`.
+    * Reachability rule: the button callback URL must be reachable from the Mattermost server. `localhost` only works when Mattermost and OpenClaw run on the same host/network namespace.
+    * If your callback target is private/tailnet/internal, add its host/domain to Mattermost `ServiceSettings.AllowedUntrustedInternalConnections`.
+  </Accordion>
+</AccordionGroup>
+
+### Direct API integration (external scripts)
+
+External scripts and webhooks can post buttons directly via the Mattermost REST API instead of going through the agent's `message` tool. Use `buildButtonAttachments()` from the plugin when possible; if posting raw JSON, follow these rules:
+
+**Payload structure:**
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channel_id: "<channelId>",
+  message: "Choose an option:",
+  props: {
+    attachments: [
+      {
+        actions: [
+          {
+            id: "mybutton01", // alphanumeric only - see below
+            type: "button", // required, or clicks are silently ignored
+            name: "Approve", // display label
+            style: "primary", // optional: "default", "primary", "danger"
+            integration: {
+              url: "https://gateway.example.com/mattermost/interactions/default",
+              context: {
+                action_id: "mybutton01", // must match button id (for name lookup)
+                action: "approve",
+                // ... any custom fields ...
+                _token: "<hmac>", // see HMAC section below
+              },
+            },
+          },
+        ],
+      },
+    ],
+  },
+}
+```
+
+<Warning>
+  **Critical rules**
+
+  1. Attachments go in `props.attachments`, not top-level `attachments` (silently ignored).
+  2. Every action needs `type: "button"` - without it, clicks are swallowed silently.
+  3. Every action needs an `id` field - Mattermost ignores actions without IDs.
+  4. Action `id` must be **alphanumeric only** (`[a-zA-Z0-9]`). Hyphens and underscores break Mattermost's server-side action routing (returns 404). Strip them before use.
+  5. `context.action_id` must match the button's `id` so the confirmation message shows the button name (e.g., "Approve") instead of a raw ID.
+  6. `context.action_id` is required - the interaction handler returns 400 without it.
+</Warning>
+
+**HMAC token generation**
+
+The gateway verifies button clicks with HMAC-SHA256. External scripts must generate tokens that match the gateway's verification logic:
+
+<Steps>
+  <Step title="Derive the secret from the bot token">
+    `HMAC-SHA256(key="openclaw-mattermost-interactions", data=botToken)`
+  </Step>
+
+  <Step title="Build the context object">
+    Build the context object with all fields **except** `_token`.
+  </Step>
+
+  <Step title="Serialize with sorted keys">
+    Serialize with **sorted keys** and **no spaces** (the gateway uses `JSON.stringify` with sorted keys, which produces compact output).
+  </Step>
+
+  <Step title="Sign the payload">
+    `HMAC-SHA256(key=secret, data=serializedContext)`
+  </Step>
+
+  <Step title="Add the token">
+    Add the resulting hex digest as `_token` in the context.
+  </Step>
+</Steps>
+
+Python example:
+
+```python theme={"theme":{"light":"min-light","dark":"min-dark"}}
+import hmac, hashlib, json
+
+secret = hmac.new(
+    b"openclaw-mattermost-interactions",
+    bot_token.encode(), hashlib.sha256
+).hexdigest()
+
+ctx = {"action_id": "mybutton01", "action": "approve"}
+payload = json.dumps(ctx, sort_keys=True, separators=(",", ":"))
+token = hmac.new(secret.encode(), payload.encode(), hashlib.sha256).hexdigest()
+
+context = {**ctx, "_token": token}
+```
+
+<AccordionGroup>
+  <Accordion title="Common HMAC pitfalls">
+    * Python's `json.dumps` adds spaces by default (`{"key": "val"}`). Use `separators=(",", ":")` to match JavaScript's compact output (`{"key":"val"}`).
+    * Always sign **all** context fields (minus `_token`). The gateway strips `_token` then signs everything remaining. Signing a subset causes silent verification failure.
+    * Use `sort_keys=True` - the gateway sorts keys before signing, and Mattermost may reorder context fields when storing the payload.
+    * Derive the secret from the bot token (deterministic), not random bytes. The secret must be the same across the process that creates buttons and the gateway that verifies.
+  </Accordion>
+</AccordionGroup>
+
+## Directory adapter
+
+The Mattermost plugin includes a directory adapter that resolves channel and user names via the Mattermost API. This enables `#channel-name` and `@username` targets in `openclaw message send` and cron/webhook deliveries.
+
+No configuration is needed - the adapter uses the bot token from the account config.
+
+## Multi-account
+
+Mattermost supports multiple accounts under `channels.mattermost.accounts`:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    mattermost: {
+      accounts: {
+        default: { name: "Primary", botToken: "mm-token", baseUrl: "https://chat.example.com" },
+        alerts: { name: "Alerts", botToken: "mm-token-2", baseUrl: "https://alerts.example.com" },
+      },
+    },
+  },
+}
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="No replies in channels">
+    Ensure the bot is in the channel and mention it (oncall), use a trigger prefix (onchar), or set `chatmode: "onmessage"`.
+  </Accordion>
+
+  <Accordion title="Auth or multi-account errors">
+    * Check the bot token, base URL, and whether the account is enabled.
+    * Multi-account issues: env vars only apply to the `default` account.
+  </Accordion>
+
+  <Accordion title="Native slash commands fail">
+    * `Unauthorized: invalid command token.`: OpenClaw did not accept the callback token. Typical causes:
+      * slash command registration failed or only partially completed at startup
+      * the callback is hitting the wrong gateway/account
+      * Mattermost still has old commands pointing at a previous callback target
+      * the gateway restarted without reactivating slash commands
+    * If native slash commands stop working, check logs for `mattermost: failed to register slash commands` or `mattermost: native slash commands enabled but no commands could be registered`.
+    * If `callbackUrl` is omitted and logs warn that the callback resolved to `http://127.0.0.1:18789/...`, that URL is probably only reachable when Mattermost runs on the same host/network namespace as OpenClaw. Set an explicit externally reachable `commands.callbackUrl` instead.
+  </Accordion>
+
+  <Accordion title="Buttons issues">
+    * Buttons appear as white boxes: the agent may be sending malformed button data. Check that each button has both `text` and `callback_data` fields.
+    * Buttons render but clicks do nothing: verify `AllowedUntrustedInternalConnections` in Mattermost server config includes `127.0.0.1 localhost`, and that `EnablePostActionIntegration` is `true` in ServiceSettings.
+    * Buttons return 404 on click: the button `id` likely contains hyphens or underscores. Mattermost's action router breaks on non-alphanumeric IDs. Use `[a-zA-Z0-9]` only.
+    * Gateway logs `invalid _token`: HMAC mismatch. Check that you sign all context fields (not a subset), use sorted keys, and use compact JSON (no spaces). See the HMAC section above.
+    * Gateway logs `missing _token in context`: the `_token` field is not in the button's context. Ensure it is included when building the integration payload.
+    * Confirmation shows raw ID instead of button name: `context.action_id` does not match the button's `id`. Set both to the same sanitized value.
+    * Agent doesn't know about buttons: add `capabilities: ["inlineButtons"]` to the Mattermost channel config.
+  </Accordion>
+</AccordionGroup>
+
+## Related
+
+* [Channel Routing](/channels/channel-routing) - session routing for messages
+* [Channels Overview](/channels) - all supported channels
+* [Groups](/channels/groups) - group chat behavior and mention gating
+* [Pairing](/channels/pairing) - DM authentication and pairing flow
+* [Security](/gateway/security) - access model and hardening
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Microsoft Teams
+
+Status: text + DM attachments are supported; channel/group file sending requires `sharePointSiteId` + Graph permissions (see [Sending files in group chats](#sending-files-in-group-chats)). Polls are sent via Adaptive Cards. Message actions expose explicit `upload-file` for file-first sends.
+
+## Bundled plugin
+
+Microsoft Teams ships as a bundled plugin in current OpenClaw releases, so no
+separate install is required in the normal packaged build.
+
+If you are on an older build or a custom install that excludes bundled Teams,
+install the npm package directly:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw plugins install @openclaw/msteams
+```
+
+Use the bare package to follow the current official release tag. Pin an exact
+version only when you need a reproducible install.
+
+Local checkout (when running from a git repo):
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw plugins install ./path/to/local/msteams-plugin
+```
+
+Details: [Plugins](/tools/plugin)
+
+## Quick setup
+
+The [`@microsoft/teams.cli`](https://www.npmjs.com/package/@microsoft/teams.cli) handles bot registration, manifest creation, and credential generation in a single command.
+
+**1. Install and log in**
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+npm install -g @microsoft/teams.cli@preview
+teams login
+teams status   # verify you're logged in and see your tenant info
+```
+
+<Note>
+  The Teams CLI is currently in preview. Commands and flags may change between releases.
+</Note>
+
+**2. Start a tunnel** (Teams can't reach localhost)
+
+Install and authenticate the devtunnel CLI if you haven't already ([getting started guide](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/get-started)).
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+# One-time setup (persistent URL across sessions):
+devtunnel create my-openclaw-bot --allow-anonymous
+devtunnel port create my-openclaw-bot -p 3978 --protocol auto
+
+# Each dev session:
+devtunnel host my-openclaw-bot
+# Your endpoint: https://<tunnel-id>.devtunnels.ms/api/messages
+```
+
+<Note>
+  `--allow-anonymous` is required because Teams cannot authenticate with devtunnels. Each incoming bot request is still validated by the Teams SDK automatically.
+</Note>
+
+Alternatives: `ngrok http 3978` or `tailscale funnel 3978` (but these may change URLs each session).
+
+**3. Create the app**
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+teams app create \
+  --name "OpenClaw" \
+  --endpoint "https://<your-tunnel-url>/api/messages"
+```
+
+This single command:
+
+* Creates an Entra ID (Azure AD) application
+* Generates a client secret
+* Builds and uploads a Teams app manifest (with icons)
+* Registers the bot (Teams-managed by default - no Azure subscription needed)
+
+The output will show `CLIENT_ID`, `CLIENT_SECRET`, `TENANT_ID`, and a **Teams App ID** - note these for the next steps. It also offers to install the app in Teams directly.
+
+**4. Configure OpenClaw** using the credentials from the output:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    msteams: {
+      enabled: true,
+      appId: "<CLIENT_ID>",
+      appPassword: "<CLIENT_SECRET>",
+      tenantId: "<TENANT_ID>",
+      webhook: { port: 3978, path: "/api/messages" },
+    },
+  },
+}
+```
+
+Or use environment variables directly: `MSTEAMS_APP_ID`, `MSTEAMS_APP_PASSWORD`, `MSTEAMS_TENANT_ID`.
+
+**5. Install the app in Teams**
+
+`teams app create` will prompt you to install the app - select "Install in Teams". If you skipped it, you can get the link later:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+teams app get <teamsAppId> --install-link
+```
+
+**6. Verify everything works**
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+teams app doctor <teamsAppId>
+```
+
+This runs diagnostics across bot registration, AAD app config, manifest validity, and SSO setup.
+
+For production deployments, consider using [federated authentication](/channels/msteams#federated-authentication-certificate-plus-managed-identity) (certificate or managed identity) instead of client secrets.
+
+<Note>
+  Group chats are blocked by default (`channels.msteams.groupPolicy: "allowlist"`). To allow group replies, set `channels.msteams.groupAllowFrom`, or use `groupPolicy: "open"` to allow any member (mention-gated).
+</Note>
+
+## Goals
+
+* Talk to OpenClaw via Teams DMs, group chats, or channels.
+* Keep routing deterministic: replies always go back to the channel they arrived on.
+* Default to safe channel behavior (mentions required unless configured otherwise).
+
+## Config writes
+
+By default, Microsoft Teams is allowed to write config updates triggered by `/config set|unset` (requires `commands.config: true`).
+
+Disable with:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: { msteams: { configWrites: false } },
+}
+```
+
+## Access control (DMs + groups)
+
+**DM access**
+
+* Default: `channels.msteams.dmPolicy = "pairing"`. Unknown senders are ignored until approved.
+* `channels.msteams.allowFrom` should use stable AAD object IDs.
+* Do not rely on UPN/display-name matching for allowlists - they can change. OpenClaw disables direct name matching by default; opt in explicitly with `channels.msteams.dangerouslyAllowNameMatching: true`.
+* The wizard can resolve names to IDs via Microsoft Graph when credentials allow.
+
+**Group access**
+
+* Default: `channels.msteams.groupPolicy = "allowlist"` (blocked unless you add `groupAllowFrom`). Use `channels.defaults.groupPolicy` to override the default when unset.
+* `channels.msteams.groupAllowFrom` controls which senders can trigger in group chats/channels (falls back to `channels.msteams.allowFrom`).
+* Set `groupPolicy: "open"` to allow any member (still mention-gated by default).
+* To allow **no channels**, set `channels.msteams.groupPolicy: "disabled"`.
+
+Example:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    msteams: {
+      groupPolicy: "allowlist",
+      groupAllowFrom: ["user@org.com"],
+    },
+  },
+}
+```
+
+**Teams + channel allowlist**
+
+* Scope group/channel replies by listing teams and channels under `channels.msteams.teams`.
+* Keys should use stable Teams conversation IDs from Teams links, not mutable display names.
+* When `groupPolicy="allowlist"` and a teams allowlist is present, only listed teams/channels are accepted (mention-gated).
+* The configure wizard accepts `Team/Channel` entries and stores them for you.
+* On startup, OpenClaw resolves team/channel and user allowlist names to IDs (when Graph permissions allow)
+  and logs the mapping; unresolved team/channel names are kept as typed but ignored for routing by default unless `channels.msteams.dangerouslyAllowNameMatching: true` is enabled.
+
+Example:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    msteams: {
+      groupPolicy: "allowlist",
+      teams: {
+        "My Team": {
+          channels: {
+            General: { requireMention: true },
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+<details>
+  <summary><strong>Manual setup (without the Teams CLI)</strong></summary>
+
+  If you can't use the Teams CLI, you can set up the bot manually through the Azure Portal.
+
+  ### How it works
+
+  1. Ensure the Microsoft Teams plugin is available (bundled in current releases).
+  2. Create an **Azure Bot** (App ID + secret + tenant ID).
+  3. Build a **Teams app package** that references the bot and includes the RSC permissions below.
+  4. Upload/install the Teams app into a team (or personal scope for DMs).
+  5. Configure `msteams` in `~/.openclaw/openclaw.json` (or env vars) and start the gateway.
+  6. The gateway listens for Bot Framework webhook traffic on `/api/messages` by default.
+
+  ### Step 1: Create Azure Bot
+
+  1. Go to [Create Azure Bot](https://portal.azure.com/#create/Microsoft.AzureBot)
+  2. Fill in the **Basics** tab:
+
+     | Field              | Value                                                    |
+     | ------------------ | -------------------------------------------------------- |
+     | **Bot handle**     | Your bot name, e.g., `openclaw-msteams` (must be unique) |
+     | **Subscription**   | Select your Azure subscription                           |
+     | **Resource group** | Create new or use existing                               |
+     | **Pricing tier**   | **Free** for dev/testing                                 |
+     | **Type of App**    | **Single Tenant** (recommended - see note below)         |
+     | **Creation type**  | **Create new Microsoft App ID**                          |
+
+  <Warning>
+    Creation of new multi-tenant bots was deprecated after 2025-07-31. Use **Single Tenant** for new bots.
+  </Warning>
+
+  3. Click **Review + create** → **Create** (wait \~1-2 minutes)
+
+  ### Step 2: Get Credentials
+
+  1. Go to your Azure Bot resource → **Configuration**
+  2. Copy **Microsoft App ID** → this is your `appId`
+  3. Click **Manage Password** → go to the App Registration
+  4. Under **Certificates & secrets** → **New client secret** → copy the **Value** → this is your `appPassword`
+  5. Go to **Overview** → copy **Directory (tenant) ID** → this is your `tenantId`
+
+  ### Step 3: Configure Messaging Endpoint
+
+  1. In Azure Bot → **Configuration**
+  2. Set **Messaging endpoint** to your webhook URL:
+     * Production: `https://your-domain.com/api/messages`
+     * Local dev: Use a tunnel (see [Local Development](#local-development-tunneling) below)
+
+  ### Step 4: Enable Teams Channel
+
+  1. In Azure Bot → **Channels**
+  2. Click **Microsoft Teams** → Configure → Save
+  3. Accept the Terms of Service
+
+  ### Step 5: Build Teams App Manifest
+
+  * Include a `bot` entry with `botId = <App ID>`.
+  * Scopes: `personal`, `team`, `groupChat`.
+  * `supportsFiles: true` (required for personal scope file handling).
+  * Add RSC permissions (see [RSC Permissions](#current-teams-rsc-permissions-manifest)).
+  * Create icons: `outline.png` (32x32) and `color.png` (192x192).
+  * Zip all three files together: `manifest.json`, `outline.png`, `color.png`.
+
+  ### Step 6: Configure OpenClaw
+
+  ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+  {
+    channels: {
+      msteams: {
         enabled: true,
-        service: \"NickServ\",
-        password: \"your-nickserv-password\",
+        appId: "<APP_ID>",
+        appPassword: "<APP_PASSWORD>",
+        tenantId: "<TENANT_ID>",
+        webhook: { port: 3978, path: "/api/messages" },
       },
     },
-  },
-}
-```
+  }
+  ```
 
-Optional one-time registration on connect:
+  Environment variables: `MSTEAMS_APP_ID`, `MSTEAMS_APP_PASSWORD`, `MSTEAMS_TENANT_ID`.
 
-```
+  ### Step 7: Run the Gateway
+
+  The Teams channel starts automatically when the plugin is available and `msteams` config exists with credentials.
+</details>
+
+## Federated authentication (certificate plus managed identity)
+
+> Added in 2026.4.11
+
+For production deployments, OpenClaw supports **federated authentication** as a more secure alternative to client secrets. Two methods are available:
+
+### Option A: Certificate-based authentication
+
+Use a PEM certificate registered with your Entra ID app registration.
+
+**Setup:**
+
+1. Generate or obtain a certificate (PEM format with private key).
+2. In Entra ID → App Registration → **Certificates & secrets** → **Certificates** → Upload the public certificate.
+
+**Config:**
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    irc: {
-      nickserv: {
-        register: true,
-        registerEmail: \"bot@example.com\",
+    msteams: {
+      enabled: true,
+      appId: "<APP_ID>",
+      tenantId: "<TENANT_ID>",
+      authType: "federated",
+      certificatePath: "/path/to/cert.pem",
+      webhook: { port: 3978, path: "/api/messages" },
+    },
+  },
+}
+```
+
+**Env vars:**
+
+* `MSTEAMS_AUTH_TYPE=federated`
+* `MSTEAMS_CERTIFICATE_PATH=/path/to/cert.pem`
+
+### Option B: Azure Managed Identity
+
+Use Azure Managed Identity for passwordless authentication. This is ideal for deployments on Azure infrastructure (AKS, App Service, Azure VMs) where a managed identity is available.
+
+**How it works:**
+
+1. The bot pod/VM has a managed identity (system-assigned or user-assigned).
+2. A **federated identity credential** links the managed identity to the Entra ID app registration.
+3. At runtime, OpenClaw uses `@azure/identity` to acquire tokens from the Azure IMDS endpoint (`169.254.169.254`).
+4. The token is passed to the Teams SDK for bot authentication.
+
+**Prerequisites:**
+
+* Azure infrastructure with managed identity enabled (AKS workload identity, App Service, VM)
+* Federated identity credential created on the Entra ID app registration
+* Network access to IMDS (`169.254.169.254:80`) from the pod/VM
+
+**Config (system-assigned managed identity):**
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    msteams: {
+      enabled: true,
+      appId: "<APP_ID>",
+      tenantId: "<TENANT_ID>",
+      authType: "federated",
+      useManagedIdentity: true,
+      webhook: { port: 3978, path: "/api/messages" },
+    },
+  },
+}
+```
+
+**Config (user-assigned managed identity):**
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    msteams: {
+      enabled: true,
+      appId: "<APP_ID>",
+      tenantId: "<TENANT_ID>",
+      authType: "federated",
+      useManagedIdentity: true,
+      managedIdentityClientId: "<MI_CLIENT_ID>",
+      webhook: { port: 3978, path: "/api/messages" },
+    },
+  },
+}
+```
+
+**Env vars:**
+
+* `MSTEAMS_AUTH_TYPE=federated`
+* `MSTEAMS_USE_MANAGED_IDENTITY=true`
+* `MSTEAMS_MANAGED_IDENTITY_CLIENT_ID=<client-id>` (only for user-assigned)
+
+### AKS Workload Identity Setup
+
+For AKS deployments using workload identity:
+
+1. **Enable workload identity** on your AKS cluster.
+
+2. **Create a federated identity credential** on the Entra ID app registration:
+
+   ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+   az ad app federated-credential create --id <APP_OBJECT_ID> --parameters '{
+     "name": "my-bot-workload-identity",
+     "issuer": "<AKS_OIDC_ISSUER_URL>",
+     "subject": "system:serviceaccount:<NAMESPACE>:<SERVICE_ACCOUNT>",
+     "audiences": ["api://AzureADTokenExchange"]
+   }'
+   ```
+
+3. **Annotate the Kubernetes service account** with the app client ID:
+
+   ```yaml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+   apiVersion: v1
+   kind: ServiceAccount
+   metadata:
+     name: my-bot-sa
+     annotations:
+       azure.workload.identity/client-id: "<APP_CLIENT_ID>"
+   ```
+
+4. **Label the pod** for workload identity injection:
+
+   ```yaml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+   metadata:
+     labels:
+       azure.workload.identity/use: "true"
+   ```
+
+5. **Ensure network access** to IMDS (`169.254.169.254`) - if using NetworkPolicy, add an egress rule allowing traffic to `169.254.169.254/32` on port 80.
+
+### Auth type comparison
+
+| Method               | Config                                         | Pros                               | Cons                                  |
+| -------------------- | ---------------------------------------------- | ---------------------------------- | ------------------------------------- |
+| **Client secret**    | `appPassword`                                  | Simple setup                       | Secret rotation required, less secure |
+| **Certificate**      | `authType: "federated"` + `certificatePath`    | No shared secret over network      | Certificate management overhead       |
+| **Managed Identity** | `authType: "federated"` + `useManagedIdentity` | Passwordless, no secrets to manage | Azure infrastructure required         |
+
+**Default behavior:** When `authType` is not set, OpenClaw defaults to client secret authentication. Existing configurations continue to work without changes.
+
+## Local development (tunneling)
+
+Teams can't reach `localhost`. Use a persistent dev tunnel so your URL stays the same across sessions:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+# One-time setup:
+devtunnel create my-openclaw-bot --allow-anonymous
+devtunnel port create my-openclaw-bot -p 3978 --protocol auto
+
+# Each dev session:
+devtunnel host my-openclaw-bot
+```
+
+Alternatives: `ngrok http 3978` or `tailscale funnel 3978` (URLs may change each session).
+
+If your tunnel URL changes, update the endpoint:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+teams app update <teamsAppId> --endpoint "https://<new-url>/api/messages"
+```
+
+## Testing the Bot
+
+**Run diagnostics:**
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+teams app doctor <teamsAppId>
+```
+
+Checks bot registration, AAD app, manifest, and SSO configuration in one pass.
+
+**Send a test message:**
+
+1. Install the Teams app (use the install link from `teams app get <id> --install-link`)
+2. Find the bot in Teams and send a DM
+3. Check gateway logs for incoming activity
+
+## Environment variables
+
+All config keys can be set via environment variables instead:
+
+* `MSTEAMS_APP_ID`
+* `MSTEAMS_APP_PASSWORD`
+* `MSTEAMS_TENANT_ID`
+* `MSTEAMS_AUTH_TYPE` (optional: `"secret"` or `"federated"`)
+* `MSTEAMS_CERTIFICATE_PATH` (federated + certificate)
+* `MSTEAMS_CERTIFICATE_THUMBPRINT` (optional, not required for auth)
+* `MSTEAMS_USE_MANAGED_IDENTITY` (federated + managed identity)
+* `MSTEAMS_MANAGED_IDENTITY_CLIENT_ID` (user-assigned MI only)
+
+## Member info action
+
+OpenClaw exposes a Graph-backed `member-info` action for Microsoft Teams so agents and automations can resolve channel member details (display name, email, role) directly from Microsoft Graph.
+
+Requirements:
+
+* `Member.Read.Group` RSC permission (already in the recommended manifest)
+* For cross-team lookups: `User.Read.All` Graph Application permission with admin consent
+
+The action is gated by `channels.msteams.actions.memberInfo` (default: enabled when Graph credentials are available).
+
+## History context
+
+* `channels.msteams.historyLimit` controls how many recent channel/group messages are wrapped into the prompt.
+* Falls back to `messages.groupChat.historyLimit`. Set `0` to disable (default 50).
+* Fetched thread history is filtered by sender allowlists (`allowFrom` / `groupAllowFrom`), so thread context seeding only includes messages from allowed senders.
+* Quoted attachment context (`ReplyTo*` derived from Teams reply HTML) is currently passed as received.
+* In other words, allowlists gate who can trigger the agent; only specific supplemental context paths are filtered today.
+* DM history can be limited with `channels.msteams.dmHistoryLimit` (user turns). Per-user overrides: `channels.msteams.dms["<user_id>"].historyLimit`.
+
+## Current Teams RSC permissions (manifest)
+
+These are the **existing resourceSpecific permissions** in our Teams app manifest. They only apply inside the team/chat where the app is installed.
+
+**For channels (team scope):**
+
+* `ChannelMessage.Read.Group` (Application) - receive all channel messages without @mention
+* `ChannelMessage.Send.Group` (Application)
+* `Member.Read.Group` (Application)
+* `Owner.Read.Group` (Application)
+* `ChannelSettings.Read.Group` (Application)
+* `TeamMember.Read.Group` (Application)
+* `TeamSettings.Read.Group` (Application)
+
+**For group chats:**
+
+* `ChatMessage.Read.Chat` (Application) - receive all group chat messages without @mention
+
+To add RSC permissions via the Teams CLI:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+teams app rsc add <teamsAppId> ChannelMessage.Read.Group --type Application
+```
+
+## Example Teams manifest (redacted)
+
+Minimal, valid example with the required fields. Replace IDs and URLs.
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  $schema: "https://developer.microsoft.com/en-us/json-schemas/teams/v1.23/MicrosoftTeams.schema.json",
+  manifestVersion: "1.23",
+  version: "1.0.0",
+  id: "00000000-0000-0000-0000-000000000000",
+  name: { short: "OpenClaw" },
+  developer: {
+    name: "Your Org",
+    websiteUrl: "https://example.com",
+    privacyUrl: "https://example.com/privacy",
+    termsOfUseUrl: "https://example.com/terms",
+  },
+  description: { short: "OpenClaw in Teams", full: "OpenClaw in Teams" },
+  icons: { outline: "outline.png", color: "color.png" },
+  accentColor: "#5B6DEF",
+  bots: [
+    {
+      botId: "11111111-1111-1111-1111-111111111111",
+      scopes: ["personal", "team", "groupChat"],
+      isNotificationOnly: false,
+      supportsCalling: false,
+      supportsVideo: false,
+      supportsFiles: true,
+    },
+  ],
+  webApplicationInfo: {
+    id: "11111111-1111-1111-1111-111111111111",
+  },
+  authorization: {
+    permissions: {
+      resourceSpecific: [
+        { name: "ChannelMessage.Read.Group", type: "Application" },
+        { name: "ChannelMessage.Send.Group", type: "Application" },
+        { name: "Member.Read.Group", type: "Application" },
+        { name: "Owner.Read.Group", type: "Application" },
+        { name: "ChannelSettings.Read.Group", type: "Application" },
+        { name: "TeamMember.Read.Group", type: "Application" },
+        { name: "TeamSettings.Read.Group", type: "Application" },
+        { name: "ChatMessage.Read.Chat", type: "Application" },
+      ],
+    },
+  },
+}
+```
+
+### Manifest caveats (must-have fields)
+
+* `bots[].botId` **must** match the Azure Bot App ID.
+* `webApplicationInfo.id` **must** match the Azure Bot App ID.
+* `bots[].scopes` must include the surfaces you plan to use (`personal`, `team`, `groupChat`).
+* `bots[].supportsFiles: true` is required for file handling in personal scope.
+* `authorization.permissions.resourceSpecific` must include channel read/send if you want channel traffic.
+
+### Updating an existing app
+
+To update an already-installed Teams app (e.g., to add RSC permissions):
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+# Download, edit, and re-upload the manifest
+teams app manifest download <teamsAppId> manifest.json
+# Edit manifest.json locally...
+teams app manifest upload manifest.json <teamsAppId>
+# Version is auto-bumped if content changed
+```
+
+After updating, reinstall the app in each team for new permissions to take effect, and **fully quit and relaunch Teams** (not just close the window) to clear cached app metadata.
+
+<details>
+  <summary>Manual manifest update (without CLI)</summary>
+
+  1. Update your `manifest.json` with the new settings
+  2. **Increment the `version` field** (e.g., `1.0.0` → `1.1.0`)
+  3. **Re-zip** the manifest with icons (`manifest.json`, `outline.png`, `color.png`)
+  4. Upload the new zip:
+     * **Teams Admin Center:** Teams apps → Manage apps → find your app → Upload new version
+     * **Sideload:** In Teams → Apps → Manage your apps → Upload a custom app
+</details>
+
+## Capabilities: RSC only vs Graph
+
+### With **Teams RSC only** (app installed, no Graph API permissions)
+
+Works:
+
+* Read channel message **text** content.
+* Send channel message **text** content.
+* Receive **personal (DM)** file attachments.
+
+Does NOT work:
+
+* Channel/group **image or file contents** (payload only includes HTML stub).
+* Downloading attachments stored in SharePoint/OneDrive.
+* Reading message history (beyond the live webhook event).
+
+### With **Teams RSC + Microsoft Graph Application permissions**
+
+Adds:
+
+* Downloading hosted contents (images pasted into messages).
+* Downloading file attachments stored in SharePoint/OneDrive.
+* Reading channel/chat message history via Graph.
+
+### RSC vs Graph API
+
+| Capability              | RSC Permissions      | Graph API                           |
+| ----------------------- | -------------------- | ----------------------------------- |
+| **Real-time messages**  | Yes (via webhook)    | No (polling only)                   |
+| **Historical messages** | No                   | Yes (can query history)             |
+| **Setup complexity**    | App manifest only    | Requires admin consent + token flow |
+| **Works offline**       | No (must be running) | Yes (query anytime)                 |
+
+**Bottom line:** RSC is for real-time listening; Graph API is for historical access. For catching up on missed messages while offline, you need Graph API with `ChannelMessage.Read.All` (requires admin consent).
+
+## Graph-enabled media + history (required for channels)
+
+If you need images/files in **channels** or want to fetch **message history**, you must enable Microsoft Graph permissions and grant admin consent.
+
+1. In Entra ID (Azure AD) **App Registration**, add Microsoft Graph **Application permissions**:
+   * `ChannelMessage.Read.All` (channel attachments + history)
+   * `Chat.Read.All` or `ChatMessage.Read.All` (group chats)
+2. **Grant admin consent** for the tenant.
+3. Bump the Teams app **manifest version**, re-upload, and **reinstall the app in Teams**.
+4. **Fully quit and relaunch Teams** to clear cached app metadata.
+
+**Additional permission for user mentions:** User @mentions work out of the box for users in the conversation. However, if you want to dynamically search and mention users who are **not in the current conversation**, add `User.Read.All` (Application) permission and grant admin consent.
+
+## Known limitations
+
+### Webhook timeouts
+
+Teams delivers messages via HTTP webhook. If processing takes too long (e.g., slow LLM responses), you may see:
+
+* Gateway timeouts
+* Teams retrying the message (causing duplicates)
+* Dropped replies
+
+OpenClaw handles this by returning quickly and sending replies proactively, but very slow responses may still cause issues.
+
+### Formatting
+
+Teams markdown is more limited than Slack or Discord:
+
+* Basic formatting works: **bold**, *italic*, `code`, links
+* Complex markdown (tables, nested lists) may not render correctly
+* Adaptive Cards are supported for polls and semantic presentation sends (see below)
+
+## Configuration
+
+Key settings (see `/gateway/configuration` for shared channel patterns):
+
+* `channels.msteams.enabled`: enable/disable the channel.
+* `channels.msteams.appId`, `channels.msteams.appPassword`, `channels.msteams.tenantId`: bot credentials.
+* `channels.msteams.webhook.port` (default `3978`)
+* `channels.msteams.webhook.path` (default `/api/messages`)
+* `channels.msteams.dmPolicy`: `pairing | allowlist | open | disabled` (default: pairing)
+* `channels.msteams.allowFrom`: DM allowlist (AAD object IDs recommended). The wizard resolves names to IDs during setup when Graph access is available.
+* `channels.msteams.dangerouslyAllowNameMatching`: break-glass toggle to re-enable mutable UPN/display-name matching and direct team/channel name routing.
+* `channels.msteams.textChunkLimit`: outbound text chunk size.
+* `channels.msteams.chunkMode`: `length` (default) or `newline` to split on blank lines (paragraph boundaries) before length chunking.
+* `channels.msteams.mediaAllowHosts`: allowlist for inbound attachment hosts (defaults to Microsoft/Teams domains).
+* `channels.msteams.mediaAuthAllowHosts`: allowlist for attaching Authorization headers on media retries (defaults to Graph + Bot Framework hosts).
+* `channels.msteams.requireMention`: require @mention in channels/groups (default true).
+* `channels.msteams.replyStyle`: `thread | top-level` (see [Reply Style](#reply-style-threads-vs-posts)).
+* `channels.msteams.teams.<teamId>.replyStyle`: per-team override.
+* `channels.msteams.teams.<teamId>.requireMention`: per-team override.
+* `channels.msteams.teams.<teamId>.tools`: default per-team tool policy overrides (`allow`/`deny`/`alsoAllow`) used when a channel override is missing.
+* `channels.msteams.teams.<teamId>.toolsBySender`: default per-team per-sender tool policy overrides (`"*"` wildcard supported).
+* `channels.msteams.teams.<teamId>.channels.<conversationId>.replyStyle`: per-channel override.
+* `channels.msteams.teams.<teamId>.channels.<conversationId>.requireMention`: per-channel override.
+* `channels.msteams.teams.<teamId>.channels.<conversationId>.tools`: per-channel tool policy overrides (`allow`/`deny`/`alsoAllow`).
+* `channels.msteams.teams.<teamId>.channels.<conversationId>.toolsBySender`: per-channel per-sender tool policy overrides (`"*"` wildcard supported).
+* `toolsBySender` keys should use explicit prefixes:
+  `id:`, `e164:`, `username:`, `name:` (legacy unprefixed keys still map to `id:` only).
+* `channels.msteams.actions.memberInfo`: enable or disable the Graph-backed member info action (default: enabled when Graph credentials are available).
+* `channels.msteams.authType`: authentication type - `"secret"` (default) or `"federated"`.
+* `channels.msteams.certificatePath`: path to PEM certificate file (federated + certificate auth).
+* `channels.msteams.certificateThumbprint`: certificate thumbprint (optional, not required for auth).
+* `channels.msteams.useManagedIdentity`: enable managed identity auth (federated mode).
+* `channels.msteams.managedIdentityClientId`: client ID for user-assigned managed identity.
+* `channels.msteams.sharePointSiteId`: SharePoint site ID for file uploads in group chats/channels (see [Sending files in group chats](#sending-files-in-group-chats)).
+
+## Routing and sessions
+
+* Session keys follow the standard agent format (see [/concepts/session](/concepts/session)):
+  * Direct messages share the main session (`agent:<agentId>:<mainKey>`).
+  * Channel/group messages use conversation id:
+    * `agent:<agentId>:msteams:channel:<conversationId>`
+    * `agent:<agentId>:msteams:group:<conversationId>`
+
+## Reply style: threads vs posts
+
+Teams recently introduced two channel UI styles over the same underlying data model:
+
+| Style                    | Description                                               | Recommended `replyStyle` |
+| ------------------------ | --------------------------------------------------------- | ------------------------ |
+| **Posts** (classic)      | Messages appear as cards with threaded replies underneath | `thread` (default)       |
+| **Threads** (Slack-like) | Messages flow linearly, more like Slack                   | `top-level`              |
+
+**The problem:** The Teams API does not expose which UI style a channel uses. If you use the wrong `replyStyle`:
+
+* `thread` in a Threads-style channel → replies appear nested awkwardly
+* `top-level` in a Posts-style channel → replies appear as separate top-level posts instead of in-thread
+
+**Solution:** Configure `replyStyle` per-channel based on how the channel is set up:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    msteams: {
+      replyStyle: "thread",
+      teams: {
+        "19:abc...@thread.tacv2": {
+          channels: {
+            "19:xyz...@thread.tacv2": {
+              replyStyle: "top-level",
+            },
+          },
+        },
       },
     },
   },
 }
 ```
 
-Disable `register` after the nick is registered to avoid repeated REGISTER attempts.
+## Attachments and images
 
-## [​](https://docs.openclaw.ai/channels/irc\\#environment-variables)  Environment variables
+**Current limitations:**
 
-Default account supports:
+* **DMs:** Images and file attachments work via Teams bot file APIs.
+* **Channels/groups:** Attachments live in M365 storage (SharePoint/OneDrive). The webhook payload only includes an HTML stub, not the actual file bytes. **Graph API permissions are required** to download channel attachments.
+* For explicit file-first sends, use `action=upload-file` with `media` / `filePath` / `path`; optional `message` becomes the accompanying text/comment, and `filename` overrides the uploaded name.
 
-- `IRC_HOST`
-- `IRC_PORT`
-- `IRC_TLS`
-- `IRC_NICK`
-- `IRC_USERNAME`
-- `IRC_REALNAME`
-- `IRC_PASSWORD`
-- `IRC_CHANNELS` (comma-separated)
-- `IRC_NICKSERV_PASSWORD`
-- `IRC_NICKSERV_REGISTER_EMAIL`
+Without Graph permissions, channel messages with images will be received as text-only (the image content is not accessible to the bot).
+By default, OpenClaw only downloads media from Microsoft/Teams hostnames. Override with `channels.msteams.mediaAllowHosts` (use `["*"]` to allow any host).
+Authorization headers are only attached for hosts in `channels.msteams.mediaAuthAllowHosts` (defaults to Graph + Bot Framework hosts). Keep this list strict (avoid multi-tenant suffixes).
 
-`IRC_HOST` cannot be set from a workspace `.env`; see [Workspace `.env` files](https://docs.openclaw.ai/gateway/security).
+## Sending files in group chats
 
-## [​](https://docs.openclaw.ai/channels/irc\\#troubleshooting)  Troubleshooting
+Bots can send files in DMs using the FileConsentCard flow (built-in). However, **sending files in group chats/channels** requires additional setup:
 
-- If the bot connects but never replies in channels, verify `channels.irc.groups` **and** whether mention-gating is dropping messages (`missing-mention`). If you want it to reply without pings, set `requireMention:false` for the channel.
-- If login fails, verify nick availability and server password.
-- If TLS fails on a custom network, verify host/port and certificate setup.
+| Context                  | How files are sent                           | Setup needed                                    |
+| ------------------------ | -------------------------------------------- | ----------------------------------------------- |
+| **DMs**                  | FileConsentCard → user accepts → bot uploads | Works out of the box                            |
+| **Group chats/channels** | Upload to SharePoint → share link            | Requires `sharePointSiteId` + Graph permissions |
+| **Images (any context)** | Base64-encoded inline                        | Works out of the box                            |
 
-## [​](https://docs.openclaw.ai/channels/irc\\#related)  Related
+### Why group chats need SharePoint
 
-- [Channels Overview](https://docs.openclaw.ai/channels) — all supported channels
-- [Pairing](https://docs.openclaw.ai/channels/pairing) — DM authentication and pairing flow
-- [Groups](https://docs.openclaw.ai/channels/groups) — group chat behavior and mention gating
-- [Channel Routing](https://docs.openclaw.ai/channels/channel-routing) — session routing for messages
-- [Security](https://docs.openclaw.ai/gateway/security) — access model and hardening
+Bots don't have a personal OneDrive drive (the `/me/drive` Graph API endpoint doesn't work for application identities). To send files in group chats/channels, the bot uploads to a **SharePoint site** and creates a sharing link.
 
-[Matrix push rules for quiet previews](https://docs.openclaw.ai/channels/matrix-push-rules) [Mattermost](https://docs.openclaw.ai/channels/mattermost)
+### Setup
 
-Ctrl+I
+1. **Add Graph API permissions** in Entra ID (Azure AD) → App Registration:
+   * `Sites.ReadWrite.All` (Application) - upload files to SharePoint
+   * `Chat.Read.All` (Application) - optional, enables per-user sharing links
 
----
+2. **Grant admin consent** for the tenant.
 
-## Broadcast groups - OpenClaw
-**Source:** https://docs.openclaw.ai/channels/broadcast-groups
+3. **Get your SharePoint site ID:**
 
-[Skip to main content](https://docs.openclaw.ai/channels/broadcast-groups#content-area)
+   ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+   # Via Graph Explorer or curl with a valid token:
+   curl -H "Authorization: Bearer $TOKEN" \
+     "https://graph.microsoft.com/v1.0/sites/{hostname}:/{site-path}"
 
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
+   # Example: for a site at "contoso.sharepoint.com/sites/BotFiles"
+   curl -H "Authorization: Bearer $TOKEN" \
+     "https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com:/sites/BotFiles"
 
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
+   # Response includes: "id": "contoso.sharepoint.com,guid1,guid2"
+   ```
 
-English
+4. **Configure OpenClaw:**
 
-Search...
+   ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+   {
+     channels: {
+       msteams: {
+         // ... other config ...
+         sharePointSiteId: "contoso.sharepoint.com,guid1,guid2",
+       },
+     },
+   }
+   ```
 
-Ctrl K
+### Sharing behavior
 
-Search...
+| Permission                              | Sharing behavior                                          |
+| --------------------------------------- | --------------------------------------------------------- |
+| `Sites.ReadWrite.All` only              | Organization-wide sharing link (anyone in org can access) |
+| `Sites.ReadWrite.All` + `Chat.Read.All` | Per-user sharing link (only chat members can access)      |
 
-Navigation
+Per-user sharing is more secure as only the chat participants can access the file. If `Chat.Read.All` permission is missing, the bot falls back to organization-wide sharing.
 
-Configuration
+### Fallback behavior
 
-Broadcast groups
+| Scenario                                          | Result                                             |
+| ------------------------------------------------- | -------------------------------------------------- |
+| Group chat + file + `sharePointSiteId` configured | Upload to SharePoint, send sharing link            |
+| Group chat + file + no `sharePointSiteId`         | Attempt OneDrive upload (may fail), send text only |
+| Personal chat + file                              | FileConsentCard flow (works without SharePoint)    |
+| Any context + image                               | Base64-encoded inline (works without SharePoint)   |
 
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
+### Files stored location
 
-On this page
+Uploaded files are stored in a `/OpenClawShared/` folder in the configured SharePoint site's default document library.
 
-- [Overview](https://docs.openclaw.ai/channels/broadcast-groups#overview)
-- [Use cases](https://docs.openclaw.ai/channels/broadcast-groups#use-cases)
-- [Configuration](https://docs.openclaw.ai/channels/broadcast-groups#configuration)
-- [Basic setup](https://docs.openclaw.ai/channels/broadcast-groups#basic-setup)
-- [Processing strategy](https://docs.openclaw.ai/channels/broadcast-groups#processing-strategy)
-- [Complete example](https://docs.openclaw.ai/channels/broadcast-groups#complete-example)
-- [How it works](https://docs.openclaw.ai/channels/broadcast-groups#how-it-works)
-- [Message flow](https://docs.openclaw.ai/channels/broadcast-groups#message-flow)
-- [Session isolation](https://docs.openclaw.ai/channels/broadcast-groups#session-isolation)
-- [Example: isolated sessions](https://docs.openclaw.ai/channels/broadcast-groups#example-isolated-sessions)
-- [Best practices](https://docs.openclaw.ai/channels/broadcast-groups#best-practices)
-- [Compatibility](https://docs.openclaw.ai/channels/broadcast-groups#compatibility)
-- [Providers](https://docs.openclaw.ai/channels/broadcast-groups#providers)
-- [Routing](https://docs.openclaw.ai/channels/broadcast-groups#routing)
-- [Troubleshooting](https://docs.openclaw.ai/channels/broadcast-groups#troubleshooting)
-- [Examples](https://docs.openclaw.ai/channels/broadcast-groups#examples)
-- [API reference](https://docs.openclaw.ai/channels/broadcast-groups#api-reference)
-- [Config schema](https://docs.openclaw.ai/channels/broadcast-groups#config-schema)
-- [Fields](https://docs.openclaw.ai/channels/broadcast-groups#fields)
-- [Limitations](https://docs.openclaw.ai/channels/broadcast-groups#limitations)
-- [Future enhancements](https://docs.openclaw.ai/channels/broadcast-groups#future-enhancements)
-- [Related](https://docs.openclaw.ai/channels/broadcast-groups#related)
+## Polls (Adaptive Cards)
 
-**Status:** Experimental. Added in 2026.1.9.
+OpenClaw sends Teams polls as Adaptive Cards (there is no native Teams poll API).
 
-## [​](https://docs.openclaw.ai/channels/broadcast-groups\\#overview) Overview
+* CLI: `openclaw message poll --channel msteams --target conversation:<id> ...`
+* Votes are recorded by the gateway in `~/.openclaw/msteams-polls.json`.
+* The gateway must stay online to record votes.
+* Polls do not auto-post result summaries yet (inspect the store file if needed).
 
-Broadcast Groups enable multiple agents to process and respond to the same message simultaneously. This allows you to create specialized agent teams that work together in a single WhatsApp group or DM — all using one phone number.Current scope: **WhatsApp only** (web channel).Broadcast groups are evaluated after channel allowlists and group activation rules. In WhatsApp groups, this means broadcasts happen when OpenClaw would normally reply (for example: on mention, depending on your group settings).
+## Presentation cards
 
-## [​](https://docs.openclaw.ai/channels/broadcast-groups\\#use-cases) Use cases
+Send semantic presentation payloads to Teams users or conversations using the `message` tool or CLI. OpenClaw renders them as Teams Adaptive Cards from the generic presentation contract.
 
-1\. Specialized agent teams
+The `presentation` parameter accepts semantic blocks. When `presentation` is provided, the message text is optional.
 
-Deploy multiple agents with atomic, focused responsibilities:
+**Agent tool:**
 
-```
-Group: \"Development Team\"
-Agents:
-  - CodeReviewer (reviews code snippets)
-  - DocumentationBot (generates docs)
-  - SecurityAuditor (checks for vulnerabilities)
-  - TestGenerator (suggests test cases)
-```
-
-Each agent processes the same message and provides its specialized perspective.
-
-2\. Multi-language support
-
-```
-Group: \"International Support\"
-Agents:
-  - Agent_EN (responds in English)
-  - Agent_DE (responds in German)
-  - Agent_ES (responds in Spanish)
-```
-
-3\. Quality assurance workflows
-
-```
-Group: \"Customer Support\"
-Agents:
-  - SupportAgent (provides answer)
-  - QAAgent (reviews quality, only responds if issues found)
-```
-
-4\. Task automation
-
-```
-Group: \"Project Management\"
-Agents:
-  - TaskTracker (updates task database)
-  - TimeLogger (logs time spent)
-  - ReportGenerator (creates summaries)
-```
-
-## [​](https://docs.openclaw.ai/channels/broadcast-groups\\#configuration) Configuration
-
-### [​](https://docs.openclaw.ai/channels/broadcast-groups\\#basic-setup) Basic setup
-
-Add a top-level `broadcast` section (next to `bindings`). Keys are WhatsApp peer ids:
-
-- group chats: group JID (e.g. `120363403215116621@g.us`)
-- DMs: E.164 phone number (e.g. `+15551234567`)
-
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-  \"broadcast\": {
-    \"120363403215116621@g.us\": [\"alfred\", \"baerbel\", \"assistant3\"]
-  }
+  action: "send",
+  channel: "msteams",
+  target: "user:<id>",
+  presentation: {
+    title: "Hello",
+    blocks: [{ type: "text", text: "Hello!" }],
+  },
 }
 ```
 
-**Result:** When OpenClaw would reply in this chat, it will run all three agents.
+**CLI:**
 
-### [​](https://docs.openclaw.ai/channels/broadcast-groups\\#processing-strategy) Processing strategy
-
-Control how agents process messages:
-
-- parallel (default)
-
-- sequential
-
-
-All agents process simultaneously:
-
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw message send --channel msteams \
+  --target "conversation:19:abc...@thread.tacv2" \
+  --presentation '{"title":"Hello","blocks":[{"type":"text","text":"Hello!"}]}'
 ```
+
+For target format details, see [Target formats](#target-formats) below.
+
+## Target formats
+
+MSTeams targets use prefixes to distinguish between users and conversations:
+
+| Target type         | Format                           | Example                                             |
+| ------------------- | -------------------------------- | --------------------------------------------------- |
+| User (by ID)        | `user:<aad-object-id>`           | `user:40a1a0ed-4ff2-4164-a219-55518990c197`         |
+| User (by name)      | `user:<display-name>`            | `user:John Smith` (requires Graph API)              |
+| Group/channel       | `conversation:<conversation-id>` | `conversation:19:abc123...@thread.tacv2`            |
+| Group/channel (raw) | `<conversation-id>`              | `19:abc123...@thread.tacv2` (if contains `@thread`) |
+
+**CLI examples:**
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+# Send to a user by ID
+openclaw message send --channel msteams --target "user:40a1a0ed-..." --message "Hello"
+
+# Send to a user by display name (triggers Graph API lookup)
+openclaw message send --channel msteams --target "user:John Smith" --message "Hello"
+
+# Send to a group chat or channel
+openclaw message send --channel msteams --target "conversation:19:abc...@thread.tacv2" --message "Hello"
+
+# Send a presentation card to a conversation
+openclaw message send --channel msteams --target "conversation:19:abc...@thread.tacv2" \
+  --presentation '{"title":"Hello","blocks":[{"type":"text","text":"Hello"}]}'
+```
+
+**Agent tool examples:**
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-  \"broadcast\": {
-    \"strategy\": \"parallel\",
-    \"120363403215116621@g.us\": [\"alfred\", \"baerbel\"]
-  }
+  action: "send",
+  channel: "msteams",
+  target: "user:John Smith",
+  message: "Hello!",
 }
 ```
 
-Agents process in order (one waits for previous to finish):
-
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-  \"broadcast\": {
-    \"strategy\": \"sequential\",
-    \"120363403215116621@g.us\": [\"alfred\", \"baerbel\"]
-  }
+  action: "send",
+  channel: "msteams",
+  target: "conversation:19:abc...@thread.tacv2",
+  presentation: {
+    title: "Hello",
+    blocks: [{ type: "text", text: "Hello" }],
+  },
 }
 ```
 
-### [​](https://docs.openclaw.ai/channels/broadcast-groups\\#complete-example) Complete example
+<Note>
+  Without the `user:` prefix, names default to group or team resolution. Always use `user:` when targeting people by display name.
+</Note>
+
+## Proactive messaging
+
+* Proactive messages are only possible **after** a user has interacted, because we store conversation references at that point.
+* See `/gateway/configuration` for `dmPolicy` and allowlist gating.
+
+## Team and Channel IDs (Common Gotcha)
+
+The `groupId` query parameter in Teams URLs is **NOT** the team ID used for configuration. Extract IDs from the URL path instead:
+
+**Team URL:**
 
 ```
+https://teams.microsoft.com/l/team/19%3ABk4j...%40thread.tacv2/conversations?groupId=...
+                                    └────────────────────────────┘
+                                    Team conversation ID (URL-decode this)
+```
+
+**Channel URL:**
+
+```
+https://teams.microsoft.com/l/channel/19%3A15bc...%40thread.tacv2/ChannelName?groupId=...
+                                      └─────────────────────────┘
+                                      Channel ID (URL-decode this)
+```
+
+**For config:**
+
+* Team key = path segment after `/team/` (URL-decoded, e.g., `19:Bk4j...@thread.tacv2`; older tenants may show `@thread.skype`, which is also valid)
+* Channel key = path segment after `/channel/` (URL-decoded)
+* **Ignore** the `groupId` query parameter for OpenClaw routing. It is the Microsoft Entra group ID, not the Bot Framework conversation ID used in incoming Teams activities.
+
+## Private channels
+
+Bots have limited support in private channels:
+
+| Feature                      | Standard Channels | Private Channels       |
+| ---------------------------- | ----------------- | ---------------------- |
+| Bot installation             | Yes               | Limited                |
+| Real-time messages (webhook) | Yes               | May not work           |
+| RSC permissions              | Yes               | May behave differently |
+| @mentions                    | Yes               | If bot is accessible   |
+| Graph API history            | Yes               | Yes (with permissions) |
+
+**Workarounds if private channels don't work:**
+
+1. Use standard channels for bot interactions
+2. Use DMs - users can always message the bot directly
+3. Use Graph API for historical access (requires `ChannelMessage.Read.All`)
+
+## Troubleshooting
+
+### Common issues
+
+* **Images not showing in channels:** Graph permissions or admin consent missing. Reinstall the Teams app and fully quit/reopen Teams.
+* **No responses in channel:** mentions are required by default; set `channels.msteams.requireMention=false` or configure per team/channel.
+* **Version mismatch (Teams still shows old manifest):** remove + re-add the app and fully quit Teams to refresh.
+* **401 Unauthorized from webhook:** Expected when testing manually without Azure JWT - means endpoint is reachable but auth failed. Use Azure Web Chat to test properly.
+
+### Manifest upload errors
+
+* **"Icon file cannot be empty":** The manifest references icon files that are 0 bytes. Create valid PNG icons (32x32 for `outline.png`, 192x192 for `color.png`).
+* **"webApplicationInfo.Id already in use":** The app is still installed in another team/chat. Find and uninstall it first, or wait 5-10 minutes for propagation.
+* **"Something went wrong" on upload:** Upload via [https://admin.teams.microsoft.com](https://admin.teams.microsoft.com) instead, open browser DevTools (F12) → Network tab, and check the response body for the actual error.
+* **Sideload failing:** Try "Upload an app to your org's app catalog" instead of "Upload a custom app" - this often bypasses sideload restrictions.
+
+### RSC permissions not working
+
+1. Verify `webApplicationInfo.id` matches your bot's App ID exactly
+2. Re-upload the app and reinstall in the team/chat
+3. Check if your org admin has blocked RSC permissions
+4. Confirm you're using the right scope: `ChannelMessage.Read.Group` for teams, `ChatMessage.Read.Chat` for group chats
+
+## References
+
+* [Create Azure Bot](https://learn.microsoft.com/en-us/azure/bot-service/bot-service-quickstart-registration) - Azure Bot setup guide
+* [Teams Developer Portal](https://dev.teams.microsoft.com/apps) - create/manage Teams apps
+* [Teams app manifest schema](https://learn.microsoft.com/en-us/microsoftteams/platform/resources/schema/manifest-schema)
+* [Receive channel messages with RSC](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/conversations/channel-messages-with-rsc)
+* [RSC permissions reference](https://learn.microsoft.com/en-us/microsoftteams/platform/graph-api/rsc/resource-specific-consent)
+* [Teams bot file handling](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/bots-filesv4) (channel/group requires Graph)
+* [Proactive messaging](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/conversations/send-proactive-messages)
+* [@microsoft/teams.cli](https://www.npmjs.com/package/@microsoft/teams.cli) - Teams CLI for bot management
+
+## Related
+
+* [Channels Overview](/channels) - all supported channels
+* [Pairing](/channels/pairing) - DM authentication and pairing flow
+* [Groups](/channels/groups) - group chat behavior and mention gating
+* [Channel Routing](/channels/channel-routing) - session routing for messages
+* [Security](/gateway/security) - access model and hardening
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Nextcloud Talk
+
+Status: bundled plugin (webhook bot). Direct messages, rooms, reactions, and markdown messages are supported.
+
+## Bundled plugin
+
+Nextcloud Talk ships as a bundled plugin in current OpenClaw releases, so
+normal packaged builds do not need a separate install.
+
+If you are on an older build or a custom install that excludes Nextcloud Talk,
+install the npm package directly:
+
+Install via CLI (npm registry):
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw plugins install @openclaw/nextcloud-talk
+```
+
+Use the bare package to follow the current official release tag. Pin an exact
+version only when you need a reproducible install.
+
+Local checkout (when running from a git repo):
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw plugins install ./path/to/local/nextcloud-talk-plugin
+```
+
+Details: [Plugins](/tools/plugin)
+
+## Quick setup (beginner)
+
+1. Ensure the Nextcloud Talk plugin is available.
+   * Current packaged OpenClaw releases already bundle it.
+   * Older/custom installs can add it manually with the commands above.
+
+2. On your Nextcloud server, create a bot:
+
+   ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+   ./occ talk:bot:install "OpenClaw" "<shared-secret>" "<webhook-url>" --feature reaction
+   ```
+
+3. Enable the bot in the target room settings.
+
+4. Configure OpenClaw:
+
+   * Config: `channels.nextcloud-talk.baseUrl` + `channels.nextcloud-talk.botSecret`
+   * Or env: `NEXTCLOUD_TALK_BOT_SECRET` (default account only)
+
+   CLI setup:
+
+   ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+   openclaw channels add --channel nextcloud-talk \
+     --url https://cloud.example.com \
+     --token "<shared-secret>"
+   ```
+
+   Equivalent explicit fields:
+
+   ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+   openclaw channels add --channel nextcloud-talk \
+     --base-url https://cloud.example.com \
+     --secret "<shared-secret>"
+   ```
+
+   File-backed secret:
+
+   ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+   openclaw channels add --channel nextcloud-talk \
+     --base-url https://cloud.example.com \
+     --secret-file /path/to/nextcloud-talk-secret
+   ```
+
+5. Restart the gateway (or finish setup).
+
+Minimal config:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-  \"agents\": {
-    \"list\": [\\\
-      {\\\
-        \"id\": \"code-reviewer\",\\\
-        \"name\": \"Code Reviewer\",\\\
-        \"workspace\": \"/path/to/code-reviewer\",\\\
-        \"sandbox\": { \"mode\": \"all\" }\\\
-      },\\\n      {\\\
-        \"id\": \"security-auditor\",\\\
-        \"name\": \"Security Auditor\",\\\
-        \"workspace\": \"/path/to/security-auditor\",\\\
-        \"sandbox\": { \"mode\": \"all\" }\\\
-      },\\\n      {\\\
-        \"id\": \"docs-generator\",\\\
-        \"name\": \"Documentation Generator\",\\\
-        \"workspace\": \"/path/to/docs-generator\",\\\
-        \"sandbox\": { \"mode\": \"all\" }\\\
-      }\\\
+  channels: {
+    "nextcloud-talk": {
+      enabled: true,
+      baseUrl: "https://cloud.example.com",
+      botSecret: "shared-secret",
+      dmPolicy: "pairing",
+    },
+  },
+}
+```
+
+## Notes
+
+* Bots cannot initiate DMs. The user must message the bot first.
+* Webhook URL must be reachable by the Gateway; set `webhookPublicUrl` if behind a proxy.
+* Media uploads are not supported by the bot API; media is sent as URLs.
+* The webhook payload does not distinguish DMs vs rooms; set `apiUser` + `apiPassword` to enable room-type lookups (otherwise DMs are treated as rooms).
+
+## Access control (DMs)
+
+* Default: `channels.nextcloud-talk.dmPolicy = "pairing"`. Unknown senders get a pairing code.
+* Approve via:
+  * `openclaw pairing list nextcloud-talk`
+  * `openclaw pairing approve nextcloud-talk <CODE>`
+* Public DMs: `channels.nextcloud-talk.dmPolicy="open"` plus `channels.nextcloud-talk.allowFrom=["*"]`.
+* `allowFrom` matches Nextcloud user IDs only; display names are ignored.
+
+## Rooms (groups)
+
+* Default: `channels.nextcloud-talk.groupPolicy = "allowlist"` (mention-gated).
+* Allowlist rooms with `channels.nextcloud-talk.rooms`:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    "nextcloud-talk": {
+      rooms: {
+        "room-token": { requireMention: true },
+      },
+    },
+  },
+}
+```
+
+* To allow no rooms, keep the allowlist empty or set `channels.nextcloud-talk.groupPolicy="disabled"`.
+
+## Capabilities
+
+| Feature         | Status        |
+| --------------- | ------------- |
+| Direct messages | Supported     |
+| Rooms           | Supported     |
+| Threads         | Not supported |
+| Media           | URL-only      |
+| Reactions       | Supported     |
+| Native commands | Not supported |
+
+## Configuration reference (Nextcloud Talk)
+
+Full configuration: [Configuration](/gateway/configuration)
+
+Provider options:
+
+* `channels.nextcloud-talk.enabled`: enable/disable channel startup.
+* `channels.nextcloud-talk.baseUrl`: Nextcloud instance URL.
+* `channels.nextcloud-talk.botSecret`: bot shared secret.
+* `channels.nextcloud-talk.botSecretFile`: regular-file secret path. Symlinks are rejected.
+* `channels.nextcloud-talk.apiUser`: API user for room lookups (DM detection).
+* `channels.nextcloud-talk.apiPassword`: API/app password for room lookups.
+* `channels.nextcloud-talk.apiPasswordFile`: API password file path.
+* `channels.nextcloud-talk.webhookPort`: webhook listener port (default: 8788).
+* `channels.nextcloud-talk.webhookHost`: webhook host (default: 0.0.0.0).
+* `channels.nextcloud-talk.webhookPath`: webhook path (default: /nextcloud-talk-webhook).
+* `channels.nextcloud-talk.webhookPublicUrl`: externally reachable webhook URL.
+* `channels.nextcloud-talk.dmPolicy`: `pairing | allowlist | open | disabled`.
+* `channels.nextcloud-talk.allowFrom`: DM allowlist (user IDs). `open` requires `"*"`.
+* `channels.nextcloud-talk.groupPolicy`: `allowlist | open | disabled`.
+* `channels.nextcloud-talk.groupAllowFrom`: group allowlist (user IDs).
+* `channels.nextcloud-talk.rooms`: per-room settings and allowlist.
+* `channels.nextcloud-talk.historyLimit`: group history limit (0 disables).
+* `channels.nextcloud-talk.dmHistoryLimit`: DM history limit (0 disables).
+* `channels.nextcloud-talk.dms`: per-DM overrides (historyLimit).
+* `channels.nextcloud-talk.textChunkLimit`: outbound text chunk size (chars).
+* `channels.nextcloud-talk.chunkMode`: `length` (default) or `newline` to split on blank lines (paragraph boundaries) before length chunking.
+* `channels.nextcloud-talk.blockStreaming`: disable block streaming for this channel.
+* `channels.nextcloud-talk.blockStreamingCoalesce`: block streaming coalesce tuning.
+* `channels.nextcloud-talk.mediaMaxMb`: inbound media cap (MB).
+
+## Related
+
+* [Channels Overview](/channels) — all supported channels
+* [Pairing](/channels/pairing) — DM authentication and pairing flow
+* [Groups](/channels/groups) — group chat behavior and mention gating
+* [Channel Routing](/channels/channel-routing) — session routing for messages
+* [Security](/gateway/security) — access model and hardening
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Pairing
+
+"Pairing" is OpenClaw's explicit access approval step.
+It is used in two places:
+
+1. **DM pairing** (who is allowed to talk to the bot)
+2. **Node pairing** (which devices/nodes are allowed to join the gateway network)
+
+Security context: [Security](/gateway/security)
+
+## 1) DM pairing (inbound chat access)
+
+When a channel is configured with DM policy `pairing`, unknown senders get a short code and their message is **not processed** until you approve.
+
+Default DM policies are documented in: [Security](/gateway/security)
+
+`dmPolicy: "open"` is public only when the effective DM allowlist includes `"*"`.
+Setup and validation require that wildcard for public-open configs. If existing
+state contains `open` with concrete `allowFrom` entries, runtime still admits
+only those senders, and pairing-store approvals do not widen `open` access.
+
+Pairing codes:
+
+* 8 characters, uppercase, no ambiguous chars (`0O1I`).
+* **Expire after 1 hour**. The bot only sends the pairing message when a new request is created (roughly once per hour per sender).
+* Pending DM pairing requests are capped at **3 per channel** by default; additional requests are ignored until one expires or is approved.
+
+### Approve a sender
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw pairing list telegram
+openclaw pairing approve telegram <CODE>
+```
+
+If no command owner is configured yet, approving a DM pairing code also bootstraps
+`commands.ownerAllowFrom` to the approved sender, such as `telegram:123456789`.
+That gives first-time setups an explicit owner for privileged commands and exec
+approval prompts. After an owner exists, later pairing approvals only grant DM
+access; they do not add more owners.
+
+Supported channels: `bluebubbles`, `discord`, `feishu`, `googlechat`, `imessage`, `irc`, `line`, `matrix`, `mattermost`, `msteams`, `nextcloud-talk`, `nostr`, `openclaw-weixin`, `signal`, `slack`, `synology-chat`, `telegram`, `twitch`, `whatsapp`, `zalo`, `zalouser`.
+
+### Reusable sender groups
+
+Use top-level `accessGroups` when the same trusted sender set should apply to
+multiple message channels or to both DM and group allowlists.
+
+Static groups use `type: "message.senders"` and are referenced with
+`accessGroup:<name>` from channel allowlists:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  accessGroups: {
+    operators: {
+      type: "message.senders",
+      members: {
+        discord: ["discord:123456789012345678"],
+        telegram: ["987654321"],
+        whatsapp: ["+15551234567"],
+      },
+    },
+  },
+  channels: {
+    telegram: { dmPolicy: "allowlist", allowFrom: ["accessGroup:operators"] },
+    whatsapp: { groupPolicy: "allowlist", groupAllowFrom: ["accessGroup:operators"] },
+  },
+}
+```
+
+Access groups are documented in detail here: [Access groups](/channels/access-groups)
+
+### Where the state lives
+
+Stored under `~/.openclaw/credentials/`:
+
+* Pending requests: `<channel>-pairing.json`
+* Approved allowlist store:
+  * Default account: `<channel>-allowFrom.json`
+  * Non-default account: `<channel>-<accountId>-allowFrom.json`
+
+Account scoping behavior:
+
+* Non-default accounts read/write only their scoped allowlist file.
+* Default account uses the channel-scoped unscoped allowlist file.
+
+Treat these as sensitive (they gate access to your assistant).
+
+<Note>
+  The pairing allowlist store is for DM access. Group authorization is separate.
+  Approving a DM pairing code does not automatically allow that sender to run group
+  commands or control the bot in groups. First-owner bootstrap is separate config
+  state in `commands.ownerAllowFrom`, and group chat delivery still follows the
+  channel's group allowlists (for example `groupAllowFrom`, `groups`, or per-group
+  or per-topic overrides depending on the channel).
+</Note>
+
+## 2) Node device pairing (iOS/Android/macOS/headless nodes)
+
+Nodes connect to the Gateway as **devices** with `role: node`. The Gateway
+creates a device pairing request that must be approved.
+
+### Pair via Telegram (recommended for iOS)
+
+If you use the `device-pair` plugin, you can do first-time device pairing entirely from Telegram:
+
+1. In Telegram, message your bot: `/pair`
+2. The bot replies with two messages: an instruction message and a separate **setup code** message (easy to copy/paste in Telegram).
+3. On your phone, open the OpenClaw iOS app → Settings → Gateway.
+4. Scan the QR code or paste the setup code and connect.
+5. Back in Telegram: `/pair pending` (review request IDs, role, and scopes), then approve.
+
+The setup code is a base64-encoded JSON payload that contains:
+
+* `url`: the Gateway WebSocket URL (`ws://...` or `wss://...`)
+* `bootstrapToken`: a short-lived single-device bootstrap token used for the initial pairing handshake
+
+That bootstrap token carries the built-in pairing bootstrap profile:
+
+* primary handed-off `node` token stays `scopes: []`
+* any handed-off `operator` token stays bounded to the bootstrap allowlist:
+  `operator.approvals`, `operator.read`, `operator.talk.secrets`, `operator.write`
+* bootstrap scope checks are role-prefixed, not one flat scope pool:
+  operator scope entries only satisfy operator requests, and non-operator roles
+  must still request scopes under their own role prefix
+* later token rotation/revocation remains bounded by both the device's approved
+  role contract and the caller session's operator scopes
+
+Treat the setup code like a password while it is valid.
+
+For Tailscale, public, or other remote mobile pairing, use Tailscale Serve/Funnel
+or another `wss://` Gateway URL. Plaintext `ws://` setup codes are accepted only
+for loopback, private LAN addresses, `.local` Bonjour hosts, and the Android
+emulator host. Tailnet CGNAT addresses, `.ts.net` names, and public hosts still
+fail closed before QR/setup-code issuance.
+
+### Approve a node device
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw devices list
+openclaw devices approve <requestId>
+openclaw devices reject <requestId>
+```
+
+When an explicit approval is denied because the approving paired-device session
+was opened with pairing-only scope, the CLI retries the same request with
+`operator.admin`. This lets an existing admin-capable paired device recover a new
+Control UI/browser pairing without editing `devices/paired.json` by hand. The
+Gateway still validates the retried connection; tokens that cannot authenticate
+with `operator.admin` remain blocked.
+
+If the same device retries with different auth details (for example different
+role/scopes/public key), the previous pending request is superseded and a new
+`requestId` is created.
+
+<Note>
+  An already paired device does not get broader access silently. If it reconnects asking for more scopes or a broader role, OpenClaw keeps the existing approval as-is and creates a fresh pending upgrade request. Use `openclaw devices list` to compare the currently approved access with the newly requested access before you approve.
+</Note>
+
+### Optional trusted-CIDR node auto-approve
+
+Device pairing remains manual by default. For tightly controlled node networks,
+you can opt in to first-time node auto-approval with explicit CIDRs or exact IPs:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  gateway: {
+    nodes: {
+      pairing: {
+        autoApproveCidrs: ["192.168.1.0/24"],
+      },
+    },
+  },
+}
+```
+
+This only applies to fresh `role: node` pairing requests with no requested
+scopes. Operator, browser, Control UI, and WebChat clients still require manual
+approval. Role, scope, metadata, and public-key changes still require manual
+approval.
+
+### Node pairing state storage
+
+Stored under `~/.openclaw/devices/`:
+
+* `pending.json` (short-lived; pending requests expire)
+* `paired.json` (paired devices + tokens)
+
+### Notes
+
+* The legacy `node.pair.*` API (CLI: `openclaw nodes pending|approve|reject|remove|rename`) is a
+  separate gateway-owned pairing store. WS nodes still require device pairing.
+* The pairing record is the durable source of truth for approved roles. Active
+  device tokens stay bounded to that approved role set; a stray token entry
+  outside the approved roles does not create new access.
+
+## Related docs
+
+* Security model + prompt injection: [Security](/gateway/security)
+* Updating safely (run doctor): [Updating](/install/updating)
+* Channel configs:
+  * Telegram: [Telegram](/channels/telegram)
+  * WhatsApp: [WhatsApp](/channels/whatsapp)
+  * Signal: [Signal](/channels/signal)
+  * BlueBubbles (iMessage): [BlueBubbles](/channels/bluebubbles)
+  * iMessage (legacy): [iMessage](/channels/imessage)
+  * Discord: [Discord](/channels/discord)
+  * Slack: [Slack](/channels/slack)
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Slack
+
+Production-ready for DMs and channels via Slack app integrations. Default mode is Socket Mode; HTTP Request URLs are also supported.
+
+<CardGroup cols={3}>
+  <Card title="Pairing" icon="link" href="/channels/pairing">
+    Slack DMs default to pairing mode.
+  </Card>
+
+  <Card title="Slash commands" icon="terminal" href="/tools/slash-commands">
+    Native command behavior and command catalog.
+  </Card>
+
+  <Card title="Channel troubleshooting" icon="wrench" href="/channels/troubleshooting">
+    Cross-channel diagnostics and repair playbooks.
+  </Card>
+</CardGroup>
+
+## Choosing Socket Mode or HTTP Request URLs
+
+Both transports are production-ready and reach feature parity for messaging, slash commands, App Home, and interactivity. Pick by deployment shape, not features.
+
+| Concern                      | Socket Mode (default)                                                                | HTTP Request URLs                                                                                              |
+| ---------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| Public Gateway URL           | Not required                                                                         | Required (DNS, TLS, reverse proxy or tunnel)                                                                   |
+| Outbound network             | Outbound WSS to `wss-primary.slack.com` must be reachable                            | No outbound WS; inbound HTTPS only                                                                             |
+| Tokens needed                | Bot token (`xoxb-...`) + App-Level Token (`xapp-...`) with `connections:write`       | Bot token (`xoxb-...`) + Signing Secret                                                                        |
+| Dev laptop / behind firewall | Works as-is                                                                          | Needs a public tunnel (ngrok, Cloudflare Tunnel, Tailscale Funnel) or staging Gateway                          |
+| Horizontal scaling           | One Socket Mode session per app per host; multiple Gateways need separate Slack apps | Stateless POST handler; multiple Gateway replicas can share one app behind a load balancer                     |
+| Multi-account on one Gateway | Supported; each account opens its own WS                                             | Supported; each account needs a unique `webhookPath` (default `/slack/events`) so registrations do not collide |
+| Slash command transport      | Delivered over the WS connection; `slash_commands[].url` is ignored                  | Slack POSTs to `slash_commands[].url`; field is required for the command to dispatch                           |
+| Request signing              | Not used (auth is the App-Level Token)                                               | Slack signs every request; OpenClaw verifies with `signingSecret`                                              |
+| Recovery on connection drop  | Slack SDK auto-reconnects; the gateway's pong-timeout transport tuning applies       | No persistent connection to drop; retries are per-request from Slack                                           |
+
+<Note>
+  **Pick Socket Mode** for single-Gateway hosts, dev laptops, and on-prem networks that can reach `*.slack.com` outbound but cannot accept inbound HTTPS.
+
+  **Pick HTTP Request URLs** when running multiple Gateway replicas behind a load balancer, when outbound WSS is blocked but inbound HTTPS is allowed, or when you already terminate Slack webhooks at a reverse proxy.
+</Note>
+
+## Quick setup
+
+<Tabs>
+  <Tab title="Socket Mode (default)">
+    <Steps>
+      <Step title="Create a new Slack app">
+        Open [api.slack.com/apps](https://api.slack.com/apps/new) → **Create New App** → **From a manifest** → select your workspace → paste one of the manifests below → **Next** → **Create**.
+
+        <CodeGroup>
+          ```json Recommended theme={"theme":{"light":"min-light","dark":"min-dark"}}
+          {
+            "display_information": {
+              "name": "OpenClaw",
+              "description": "Slack connector for OpenClaw"
+            },
+            "features": {
+              "bot_user": { "display_name": "OpenClaw", "always_online": true },
+              "app_home": {
+                "home_tab_enabled": true,
+                "messages_tab_enabled": true,
+                "messages_tab_read_only_enabled": false
+              },
+              "slash_commands": [
+                {
+                  "command": "/openclaw",
+                  "description": "Send a message to OpenClaw",
+                  "should_escape": false
+                }
+              ]
+            },
+            "oauth_config": {
+              "scopes": {
+                "bot": [
+                  "app_mentions:read",
+                  "assistant:write",
+                  "channels:history",
+                  "channels:read",
+                  "chat:write",
+                  "commands",
+                  "emoji:read",
+                  "files:read",
+                  "files:write",
+                  "groups:history",
+                  "groups:read",
+                  "im:history",
+                  "im:read",
+                  "im:write",
+                  "mpim:history",
+                  "mpim:read",
+                  "mpim:write",
+                  "pins:read",
+                  "pins:write",
+                  "reactions:read",
+                  "reactions:write",
+                  "usergroups:read",
+                  "users:read"
+                ]
+              }
+            },
+            "settings": {
+              "socket_mode_enabled": true,
+              "event_subscriptions": {
+                "bot_events": [
+                  "app_home_opened",
+                  "app_mention",
+                  "channel_rename",
+                  "member_joined_channel",
+                  "member_left_channel",
+                  "message.channels",
+                  "message.groups",
+                  "message.im",
+                  "message.mpim",
+                  "pin_added",
+                  "pin_removed",
+                  "reaction_added",
+                  "reaction_removed"
+                ]
+              }
+            }
+          }
+          ```
+
+          ```json Minimal theme={"theme":{"light":"min-light","dark":"min-dark"}}
+          {
+            "display_information": {
+              "name": "OpenClaw",
+              "description": "Slack connector for OpenClaw"
+            },
+            "features": {
+              "bot_user": { "display_name": "OpenClaw", "always_online": true },
+              "app_home": {
+                "home_tab_enabled": true,
+                "messages_tab_enabled": true,
+                "messages_tab_read_only_enabled": false
+              },
+              "slash_commands": [
+                {
+                  "command": "/openclaw",
+                  "description": "Send a message to OpenClaw",
+                  "should_escape": false
+                }
+              ]
+            },
+            "oauth_config": {
+              "scopes": {
+                "bot": [
+                  "app_mentions:read",
+                  "assistant:write",
+                  "channels:history",
+                  "channels:read",
+                  "chat:write",
+                  "commands",
+                  "groups:history",
+                  "groups:read",
+                  "im:history",
+                  "im:read",
+                  "im:write",
+                  "users:read"
+                ]
+              }
+            },
+            "settings": {
+              "socket_mode_enabled": true,
+              "event_subscriptions": {
+                "bot_events": [
+                  "app_home_opened",
+                  "app_mention",
+                  "message.channels",
+                  "message.groups",
+                  "message.im"
+                ]
+              }
+            }
+          }
+          ```
+        </CodeGroup>
+
+        <Note>
+          **Recommended** matches the bundled Slack plugin's full feature set: App Home, slash commands, files, reactions, pins, group DMs, and emoji/usergroup reads. Pick **Minimal** when workspace policy restricts scopes — it covers DMs, channel/group history, mentions, and slash commands but drops files, reactions, pins, group-DM (`mpim:*`), `emoji:read`, and `usergroups:read`. See [Manifest and scope checklist](#manifest-and-scope-checklist) for per-scope rationale and additive options like extra slash commands.
+        </Note>
+
+        After Slack creates the app:
+
+        * **Basic Information → App-Level Tokens → Generate Token and Scopes**: add `connections:write`, save, copy the `xapp-...` value.
+        * **Install App → Install to Workspace**: copy the `xoxb-...` Bot User OAuth Token.
+      </Step>
+
+      <Step title="Configure OpenClaw">
+        Recommended SecretRef setup:
+
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        export SLACK_APP_TOKEN=xapp-...
+        export SLACK_BOT_TOKEN=xoxb-...
+        cat > slack.socket.patch.json5 <<'JSON5'
+        {
+          channels: {
+            slack: {
+              enabled: true,
+              mode: "socket",
+              appToken: { source: "env", provider: "default", id: "SLACK_APP_TOKEN" },
+              botToken: { source: "env", provider: "default", id: "SLACK_BOT_TOKEN" },
+            },
+          },
+        }
+        JSON5
+        openclaw config patch --file ./slack.socket.patch.json5 --dry-run
+        openclaw config patch --file ./slack.socket.patch.json5
+        ```
+
+        Env fallback (default account only):
+
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        SLACK_APP_TOKEN=xapp-...
+        SLACK_BOT_TOKEN=xoxb-...
+        ```
+      </Step>
+
+      <Step title="Start gateway">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw gateway
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="HTTP Request URLs">
+    <Steps>
+      <Step title="Create a new Slack app">
+        Open [api.slack.com/apps](https://api.slack.com/apps/new) → **Create New App** → **From a manifest** → select your workspace → paste one of the manifests below → replace `https://gateway-host.example.com/slack/events` with your public Gateway URL → **Next** → **Create**.
+
+        <CodeGroup>
+          ```json Recommended theme={"theme":{"light":"min-light","dark":"min-dark"}}
+          {
+            "display_information": {
+              "name": "OpenClaw",
+              "description": "Slack connector for OpenClaw"
+            },
+            "features": {
+              "bot_user": { "display_name": "OpenClaw", "always_online": true },
+              "app_home": {
+                "home_tab_enabled": true,
+                "messages_tab_enabled": true,
+                "messages_tab_read_only_enabled": false
+              },
+              "slash_commands": [
+                {
+                  "command": "/openclaw",
+                  "description": "Send a message to OpenClaw",
+                  "should_escape": false,
+                  "url": "https://gateway-host.example.com/slack/events"
+                }
+              ]
+            },
+            "oauth_config": {
+              "scopes": {
+                "bot": [
+                  "app_mentions:read",
+                  "assistant:write",
+                  "channels:history",
+                  "channels:read",
+                  "chat:write",
+                  "commands",
+                  "emoji:read",
+                  "files:read",
+                  "files:write",
+                  "groups:history",
+                  "groups:read",
+                  "im:history",
+                  "im:read",
+                  "im:write",
+                  "mpim:history",
+                  "mpim:read",
+                  "mpim:write",
+                  "pins:read",
+                  "pins:write",
+                  "reactions:read",
+                  "reactions:write",
+                  "usergroups:read",
+                  "users:read"
+                ]
+              }
+            },
+            "settings": {
+              "event_subscriptions": {
+                "request_url": "https://gateway-host.example.com/slack/events",
+                "bot_events": [
+                  "app_home_opened",
+                  "app_mention",
+                  "channel_rename",
+                  "member_joined_channel",
+                  "member_left_channel",
+                  "message.channels",
+                  "message.groups",
+                  "message.im",
+                  "message.mpim",
+                  "pin_added",
+                  "pin_removed",
+                  "reaction_added",
+                  "reaction_removed"
+                ]
+              },
+              "interactivity": {
+                "is_enabled": true,
+                "request_url": "https://gateway-host.example.com/slack/events",
+                "message_menu_options_url": "https://gateway-host.example.com/slack/events"
+              }
+            }
+          }
+          ```
+
+          ```json Minimal theme={"theme":{"light":"min-light","dark":"min-dark"}}
+          {
+            "display_information": {
+              "name": "OpenClaw",
+              "description": "Slack connector for OpenClaw"
+            },
+            "features": {
+              "bot_user": { "display_name": "OpenClaw", "always_online": true },
+              "app_home": {
+                "home_tab_enabled": true,
+                "messages_tab_enabled": true,
+                "messages_tab_read_only_enabled": false
+              },
+              "slash_commands": [
+                {
+                  "command": "/openclaw",
+                  "description": "Send a message to OpenClaw",
+                  "should_escape": false,
+                  "url": "https://gateway-host.example.com/slack/events"
+                }
+              ]
+            },
+            "oauth_config": {
+              "scopes": {
+                "bot": [
+                  "app_mentions:read",
+                  "assistant:write",
+                  "channels:history",
+                  "channels:read",
+                  "chat:write",
+                  "commands",
+                  "groups:history",
+                  "groups:read",
+                  "im:history",
+                  "im:read",
+                  "im:write",
+                  "users:read"
+                ]
+              }
+            },
+            "settings": {
+              "event_subscriptions": {
+                "request_url": "https://gateway-host.example.com/slack/events",
+                "bot_events": [
+                  "app_home_opened",
+                  "app_mention",
+                  "message.channels",
+                  "message.groups",
+                  "message.im"
+                ]
+              },
+              "interactivity": {
+                "is_enabled": true,
+                "request_url": "https://gateway-host.example.com/slack/events",
+                "message_menu_options_url": "https://gateway-host.example.com/slack/events"
+              }
+            }
+          }
+          ```
+        </CodeGroup>
+
+        <Note>
+          **Recommended** matches the bundled Slack plugin's full feature set; **Minimal** drops files, reactions, pins, group-DM (`mpim:*`), `emoji:read`, and `usergroups:read` for restrictive workspaces. See [Manifest and scope checklist](#manifest-and-scope-checklist) for per-scope rationale.
+        </Note>
+
+        <Info>
+          The three URL fields (`slash_commands[].url`, `event_subscriptions.request_url`, and `interactivity.request_url` / `message_menu_options_url`) all point at the same OpenClaw endpoint. Slack's manifest schema requires them named separately, but OpenClaw routes by payload type so a single `webhookPath` (default `/slack/events`) is enough. Slash commands without `slash_commands[].url` will silently no-op in HTTP mode.
+        </Info>
+
+        After Slack creates the app:
+
+        * **Basic Information → App Credentials**: copy the **Signing Secret** for request verification.
+        * **Install App → Install to Workspace**: copy the `xoxb-...` Bot User OAuth Token.
+      </Step>
+
+      <Step title="Configure OpenClaw">
+        Recommended SecretRef setup:
+
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        export SLACK_BOT_TOKEN=xoxb-...
+        export SLACK_SIGNING_SECRET=...
+        cat > slack.http.patch.json5 <<'JSON5'
+        {
+          channels: {
+            slack: {
+              enabled: true,
+              mode: "http",
+              botToken: { source: "env", provider: "default", id: "SLACK_BOT_TOKEN" },
+              signingSecret: { source: "env", provider: "default", id: "SLACK_SIGNING_SECRET" },
+              webhookPath: "/slack/events",
+            },
+          },
+        }
+        JSON5
+        openclaw config patch --file ./slack.http.patch.json5 --dry-run
+        openclaw config patch --file ./slack.http.patch.json5
+        ```
+
+        <Note>
+          Use unique webhook paths for multi-account HTTP
+
+          Give each account a distinct `webhookPath` (default `/slack/events`) so registrations do not collide.
+        </Note>
+      </Step>
+
+      <Step title="Start gateway">
+        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        openclaw gateway
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Socket Mode transport tuning
+
+OpenClaw sets the Slack SDK client pong timeout to 15 seconds by default for Socket Mode. Override the transport settings only when you need workspace- or host-specific tuning:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    slack: {
+      mode: "socket",
+      socketMode: {
+        clientPingTimeout: 20000,
+        serverPingTimeout: 30000,
+        pingPongLoggingEnabled: false,
+      },
+    },
+  },
+}
+```
+
+Use this only for Socket Mode workspaces that log Slack websocket pong/server-ping timeouts or run on hosts with known event-loop starvation. `clientPingTimeout` is the pong wait after the SDK sends a client ping; `serverPingTimeout` is the wait for Slack server pings. App messages and events remain application state, not transport liveness signals.
+
+## Manifest and scope checklist
+
+The base Slack app manifest is the same for Socket Mode and HTTP Request URLs. Only the `settings` block (and the slash command `url`) differs.
+
+Base manifest (Socket Mode default):
+
+```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  "display_information": {
+    "name": "OpenClaw",
+    "description": "Slack connector for OpenClaw"
+  },
+  "features": {
+    "bot_user": { "display_name": "OpenClaw", "always_online": true },
+    "app_home": {
+      "home_tab_enabled": true,
+      "messages_tab_enabled": true,
+      "messages_tab_read_only_enabled": false
+    },
+    "slash_commands": [
+      {
+        "command": "/openclaw",
+        "description": "Send a message to OpenClaw",
+        "should_escape": false
+      }
     ]
   },
-  \"broadcast\": {
-    \"strategy\": \"parallel\",
-    \"120363403215116621@g.us\": [\"code-reviewer\", \"security-auditor\", \"docs-generator\"],
-    \"120363424282127706@g.us\": [\"support-en\", \"support-de\"],
-    \"+15555550123\": [\"assistant\", \"logger\"]
-  }
-}
-```
-
-## [​](https://docs.openclaw.ai/channels/broadcast-groups\\#how-it-works) How it works
-
-### [​](https://docs.openclaw.ai/channels/broadcast-groups\\#message-flow) Message flow
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/channels/broadcast-groups#)
-
-Incoming message arrives
-
-A WhatsApp group or DM message arrives.
-
-2
-
-[Navigate to header](https://docs.openclaw.ai/channels/broadcast-groups#)
-
-Broadcast check
-
-System checks if peer ID is in `broadcast`.
-
-3
-
-[Navigate to header](https://docs.openclaw.ai/channels/broadcast-groups#)
-
-If in broadcast list
-
-- All listed agents process the message.
-- Each agent has its own session key and isolated context.
-- Agents process in parallel (default) or sequentially.
-
-4
-
-[Navigate to header](https://docs.openclaw.ai/channels/broadcast-groups#)
-
-If not in broadcast list
-
-Normal routing applies (first matching binding).
-
-Broadcast groups do not bypass channel allowlists or group activation rules (mentions/commands/etc). They only change _which agents run_ when a message is eligible for processing.
-
-### [​](https://docs.openclaw.ai/channels/broadcast-groups\\#session-isolation) Session isolation
-
-Each agent in a broadcast group maintains completely separate:
-
-- **Session keys** (`agent:alfred:whatsapp:group:120363...` vs `agent:baerbel:whatsapp:group:120363...`)
-- **Conversation history** (agent doesn’t see other agents’ messages)
-- **Workspace** (separate sandboxes if configured)
-- **Tool access** (different allow/deny lists)
-- **Memory/context** (separate IDENTITY.md, SOUL.md, etc.)
-- **Group context buffer** (recent group messages used for context) is shared per peer, so all broadcast agents see the same context when triggered
-
-This allows each agent to have:
-
-- Different personalities
-- Different tool access (e.g., read-only vs. read-write)
-- Different models (e.g., opus vs. sonnet)
-- Different skills installed
-
-### [​](https://docs.openclaw.ai/channels/broadcast-groups\\#example-isolated-sessions) Example: isolated sessions
-
-In group `120363403215116621@g.us` with agents `[\"alfred\", \"baerbel\"]`:
-
-- Alfred\'s context
-
-- Bärbel\'s context
-
-
-```
-Session: agent:alfred:whatsapp:group:120363403215116621@g.us
-History: [user message, alfred\'s previous responses]
-Workspace: /Users/user/openclaw-alfred/
-Tools: read, write, exec
-```
-
-```
-Session: agent:baerbel:whatsapp:group:120363403215116621@g.us
-History: [user message, baerbel\'s previous responses]
-Workspace: /Users/user/openclaw-baerbel/
-Tools: read only
-```
-
-## [​](https://docs.openclaw.ai/channels/broadcast-groups\\#best-practices) Best practices
-
-1\. Keep agents focused
-
-Design each agent with a single, clear responsibility:
-
-```
-{
-  \"broadcast\": {
-    \"DEV_GROUP\": [\"formatter\", \"linter\", \"tester\"]
-  }
-}
-```
-
-✅ **Good:** Each agent has one job. ❌ **Bad:** One generic “dev-helper” agent.
-
-2\. Use descriptive names
-
-Make it clear what each agent does:
-
-```
-{
-  \"agents\": {
-    \"security-scanner\": { \"name\": \"Security Scanner\" },
-    \"code-formatter\": { \"name\": \"Code Formatter\" },
-    \"test-generator\": { \"name\": \"Test Generator\" }
-  }
-}
-```
-
-3\. Configure different tool access
-
-Give agents only the tools they need:
-
-```
-{
-  \"agents\": {
-    \"reviewer\": {
-      \"tools\": { \"allow\": [\"read\", \"exec\"] } // Read-only
-    },
-    \"fixer\": {
-      \"tools\": { \"allow\": [\"read\", \"write\", \"edit\", \"exec\"] } // Read-write
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "app_mentions:read",
+        "assistant:write",
+        "channels:history",
+        "channels:read",
+        "chat:write",
+        "commands",
+        "emoji:read",
+        "files:read",
+        "files:write",
+        "groups:history",
+        "groups:read",
+        "im:history",
+        "im:read",
+        "im:write",
+        "mpim:history",
+        "mpim:read",
+        "mpim:write",
+        "pins:read",
+        "pins:write",
+        "reactions:read",
+        "reactions:write",
+        "usergroups:read",
+        "users:read"
+      ]
+    }
+  },
+  "settings": {
+    "socket_mode_enabled": true,
+    "event_subscriptions": {
+      "bot_events": [
+        "app_home_opened",
+        "app_mention",
+        "channel_rename",
+        "member_joined_channel",
+        "member_left_channel",
+        "message.channels",
+        "message.groups",
+        "message.im",
+        "message.mpim",
+        "pin_added",
+        "pin_removed",
+        "reaction_added",
+        "reaction_removed"
+      ]
     }
   }
 }
 ```
 
-4\. Monitor performance
+For **HTTP Request URLs mode**, replace `settings` with the HTTP variant and add `url` to each slash command. Public URL required:
 
-With many agents, consider:
-
-- Using `\"strategy\": \"parallel\"` (default) for speed
-- Limiting broadcast groups to 5-10 agents
-- Using faster models for simpler agents
-
-5\. Handle failures gracefully
-
-Agents fail independently. One agent’s error doesn’t block others:
-
-```
-Message → [Agent A ✓, Agent B ✗ error, Agent C ✓]
-Result: Agent A and C respond, Agent B logs error
-```
-
-## [​](https://docs.openclaw.ai/channels/broadcast-groups\\#compatibility) Compatibility
-
-### [​](https://docs.openclaw.ai/channels/broadcast-groups\\#providers) Providers
-
-Broadcast groups currently work with:
-
-- ✅ WhatsApp (implemented)
-- 🚧 Telegram (planned)
-- 🚧 Discord (planned)
-- 🚧 Slack (planned)
-
-### [​](https://docs.openclaw.ai/channels/broadcast-groups\\#routing) Routing
-
-Broadcast groups work alongside existing routing:
-
-```
+```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-  \"bindings\": [\\\
-    {\\\\n      \"match\": { \"channel\": \"whatsapp\", \"peer\": { \"kind\": \"group\", \"id\": \"GROUP_A\" } },\\\
-      \"agentId\": \"alfred\"\\\
-    }\\\\n  ],
-  \"broadcast\": {
-    \"GROUP_B\": [\"agent1\", \"agent2\"]
-  }
-}
-```
-
-- `GROUP_A`: Only alfred responds (normal routing).
-- `GROUP_B`: agent1 AND agent2 respond (broadcast).
-
-**Precedence:**`broadcast` takes priority over `bindings`.
-
-## [​](https://docs.openclaw.ai/channels/broadcast-groups\\#troubleshooting) Troubleshooting
-
-Agents not responding
-
-**Check:**
-
-1. Agent IDs exist in `agents.list`.
-2. Peer ID format is correct (e.g., `120363403215116621@g.us`).
-3. Agents are not in deny lists.
-
-**Debug:**
-
-```
-tail -f ~/.openclaw/logs/gateway.log | grep broadcast
-```
-
-Only one agent responding
-
-**Cause:** Peer ID might be in `bindings` but not `broadcast`.**Fix:** Add to broadcast config or remove from bindings.
-
-Performance issues
-
-If slow with many agents:
-
-- Reduce number of agents per group.
-- Use lighter models (sonnet instead of opus).
-- Check sandbox startup time.
-
-## [​](https://docs.openclaw.ai/channels/broadcast-groups\\#examples) Examples
-
-Example 1: Code review team
-
-```
-{
-  \"broadcast\": {
-    \"strategy\": \"parallel\",
-    \"120363403215116621@g.us\": [\\\
-      \"code-formatter\",\\\
-      \"security-scanner\",\\\
-      \"test-coverage\",\\\
-      \"docs-checker\"\\\
+  "features": {
+    "slash_commands": [
+      {
+        "command": "/openclaw",
+        "description": "Send a message to OpenClaw",
+        "should_escape": false,
+        "url": "https://gateway-host.example.com/slack/events"
+      }
     ]
   },
-  \"agents\": {
-    \"list\": [\\\
-      {\\\\n        \"id\": \"code-formatter\",\\\
-        \"workspace\": \"~/agents/formatter\",\\\
-        \"tools\": { \"allow\": [\"read\", \"write\"] }\\\
-      },\\\n      {\\\\n        \"id\": \"security-scanner\",\\\
-        \"workspace\": \"~/agents/security\",\\\
-        \"tools\": { \"allow\": [\"read\", \"exec\"] }\\\
-      },\\\n      {\\\\n        \"id\": \"test-coverage\",\\\
-        \"workspace\": \"~/agents/testing\",\\\
-        \"tools\": { \"allow\": [\"read\", \"exec\"] }\\\
-      },\\\n      { \"id\": \"docs-checker\", \"workspace\": \"~/agents/docs\", \"tools\": { \"allow\": [\"read\"] } }\\\
-    ]
-  }
-}
-```
-
-**User sends:** Code snippet.**Responses:**
-
-- code-formatter: “Fixed indentation and added type hints”
-- security-scanner: “⚠️ SQL injection vulnerability in line 12”
-- test-coverage: “Coverage is 45%, missing tests for error cases”
-- docs-checker: “Missing docstring for function `process_data`”
-
-Example 2: Multi-language support
-
-```
-{
-  \"broadcast\": {
-    \"strategy\": \"sequential\",
-    \"+15555550123\": [\"detect-language\", \"translator-en\", \"translator-de\"]
-  },
-  \"agents\": {
-    \"list\": [\\\
-      { \"id\": \"detect-language\", \"workspace\": \"~/agents/lang-detect\" },\\\
-      { \"id\": \"translator-en\", \"workspace\": \"~/agents/translate-en\" },\\\
-      { \"id\": \"translator-de\", \"workspace\": \"~/agents/translate-de\" }\\\
-    ]
-  }
-}
-```
-
-## [​](https://docs.openclaw.ai/channels/broadcast-groups\\#api-reference) API reference
-
-### [​](https://docs.openclaw.ai/channels/broadcast-groups\\#config-schema) Config schema
-
-```
-interface OpenClawConfig {
-  broadcast?: {
-    strategy?: \"parallel\" | \"sequential\";
-    [peerId: string]: string[];
-  };
-}
-```
-
-### [​](https://docs.openclaw.ai/channels/broadcast-groups\\#fields) Fields
-
-[​](https://docs.openclaw.ai/channels/broadcast-groups#param-strategy)
-
-strategy
-
-\"parallel\" \\| \"sequential\"
-
-default:\"\\\\\"parallel\\\\\"\"
-
-How to process agents. `parallel` runs all agents simultaneously; `sequential` runs them in array order.
-
-[​](https://docs.openclaw.ai/channels/broadcast-groups#param-peer-id)
-
-\\[peerId\\]
-
-string\\[\\]
-
-WhatsApp group JID, E.164 number, or other peer ID. Value is the array of agent IDs that should process messages.
-
-## [​](https://docs.openclaw.ai/channels/broadcast-groups\\#limitations) Limitations
-
-1. **Max agents:** No hard limit, but 10+ agents may be slow.
-2. **Shared context:** Agents don’t see each other’s responses (by design).
-3. **Message ordering:** Parallel responses may arrive in any order.
-4. **Rate limits:** All agents count toward WhatsApp rate limits.
-
-## [​](https://docs.openclaw.ai/channels/broadcast-groups\\#future-enhancements) Future enhancements
-
-Planned features:
-
-- [ ] Shared context mode (agents see each other’s responses)
-- [ ] Agent coordination (agents can signal each other)
-- [ ] Dynamic agent selection (choose agents based on message content)
-- [ ] Agent priorities (some agents respond before others)
-
-## [​](https://docs.openclaw.ai/channels/broadcast-groups\\#related) Related
-
-- [Channel routing](https://docs.openclaw.ai/channels/channel-routing)
-- [Groups](https://docs.openclaw.ai/channels/groups)
-- [Multi-agent sandbox tools](https://docs.openclaw.ai/tools/multi-agent-sandbox-tools)
-- [Pairing](https://docs.openclaw.ai/channels/pairing)
-- [Session management](https://docs.openclaw.ai/concepts/session)
-
-[Groups](https://docs.openclaw.ai/channels/groups) [Channel routing](https://docs.openclaw.ai/channels/channel-routing)
-
-Ctrl+I
-
----
-
-## WhatsApp
-**Source:** https://docs.openclaw.ai/channels/whatsapp
-
-[Skip to main content](https://docs.openclaw.ai/channels/whatsapp#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Mainstream messaging
-
-WhatsApp
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Install (on demand)](https://docs.openclaw.ai/channels/whatsapp#install-on-demand)
-- [Quick setup](https://docs.openclaw.ai/channels/whatsapp#quick-setup)
-- [Deployment patterns](https://docs.openclaw.ai/channels/whatsapp#deployment-patterns)
-- [Runtime model](https://docs.openclaw.ai/channels/whatsapp#runtime-model)
-- [Plugin hooks and privacy](https://docs.openclaw.ai/channels/whatsapp#plugin-hooks-and-privacy)
-- [Access control and activation](https://docs.openclaw.ai/channels/whatsapp#access-control-and-activation)
-- [Personal-number and self-chat behavior](https://docs.openclaw.ai/channels/whatsapp#personal-number-and-self-chat-behavior)
-- [Message normalization and context](https://docs.openclaw.ai/channels/whatsapp#message-normalization-and-context)
-- [Delivery, chunking, and media](https://docs.openclaw.ai/channels/whatsapp#delivery-chunking-and-media)
-- [Reply quoting](https://docs.openclaw.ai/channels/whatsapp#reply-quoting)
-- [Reaction level](https://docs.openclaw.ai/channels/whatsapp#reaction-level)
-- [Acknowledgment reactions](https://docs.openclaw.ai/channels/whatsapp#acknowledgment-reactions)
-- [Multi-account and credentials](https://docs.openclaw.ai/channels/whatsapp#multi-account-and-credentials)
-- [Tools, actions, and config writes](https://docs.openclaw.ai/channels/whatsapp#tools-actions-and-config-writes)
-- [Troubleshooting](https://docs.openclaw.ai/channels/whatsapp#troubleshooting)
-- [System prompts](https://docs.openclaw.ai/channels/whatsapp#system-prompts)
-- [Configuration reference pointers](https://docs.openclaw.ai/channels/whatsapp#configuration-reference-pointers)
-- [Related](https://docs.openclaw.ai/channels/whatsapp#related)
-
-Status: production-ready via WhatsApp Web (Baileys). Gateway owns linked session(s).
-
-## [​](https://docs.openclaw.ai/channels/whatsapp\\#install-on-demand)  Install (on demand)
-
-- Onboarding (`openclaw onboard`) and `openclaw channels add --channel whatsapp`
-prompt to install the WhatsApp plugin the first time you select it.
-- `openclaw channels login --channel whatsapp` also offers the install flow when
-the plugin is not present yet.
-- Dev channel + git checkout: defaults to the local plugin path.
-- Stable/Beta: defaults to the npm package `@openclaw/whatsapp`.
-
-Manual install stays available:
-
-```
-openclaw plugins install @openclaw/whatsapp
-```
-
-[**Pairing** \\\\\n\\\\\nDefault DM policy is pairing for unknown senders.](https://docs.openclaw.ai/channels/pairing)
-
-[**Channel troubleshooting** \\\\\n\\\\\nCross-channel diagnostics and repair playbooks.](https://docs.openclaw.ai/channels/troubleshooting)
-
-[**Gateway configuration** \\\\\n\\\\\nFull channel config patterns and examples.](https://docs.openclaw.ai/gateway/configuration)
-
-## [​](https://docs.openclaw.ai/channels/whatsapp\\#quick-setup)  Quick setup
-
-1
-
-[Navigate to header](https://docs.openclaw.ai/channels/whatsapp#)
-
-Configure WhatsApp access policy
-
-```
-{
-  channels: {
-    whatsapp: {
-      dmPolicy: \"pairing\",
-      allowFrom: [\"+15551234567\"],
-      groupPolicy: \"allowlist\",
-      groupAllowFrom: [\"+15551234567\"],
+  "settings": {
+    "event_subscriptions": {
+      "request_url": "https://gateway-host.example.com/slack/events",
+      "bot_events": [
+        "app_home_opened",
+        "app_mention",
+        "channel_rename",
+        "member_joined_channel",
+        "member_left_channel",
+        "message.channels",
+        "message.groups",
+        "message.im",
+        "message.mpim",
+        "pin_added",
+        "pin_removed",
+        "reaction_added",
+        "reaction_removed"
+      ]
     },
-  },
+    "interactivity": {
+      "is_enabled": true,
+      "request_url": "https://gateway-host.example.com/slack/events",
+      "message_menu_options_url": "https://gateway-host.example.com/slack/events"
+    }
+  }
 }
 ```
 
-2
+### Additional manifest settings
 
-[Navigate to header](https://docs.openclaw.ai/channels/whatsapp#)
+Surface different features that extend the above defaults.
 
-Link WhatsApp (QR)
+The default manifest enables the Slack App Home **Home** tab and subscribes to `app_home_opened`. When a workspace member opens the Home tab, OpenClaw publishes a safe default Home view with `views.publish`; no conversation payload or private configuration is included. The **Messages** tab remains enabled for Slack DMs.
 
-```
-openclaw channels login --channel whatsapp
-```
+<AccordionGroup>
+  <Accordion title="Optional native slash commands">
+    Multiple [native slash commands](#commands-and-slash-behavior) can be used instead of a single configured command with nuance:
 
-For a specific account:
+    * Use `/agentstatus` instead of `/status` because the `/status` command is reserved.
+    * No more than 25 slash commands can be made available at once.
 
-```
-openclaw channels login --channel whatsapp --account work
-```
+    Replace your existing `features.slash_commands` section with a subset of [available commands](/tools/slash-commands#command-list):
 
-To attach an existing/custom WhatsApp Web auth directory before login:
+    <Tabs>
+      <Tab title="Socket Mode (default)">
+        ```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        {
+          "slash_commands": [
+            {
+              "command": "/new",
+              "description": "Start a new session",
+              "usage_hint": "[model]"
+            },
+            {
+              "command": "/reset",
+              "description": "Reset the current session"
+            },
+            {
+              "command": "/compact",
+              "description": "Compact the session context",
+              "usage_hint": "[instructions]"
+            },
+            {
+              "command": "/stop",
+              "description": "Stop the current run"
+            },
+            {
+              "command": "/session",
+              "description": "Manage thread-binding expiry",
+              "usage_hint": "idle <duration|off> or max-age <duration|off>"
+            },
+            {
+              "command": "/think",
+              "description": "Set the thinking level",
+              "usage_hint": "<level>"
+            },
+            {
+              "command": "/verbose",
+              "description": "Toggle verbose output",
+              "usage_hint": "on|off|full"
+            },
+            {
+              "command": "/fast",
+              "description": "Show or set fast mode",
+              "usage_hint": "[status|on|off]"
+            },
+            {
+              "command": "/reasoning",
+              "description": "Toggle reasoning visibility",
+              "usage_hint": "[on|off|stream]"
+            },
+            {
+              "command": "/elevated",
+              "description": "Toggle elevated mode",
+              "usage_hint": "[on|off|ask|full]"
+            },
+            {
+              "command": "/exec",
+              "description": "Show or set exec defaults",
+              "usage_hint": "host=<auto|sandbox|gateway|node> security=<deny|allowlist|full> ask=<off|on-miss|always> node=<id>"
+            },
+            {
+              "command": "/model",
+              "description": "Show or set the model",
+              "usage_hint": "[name|#|status]"
+            },
+            {
+              "command": "/models",
+              "description": "List providers/models",
+              "usage_hint": "[provider] [page] [limit=<n>|size=<n>|all]"
+            },
+            {
+              "command": "/help",
+              "description": "Show the short help summary"
+            },
+            {
+              "command": "/commands",
+              "description": "Show the generated command catalog"
+            },
+            {
+              "command": "/tools",
+              "description": "Show what the current agent can use right now",
+              "usage_hint": "[compact|verbose]"
+            },
+            {
+              "command": "/agentstatus",
+              "description": "Show runtime status, including provider usage/quota when available"
+            },
+            {
+              "command": "/tasks",
+              "description": "List active/recent background tasks for the current session"
+            },
+            {
+              "command": "/context",
+              "description": "Explain how context is assembled",
+              "usage_hint": "[list|detail|json]"
+            },
+            {
+              "command": "/whoami",
+              "description": "Show your sender identity"
+            },
+            {
+              "command": "/skill",
+              "description": "Run a skill by name",
+              "usage_hint": "<name> [input]"
+            },
+            {
+              "command": "/btw",
+              "description": "Ask a side question without changing session context",
+              "usage_hint": "<question>"
+            },
+            {
+              "command": "/side",
+              "description": "Ask a side question without changing session context",
+              "usage_hint": "<question>"
+            },
+            {
+              "command": "/usage",
+              "description": "Control the usage footer or show cost summary",
+              "usage_hint": "off|tokens|full|cost"
+            }
+          ]
+        }
+        ```
+      </Tab>
 
-```
-openclaw channels add --channel whatsapp --account work --auth-dir /path/to/wa-auth
-openclaw channels login --channel whatsapp --account work
-```
+      <Tab title="HTTP Request URLs">
+        Use the same `slash_commands` list as Socket Mode above, and add `"url": "https://gateway-host.example.com/slack/events"` to every entry. Example:
 
-3
+        ```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        {
+          "slash_commands": [
+            {
+              "command": "/new",
+              "description": "Start a new session",
+              "usage_hint": "[model]",
+              "url": "https://gateway-host.example.com/slack/events"
+            },
+            {
+              "command": "/help",
+              "description": "Show the short help summary",
+              "url": "https://gateway-host.example.com/slack/events"
+            }
+          ]
+        }
+        ```
 
-[Navigate to header](https://docs.openclaw.ai/channels/whatsapp#)
+        Repeat that `url` value on every command in the list.
+      </Tab>
+    </Tabs>
+  </Accordion>
 
-Start the gateway
+  <Accordion title="Optional authorship scopes (write operations)">
+    Add the `chat:write.customize` bot scope if you want outgoing messages to use the active agent identity (custom username and icon) instead of the default Slack app identity.
 
-```
-openclaw gateway
-```
+    If you use an emoji icon, Slack expects `:emoji_name:` syntax.
+  </Accordion>
 
-4
+  <Accordion title="Optional user-token scopes (read operations)">
+    If you configure `channels.slack.userToken`, typical read scopes are:
 
-[Navigate to header](https://docs.openclaw.ai/channels/whatsapp#)
+    * `channels:history`, `groups:history`, `im:history`, `mpim:history`
+    * `channels:read`, `groups:read`, `im:read`, `mpim:read`
+    * `users:read`
+    * `reactions:read`
+    * `pins:read`
+    * `emoji:read`
+    * `search:read` (if you depend on Slack search reads)
+  </Accordion>
+</AccordionGroup>
 
-Approve first pairing request (if using pairing mode)
+## Token model
 
-```
-openclaw pairing list whatsapp
-openclaw pairing approve whatsapp <CODE>
-```
+* `botToken` + `appToken` are required for Socket Mode.
+* HTTP mode requires `botToken` + `signingSecret`.
+* `botToken`, `appToken`, `signingSecret`, and `userToken` accept plaintext
+  strings or SecretRef objects.
+* Config tokens override env fallback.
+* `SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN` env fallback applies only to the default account.
+* `userToken` (`xoxp-...`) is config-only (no env fallback) and defaults to read-only behavior (`userTokenReadOnly: true`).
 
-Pairing requests expire after 1 hour. Pending requests are capped at 3 per channel.
+Status snapshot behavior:
 
-OpenClaw recommends running WhatsApp on a separate number when possible. (The channel metadata and setup flow are optimized for that setup, but personal-number setups are also supported.)
+* Slack account inspection tracks per-credential `*Source` and `*Status`
+  fields (`botToken`, `appToken`, `signingSecret`, `userToken`).
+* Status is `available`, `configured_unavailable`, or `missing`.
+* `configured_unavailable` means the account is configured through SecretRef
+  or another non-inline secret source, but the current command/runtime path
+  could not resolve the actual value.
+* In HTTP mode, `signingSecretStatus` is included; in Socket Mode, the
+  required pair is `botTokenStatus` + `appTokenStatus`.
 
-## [​](https://docs.openclaw.ai/channels/whatsapp\\#deployment-patterns)  Deployment patterns
+<Tip>
+  For actions/directory reads, user token can be preferred when configured. For writes, bot token remains preferred; user-token writes are only allowed when `userTokenReadOnly: false` and bot token is unavailable.
+</Tip>
 
-Dedicated number (recommended)
+## Actions and gates
 
-This is the cleanest operational mode:
+Slack actions are controlled by `channels.slack.actions.*`.
 
-- separate WhatsApp identity for OpenClaw
-- clearer DM allowlists and routing boundaries
-- lower chance of self-chat confusion
+Available action groups in current Slack tooling:
 
-Minimal policy pattern:
+| Group      | Default |
+| ---------- | ------- |
+| messages   | enabled |
+| reactions  | enabled |
+| pins       | enabled |
+| memberInfo | enabled |
+| emojiList  | enabled |
 
-```
+Current Slack message actions include `send`, `upload-file`, `download-file`, `read`, `edit`, `delete`, `pin`, `unpin`, `list-pins`, `member-info`, and `emoji-list`. `download-file` accepts Slack file IDs shown in inbound file placeholders and returns image previews for images or local file metadata for other file types.
+
+## Access control and routing
+
+<Tabs>
+  <Tab title="DM policy">
+    `channels.slack.dmPolicy` controls DM access. `channels.slack.allowFrom` is the canonical DM allowlist.
+
+    * `pairing` (default)
+    * `allowlist`
+    * `open` (requires `channels.slack.allowFrom` to include `"*"`)
+    * `disabled`
+
+    DM flags:
+
+    * `dm.enabled` (default true)
+    * `channels.slack.allowFrom`
+    * `dm.allowFrom` (legacy)
+    * `dm.groupEnabled` (group DMs default false)
+    * `dm.groupChannels` (optional MPIM allowlist)
+
+    Multi-account precedence:
+
+    * `channels.slack.accounts.default.allowFrom` applies only to the `default` account.
+    * Named accounts inherit `channels.slack.allowFrom` when their own `allowFrom` is unset.
+    * Named accounts do not inherit `channels.slack.accounts.default.allowFrom`.
+
+    Legacy `channels.slack.dm.policy` and `channels.slack.dm.allowFrom` still read for compatibility. `openclaw doctor --fix` migrates them to `dmPolicy` and `allowFrom` when it can do so without changing access.
+
+    Pairing in DMs uses `openclaw pairing approve slack <code>`.
+  </Tab>
+
+  <Tab title="Channel policy">
+    `channels.slack.groupPolicy` controls channel handling:
+
+    * `open`
+    * `allowlist`
+    * `disabled`
+
+    Channel allowlist lives under `channels.slack.channels` and **must use stable Slack channel IDs** (for example `C12345678`) as config keys.
+
+    Runtime note: if `channels.slack` is completely missing (env-only setup), runtime falls back to `groupPolicy="allowlist"` and logs a warning (even if `channels.defaults.groupPolicy` is set).
+
+    Name/ID resolution:
+
+    * channel allowlist entries and DM allowlist entries are resolved at startup when token access allows
+    * unresolved channel-name entries are kept as configured but ignored for routing by default
+    * inbound authorization and channel routing are ID-first by default; direct username/slug matching requires `channels.slack.dangerouslyAllowNameMatching: true`
+
+    <Warning>
+      Name-based keys (`#channel-name` or `channel-name`) do **not** match under `groupPolicy: "allowlist"`. The channel lookup is ID-first by default, so a name-based key will never route successfully and all messages in that channel will be silently blocked. This differs from `groupPolicy: "open"`, where the channel key is not required for routing and a name-based key appears to work.
+
+      Always use the Slack channel ID as the key. To find it: right-click the channel in Slack → **Copy link** — the ID (`C...`) appears at the end of the URL.
+
+      Correct:
+
+      ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+      {
+        channels: {
+          slack: {
+            groupPolicy: "allowlist",
+            channels: {
+              C12345678: { allow: true, requireMention: true },
+            },
+          },
+        },
+      }
+      ```
+
+      Incorrect (silently blocked under `groupPolicy: "allowlist"`):
+
+      ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+      {
+        channels: {
+          slack: {
+            groupPolicy: "allowlist",
+            channels: {
+              "#eng-my-channel": { allow: true, requireMention: true },
+            },
+          },
+        },
+      }
+      ```
+    </Warning>
+  </Tab>
+
+  <Tab title="Mentions and channel users">
+    Channel messages are mention-gated by default.
+
+    Mention sources:
+
+    * explicit app mention (`<@botId>`)
+    * Slack user-group mention (`<!subteam^S...>`) when the bot user is a member of that user group; requires `usergroups:read`
+    * mention regex patterns (`agents.list[].groupChat.mentionPatterns`, fallback `messages.groupChat.mentionPatterns`)
+    * implicit reply-to-bot thread behavior (disabled when `thread.requireExplicitMention` is `true`)
+
+    Per-channel controls (`channels.slack.channels.<id>`; names only via startup resolution or `dangerouslyAllowNameMatching`):
+
+    * `requireMention`
+    * `users` (allowlist)
+    * `allowBots`
+    * `skills`
+    * `systemPrompt`
+    * `tools`, `toolsBySender`
+    * `toolsBySender` key format: `id:`, `e164:`, `username:`, `name:`, or `"*"` wildcard
+      (legacy unprefixed keys still map to `id:` only)
+
+    `allowBots` is conservative for channels and private channels: bot-authored room messages are accepted only when the sending bot is explicitly listed in that room's `users` allowlist, or when at least one explicit Slack owner ID from `channels.slack.allowFrom` is currently a room member. Wildcards and display-name owner entries do not satisfy owner presence. Owner presence uses Slack `conversations.members`; make sure the app has the matching read scope for the room type (`channels:read` for public channels, `groups:read` for private channels). If the member lookup fails, OpenClaw drops the bot-authored room message.
+  </Tab>
+</Tabs>
+
+## Threading, sessions, and reply tags
+
+* DMs route as `direct`; channels as `channel`; MPIMs as `group`.
+* Slack route bindings accept raw peer IDs plus Slack target forms such as `channel:C12345678`, `user:U12345678`, and `<@U12345678>`.
+* With default `session.dmScope=main`, Slack DMs collapse to agent main session.
+* Channel sessions: `agent:<agentId>:slack:channel:<channelId>`.
+* Thread replies can create thread session suffixes (`:thread:<threadTs>`) when applicable.
+* `channels.slack.thread.historyScope` default is `thread`; `thread.inheritParent` default is `false`.
+* `channels.slack.thread.initialHistoryLimit` controls how many existing thread messages are fetched when a new thread session starts (default `20`; set `0` to disable).
+* `channels.slack.thread.requireExplicitMention` (default `false`): when `true`, suppress implicit thread mentions so the bot only responds to explicit `@bot` mentions inside threads, even when the bot already participated in the thread. Without this, replies in a bot-participated thread bypass `requireMention` gating.
+
+Reply threading controls:
+
+* `channels.slack.replyToMode`: `off|first|all|batched` (default `off`)
+* `channels.slack.replyToModeByChatType`: per `direct|group|channel`
+* legacy fallback for direct chats: `channels.slack.dm.replyToMode`
+
+Manual reply tags are supported:
+
+* `[[reply_to_current]]`
+* `[[reply_to:<id>]]`
+
+<Note>
+  `replyToMode="off"` disables **all** reply threading in Slack, including explicit `[[reply_to_*]]` tags. This differs from Telegram, where explicit tags are still honored in `"off"` mode. Slack threads hide messages from the channel while Telegram replies stay visible inline.
+</Note>
+
+## Ack reactions
+
+`ackReaction` sends an acknowledgement emoji while OpenClaw is processing an inbound message.
+
+Resolution order:
+
+* `channels.slack.accounts.<accountId>.ackReaction`
+* `channels.slack.ackReaction`
+* `messages.ackReaction`
+* agent identity emoji fallback (`agents.list[].identity.emoji`, else "👀")
+
+Notes:
+
+* Slack expects shortcodes (for example `"eyes"`).
+* Use `""` to disable the reaction for the Slack account or globally.
+
+## Text streaming
+
+`channels.slack.streaming` controls live preview behavior:
+
+* `off`: disable live preview streaming.
+* `partial` (default): replace preview text with the latest partial output.
+* `block`: append chunked preview updates.
+* `progress`: show progress status text while generating, then send final text.
+* `streaming.preview.toolProgress`: when draft preview is active, route tool/progress updates into the same edited preview message (default: `true`). Set `false` to keep separate tool/progress messages.
+* `streaming.preview.commandText` / `streaming.progress.commandText`: set to `status` to keep compact tool-progress lines while hiding raw command/exec text (default: `raw`).
+
+Hide raw command/exec text while keeping compact progress lines:
+
+```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-  channels: {
-    whatsapp: {
-      dmPolicy: \"allowlist\",
-      allowFrom: [\"+15551234567\"],
-    },
-  },
+  "channels": {
+    "slack": {
+      "streaming": {
+        "mode": "progress",
+        "progress": {
+          "toolProgress": true,
+          "commandText": "status"
+        }
+      }
+    }
+  }
 }
 ```
 
-Personal-number fallback
+`channels.slack.streaming.nativeTransport` controls Slack native text streaming when `channels.slack.streaming.mode` is `partial` (default: `true`).
 
-Onboarding supports personal-number mode and writes a self-chat-friendly baseline:
+* A reply thread must be available for native text streaming and Slack assistant thread status to appear. Thread selection still follows `replyToMode`.
+* Channel, group-chat, and top-level DM roots can still use the normal draft preview when native streaming is unavailable or no reply thread exists.
+* Top-level Slack DMs stay off-thread by default, so they do not show Slack's thread-style native stream/status preview; OpenClaw posts and edits a draft preview in the DM instead.
+* Media and non-text payloads fall back to normal delivery.
+* Media/error finals cancel pending preview edits; eligible text/block finals flush only when they can edit the preview in place.
+* If streaming fails mid-reply, OpenClaw falls back to normal delivery for remaining payloads.
 
-- `dmPolicy: \"allowlist\"`
-- `allowFrom` includes your personal number
-- `selfChatMode: true`
+Use draft preview instead of Slack native text streaming:
 
-In runtime, self-chat protections key off the linked self number and `allowFrom`.
-
-WhatsApp Web-only channel scope
-
-The messaging platform channel is WhatsApp Web-based (`Baileys`) in current OpenClaw channel architecture.There is no separate Twilio WhatsApp messaging channel in the built-in chat-channel registry.
-
-## [​](https://docs.openclaw.ai/channels/whatsapp\\#runtime-model)  Runtime model
-
-- Gateway owns the WhatsApp socket and reconnect loop.
-- The reconnect watchdog uses WhatsApp Web transport activity, not only inbound app-message volume, so a quiet linked-device session is not restarted solely because nobody has sent a message recently. A longer application-silence cap still forces a reconnect if transport frames keep arriving but no application messages are handled for the watchdog window.
-- Outbound sends require an active WhatsApp listener for the target account.
-- Status and broadcast chats are ignored (`@status`, `@broadcast`).
-- Direct chats use DM session rules (`session.dmScope`; default `main` collapses DMs to the agent main session).
-- Group sessions are isolated (`agent:<agentId>:whatsapp:group:<jid>`).
-- WhatsApp Web transport honors standard proxy environment variables on the gateway host (`HTTPS_PROXY`, `HTTP_PROXY`, `NO_PROXY` / lowercase variants). Prefer host-level proxy config over channel-specific WhatsApp proxy settings.
-- When `messages.removeAckAfterReply` is enabled, OpenClaw clears the WhatsApp ack reaction after a visible reply is delivered.
-
-## [​](https://docs.openclaw.ai/channels/whatsapp\\#plugin-hooks-and-privacy)  Plugin hooks and privacy
-
-WhatsApp inbound messages can contain personal message content, phone numbers,\ngroup identifiers, sender names, and session correlation fields. For that reason,\nWhatsApp does not broadcast inbound `message_received` hook payloads to plugins\nunless you explicitly opt in:\n
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    whatsapp: {
-      pluginHooks: {
-        messageReceived: true,
+    slack: {
+      streaming: {
+        mode: "partial",
+        nativeTransport: false,
       },
     },
   },
 }
 ```
 
-You can scope the opt-in to one account:
+Legacy keys:
 
+* `channels.slack.streamMode` (`replace | status_final | append`) is a legacy runtime alias for `channels.slack.streaming.mode`.
+* boolean `channels.slack.streaming` is a legacy runtime alias for `channels.slack.streaming.mode` and `channels.slack.streaming.nativeTransport`.
+* legacy `channels.slack.nativeStreaming` is a runtime alias for `channels.slack.streaming.nativeTransport`.
+* Run `openclaw doctor --fix` to rewrite persisted Slack streaming config to the canonical keys.
+
+## Typing reaction fallback
+
+`typingReaction` adds a temporary reaction to the inbound Slack message while OpenClaw is processing a reply, then removes it when the run finishes. This is most useful outside of thread replies, which use a default "is typing..." status indicator.
+
+Resolution order:
+
+* `channels.slack.accounts.<accountId>.typingReaction`
+* `channels.slack.typingReaction`
+
+Notes:
+
+* Slack expects shortcodes (for example `"hourglass_flowing_sand"`).
+* The reaction is best-effort and cleanup is attempted automatically after the reply or failure path completes.
+
+## Media, chunking, and delivery
+
+<AccordionGroup>
+  <Accordion title="Inbound attachments">
+    Slack file attachments are downloaded from Slack-hosted private URLs (token-authenticated request flow) and written to the media store when fetch succeeds and size limits permit. File placeholders include the Slack `fileId` so agents can fetch the original file with `download-file`.
+
+    Downloads use bounded idle and total timeouts. If Slack file retrieval stalls or fails, OpenClaw keeps processing the message and falls back to the file placeholder.
+
+    Runtime inbound size cap defaults to `20MB` unless overridden by `channels.slack.mediaMaxMb`.
+  </Accordion>
+
+  <Accordion title="Outbound text and files">
+    * text chunks use `channels.slack.textChunkLimit` (default 4000)
+    * `channels.slack.chunkMode="newline"` enables paragraph-first splitting
+    * file sends use Slack upload APIs and can include thread replies (`thread_ts`)
+    * outbound media cap follows `channels.slack.mediaMaxMb` when configured; otherwise channel sends use MIME-kind defaults from media pipeline
+  </Accordion>
+
+  <Accordion title="Delivery targets">
+    Preferred explicit targets:
+
+    * `user:<id>` for DMs
+    * `channel:<id>` for channels
+
+    Text/block-only Slack DMs can post directly to user IDs; file uploads and threaded sends open the DM via Slack conversation APIs first because those paths require a concrete conversation ID.
+  </Accordion>
+</AccordionGroup>
+
+## Commands and slash behavior
+
+Slash commands appear in Slack as either a single configured command or multiple native commands. Configure `channels.slack.slashCommand` to change command defaults:
+
+* `enabled: false`
+* `name: "openclaw"`
+* `sessionPrefix: "slack:slash"`
+* `ephemeral: true`
+
+```txt theme={"theme":{"light":"min-light","dark":"min-dark"}}
+/openclaw /help
 ```
+
+Native commands require [additional manifest settings](#additional-manifest-settings) in your Slack app and are enabled with `channels.slack.commands.native: true` or `commands.native: true` in global configurations instead.
+
+* Native command auto-mode is **off** for Slack so `commands.native: "auto"` does not enable Slack native commands.
+
+```txt theme={"theme":{"light":"min-light","dark":"min-dark"}}
+/help
+```
+
+Native argument menus use an adaptive rendering strategy that shows a confirmation modal before dispatching a selected option value:
+
+* up to 5 options: button blocks
+* 6-100 options: static select menu
+* more than 100 options: external select with async option filtering when interactivity options handlers are available
+* exceeded Slack limits: encoded option values fall back to buttons
+
+```txt theme={"theme":{"light":"min-light","dark":"min-dark"}}
+/think
+```
+
+Slash sessions use isolated keys like `agent:<agentId>:slack:slash:<userId>` and still route command executions to the target conversation session using `CommandTargetSessionKey`.
+
+## Interactive replies
+
+Slack can render agent-authored interactive reply controls, but this feature is disabled by default.
+
+Enable it globally:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    whatsapp: {
+    slack: {
+      capabilities: {
+        interactiveReplies: true,
+      },
+    },
+  },
+}
+```
+
+Or enable it for one Slack account only:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    slack: {
       accounts: {
-        work: {
-          pluginHooks: {
-            messageReceived: true,
+        ops: {
+          capabilities: {
+            interactiveReplies: true,
           },
         },
       },
@@ -1721,2177 +6279,1937 @@ You can scope the opt-in to one account:
 }
 ```
 
-Only enable this for plugins you trust to receive inbound WhatsApp message\ncontent and identifiers.
+When enabled, agents can emit Slack-only reply directives:
 
-## [​](https://docs.openclaw.ai/channels/whatsapp\\#access-control-and-activation)  Access control and activation
+* `[[slack_buttons: Approve:approve, Reject:reject]]`
+* `[[slack_select: Choose a target | Canary:canary, Production:production]]`
 
-- DM policy
-
-- Group policy + allowlists
-
-- Mentions + /activation
-
-
-`channels.whatsapp.dmPolicy` controls direct chat access:
-
-- `pairing` (default)
-- `allowlist`
-- `open` (requires `allowFrom` to include `\"*\"`)
-- `disabled`
-
-`allowFrom` accepts E.164-style numbers (normalized internally).Multi-account override: `channels.whatsapp.accounts.<id>.dmPolicy` (and `allowFrom`) take precedence over channel-level defaults for that account.Runtime behavior details:
-
-- pairings are persisted in channel allow-store and merged with configured `allowFrom`
-- if no allowlist is configured, the linked self number is allowed by default
-- OpenClaw never auto-pairs outbound `fromMe` DMs (messages you send to yourself from the linked device)
-
-Group access has two layers:
-
-1. **Group membership allowlist** (`channels.whatsapp.groups`)   - if `groups` is omitted, all groups are eligible
-   - if `groups` is present, it acts as a group allowlist (`\"*\"` allowed)
-2. **Group sender policy** (`channels.whatsapp.groupPolicy` \\+ `groupAllowFrom`)   - `open`: sender allowlist bypassed
-   - `allowlist`: sender must match `groupAllowFrom` (or `*`)
-   - `disabled`: block all group inbound
-
-Sender allowlist fallback:
-
-- if `groupAllowFrom` is unset, runtime falls back to `allowFrom` when available
-- sender allowlists are evaluated before mention/reply activation
-
-Note: if no `channels.whatsapp` block exists at all, runtime group-policy fallback is `allowlist` (with a warning log), even if `channels.defaults.groupPolicy` is set.
-
-Group replies require mention by default.Mention detection includes:
-
-- explicit WhatsApp mentions of the bot identity
-- configured mention regex patterns (`agents.list[].groupChat.mentionPatterns`, fallback `messages.groupChat.mentionPatterns`)
-- inbound voice-note transcripts for authorized group messages
-- implicit reply-to-bot detection (reply sender matches bot identity)
-
-Security note:
-
-- quote/reply only satisfies mention gating; it does **not** grant sender authorization
-- with `groupPolicy: \"allowlist\"`, non-allowlisted senders are still blocked even if they reply to an allowlisted user’s message
-
-Session-level activation command:
-
-- `/activation mention`
-- `/activation always`
-
-`activation` updates session state (not global config). It is owner-gated.
-
-## [​](https://docs.openclaw.ai/channels/whatsapp\\#personal-number-and-self-chat-behavior)  Personal-number and self-chat behavior
-
-When the linked self number is also present in `allowFrom`, WhatsApp self-chat safeguards activate:
-
-- skip read receipts for self-chat turns
-- ignore mention-JID auto-trigger behavior that would otherwise ping yourself
-- if `messages.responsePrefix` is unset, self-chat replies default to `[{identity.name}]` or `[openclaw]`
-
-## [​](https://docs.openclaw.ai/channels/whatsapp\\#message-normalization-and-context)  Message normalization and context
-
-Inbound envelope + reply context
-
-Incoming WhatsApp messages are wrapped in the shared inbound envelope.If a quoted reply exists, context is appended in this form:
-
-```
-[Replying to <sender> id:<stanzaId>]
-<quoted body or media placeholder>
-[/Replying]
-```
-
-Reply metadata fields are also populated when available (`ReplyToId`, `ReplyToBody`, `ReplyToSender`, sender JID/E.164).
-
-Media placeholders and location/contact extraction
-
-Media-only inbound messages are normalized with placeholders such as:
-
-- `<media:image>`
-- `<media:video>`
-- `<media:audio>`
-- `<media:document>`
-- `<media:sticker>`
-
-Authorized group voice notes are transcribed before mention gating when the\nbody is only `<media:audio>`, so saying the bot mention in the voice note can\ntrigger the reply. If the transcript still does not mention the bot, the\ntranscript is kept in pending group history instead of the raw placeholder.Location bodies use terse coordinate text. Location labels/comments and contact/vCard details are rendered as fenced untrusted metadata, not inline prompt text.
-
-Pending group history injection
-
-For groups, unprocessed messages can be buffered and injected as context when the bot is finally triggered.
-
-- default limit: `50`
-- config: `channels.whatsapp.historyLimit`
-- fallback: `messages.groupChat.historyLimit`
-- `0` disables
-
-Injection markers:
-
-- `[Chat messages since your last reply - for context]`
-- `[Current message - respond to this]`
-
-Read receipts
-
-Read receipts are enabled by default for accepted inbound WhatsApp messages.Disable globally:
-
-```
-{
-  channels: {
-    whatsapp: {
-      sendReadReceipts: false,
-    },
-  },
-}
-```
-
-Per-account override:
-
-```
-{
-  channels: {
-    whatsapp: {
-      accounts: {
-        work: {
-          sendReadReceipts: false,
-        },
-      },
-    },
-  },
-}
-```
-
-Self-chat turns skip read receipts even when globally enabled.
-
-## [​](https://docs.openclaw.ai/channels/whatsapp\\#delivery-chunking-and-media)  Delivery, chunking, and media
-
-Text chunking
-
-- default chunk limit: `channels.whatsapp.textChunkLimit = 4000`
-- `channels.whatsapp.chunkMode = \"length\" | \"newline\"`
-- `newline` mode prefers paragraph boundaries (blank lines), then falls back to length-safe chunking
-
-Outbound media behavior
-
-- supports image, video, audio (PTT voice-note), and document payloads
-- audio media is sent through the Baileys `audio` payload with `ptt: true`, so WhatsApp clients render it as a push-to-talk voice note
-- reply payloads preserve `audioAsVoice`; TTS voice-note output for WhatsApp stays on this PTT path even when the provider returns MP3 or WebM
-- native Ogg/Opus audio is sent as `audio/ogg; codecs=opus` for voice-note compatibility
-- non-Ogg audio, including Microsoft Edge TTS MP3/WebM output, is transcoded with `ffmpeg` to 48 kHz mono Ogg/Opus before PTT delivery
-- `/tts latest` sends the latest assistant reply as one voice note and suppresses repeat sends for the same reply; `/tts chat on|off|default` controls auto-TTS for the current WhatsApp chat
-- animated GIF playback is supported via `gifPlayback: true` on video sends
-- captions are applied to the first media item when sending multi-media reply payloads, except PTT voice notes send the audio first and visible text separately because WhatsApp clients do not render voice-note captions consistently
-- media source can be HTTP(S), `file://`, or local paths
-
-Media size limits and fallback behavior
-
-- inbound media save cap: `channels.whatsapp.mediaMaxMb` (default `50`)
-- outbound media send cap: `channels.whatsapp.mediaMaxMb` (default `50`)
-- per-account overrides use `channels.whatsapp.accounts.<accountId>.mediaMaxMb`
-- images are auto-optimized (resize/quality sweep) to fit limits
-- on media send failure, first-item fallback sends text warning instead of dropping the response silently
-
-## [​](https://docs.openclaw.ai/channels/whatsapp\\#reply-quoting)  Reply quoting
-
-WhatsApp supports native reply quoting, where outbound replies visibly quote the inbound message. Control it with `channels.whatsapp.replyToMode`.
-
-| Value | Behavior |
-| --- | --- |
-| `\"off\"` | Never quote; send as a plain message |
-| `\"first\"` | Quote only the first outbound reply chunk |
-| `\"all\"` | Quote every outbound reply chunk |
-| `\"batched\"` | Quote queued batched replies while leaving immediate replies unquoted |
-
-Default is `\"off\"`. Per-account overrides use `channels.whatsapp.accounts.<id>.replyToMode`.
-
-```
-{
-  channels: {
-    whatsapp: {
-      replyToMode: \"first\",
-    },
-  },
-}
-```
-
-## [​](https://docs.openclaw.ai/channels/whatsapp\\#reaction-level)  Reaction level
-
-`channels.whatsapp.reactionLevel` controls how broadly the agent uses emoji reactions on WhatsApp:
-
-| Level | Ack reactions | Agent-initiated reactions | Description |
-| --- | --- | --- | --- |
-| `\"off\"` | No | No | No reactions at all |
-| `\"ack\"` | Yes | No | Ack reactions only (pre-reply receipt) |
-| `\"minimal\"` | Yes | Yes (conservative) | Ack + agent reactions with conservative guidance |
-| `\"extensive\"` | Yes | Yes (encouraged) | Ack + agent reactions with encouraged guidance |
-
-Default: `\"minimal\"`.Per-account overrides use `channels.whatsapp.accounts.<id>.reactionLevel`.
-
-```
-{
-  channels: {
-    whatsapp: {
-      reactionLevel: \"ack\",
-    },
-  },
-}
-```
-
-## [​](https://docs.openclaw.ai/channels/whatsapp\\#acknowledgment-reactions)  Acknowledgment reactions
-
-WhatsApp supports immediate ack reactions on inbound receipt via `channels.whatsapp.ackReaction`.
-Ack reactions are gated by `reactionLevel` — they are suppressed when `reactionLevel` is `\"off\"`.
-
-```
-{
-  channels: {
-    whatsapp: {
-      ackReaction: {
-        emoji: \"👀\",
-        direct: true,
-        group: \"mentions\", // always | mentions | never
-      },
-    },
-  },
-}
-```
-
-Behavior notes:
-
-- sent immediately after inbound is accepted (pre-reply)
-- failures are logged but do not block normal reply delivery
-- group mode `mentions` reacts on mention-triggered turns; group activation `always` acts as bypass for this check
-- WhatsApp uses `channels.whatsapp.ackReaction` (legacy `messages.ackReaction` is not used here)
-
-## [​](https://docs.openclaw.ai/channels/whatsapp\\#multi-account-and-credentials)  Multi-account and credentials
-
-Account selection and defaults
-
-- account ids come from `channels.whatsapp.accounts`
-- default account selection: `default` if present, otherwise first configured account id (sorted)
-- account ids are normalized internally for lookup
-
-Credential paths and legacy compatibility
-
-- current auth path: `~/.openclaw/credentials/whatsapp/<accountId>/creds.json`
-- backup file: `creds.json.bak`
-- legacy default auth in `~/.openclaw/credentials/` is still recognized/migrated for default-account flows
-
-Logout behavior
-
-`openclaw channels logout --channel whatsapp [--account <id>]` clears WhatsApp auth state for that account.In legacy auth directories, `oauth.json` is preserved while Baileys auth files are removed.
-
-## [​](https://docs.openclaw.ai/channels/whatsapp\\#tools-actions-and-config-writes)  Tools, actions, and config writes
-
-- Agent tool support includes WhatsApp reaction action (`react`).
-- Action gates:
-  - `channels.whatsapp.actions.reactions`
-  - `channels.whatsapp.actions.polls`
-- Channel-initiated config writes are enabled by default (disable via `channels.whatsapp.configWrites=false`).
-
-## [​](https://docs.openclaw.ai/channels/whatsapp\\#troubleshooting)  Troubleshooting
-
-Not linked (QR required)
-
-Symptom: channel status reports not linked.Fix:
-
-```
-openclaw channels login --channel whatsapp
-openclaw channels status
-```
-
-Linked but disconnected / reconnect loop
-
-Symptom: linked account with repeated disconnects or reconnect attempts.Quiet accounts can stay connected past the normal message timeout; the watchdog\nrestarts when WhatsApp Web transport activity stops, the socket closes, or\napplication-level activity stays silent beyond the longer safety window.Fi...(content truncated)
-
----
-
-## WeChat - OpenClaw
-**Source:** https://docs.openclaw.ai/channels/wechat
-
-[Skip to main content](https://docs.openclaw.ai/channels/wechat#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Regional platforms
-
-WeChat
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Naming](https://docs.openclaw.ai/channels/wechat#naming)
-- [How it works](https://docs.openclaw.ai/channels/wechat#how-it-works)
-- [Install](https://docs.openclaw.ai/channels/wechat#install)
-- [Login](https://docs.openclaw.ai/channels/wechat#login)
-- [Access control](https://docs.openclaw.ai/channels/wechat#access-control)
-- [Compatibility](https://docs.openclaw.ai/channels/wechat#compatibility)
-- [Sidecar process](https://docs.openclaw.ai/channels/wechat#sidecar-process)
-- [Troubleshooting](https://docs.openclaw.ai/channels/wechat#troubleshooting)
-- [Related docs](https://docs.openclaw.ai/channels/wechat#related-docs)
-
-OpenClaw connects to WeChat through Tencent’s external
-`@tencent-weixin/openclaw-weixin` channel plugin.Status: external plugin. Direct chats and media are supported. Group chats are not
-advertised by the current plugin capability metadata.
-
-## [​](https://docs.openclaw.ai/channels/wechat\\#naming)  Naming
-
-- **WeChat** is the user-facing name in these docs.
-- **Weixin** is the name used by Tencent’s package and by the plugin id.
-- `openclaw-weixin` is the OpenClaw channel id.
-- `@tencent-weixin/openclaw-weixin` is the npm package.
-
-Use `openclaw-weixin` in CLI commands and config paths.
-
-## [​](https://docs.openclaw.ai/channels/wechat\\#how-it-works)  How it works
-
-The WeChat code does not live in the OpenClaw core repo. OpenClaw provides the
-generic channel plugin contract, and the external plugin provides the
-WeChat-specific runtime:
-
-1. `openclaw plugins install` installs `@tencent-weixin/openclaw-weixin`.
-2. The Gateway discovers the plugin manifest and loads the plugin entrypoint.
-3. The plugin registers channel id `openclaw-weixin`.
-4. `openclaw channels login --channel openclaw-weixin` starts QR login.
-5. The plugin stores account credentials under the OpenClaw state directory.
-6. When the Gateway starts, the plugin starts its Weixin monitor for each
-configured account.
-7. Inbound WeChat messages are normalized through the channel contract, routed to
-the selected OpenClaw agent, and sent back through the plugin outbound path.
-
-That separation matters: OpenClaw core should stay channel-agnostic. WeChat login,
-Tencent iLink API calls, media upload/download, context tokens, and account
-monitoring are owned by the external plugin.
-
-## [​](https://docs.openclaw.ai/channels/wechat\\#install)  Install
-
-Quick install:
-
-```
-npx -y @tencent-weixin/openclaw-weixin-cli install
-```
-
-Manual install:
-
-```
-openclaw plugins install \"@tencent-weixin/openclaw-weixin\"
-openclaw config set plugins.entries.openclaw-weixin.enabled true
-```
-
-Restart the Gateway after install:
-
-```
-openclaw gateway restart
-```
-
-## [​](https://docs.openclaw.ai/channels/wechat\\#login)  Login
-
-Run QR login on the same machine that runs the Gateway:
-
-```
-openclaw channels login --channel openclaw-weixin
-```
-
-Scan the QR code with WeChat on your phone and confirm the login. The plugin saves
-the account token locally after a successful scan.To add another WeChat account, run the same login command again. For multiple
-accounts, isolate direct-message sessions by account, channel, and sender:
-
-```
-openclaw config set session.dmScope per-account-channel-peer
-```
-
-## [​](https://docs.openclaw.ai/channels/wechat\\#access-control)  Access control
-
-Direct messages use the normal OpenClaw pairing and allowlist model for channel
-plugins.Approve new senders:
-
-```
-openclaw pairing list openclaw-weixin
-openclaw pairing approve openclaw-weixin <CODE>
-```
-
-For the full access-control model, see [Pairing](https://docs.openclaw.ai/channels/pairing).
-
-## [​](https://docs.openclaw.ai/channels/wechat\\#compatibility)  Compatibility
-
-The plugin checks the host OpenClaw version at startup.
-
-| Plugin line | OpenClaw version | npm tag |
-| --- | --- | --- |
-| `2.x` | `>=2026.3.22` | `latest` |
-| `1.x` | `>=2026.1.0 <2026.3.22` | `legacy` |
-
-If the plugin reports that your OpenClaw version is too old, either update
-OpenClaw or install the legacy plugin line:
-
-```
-openclaw plugins install @tencent-weixin/openclaw-weixin@legacy
-```
-
-## [​](https://docs.openclaw.ai/channels/wechat\\#sidecar-process)  Sidecar process
-
-The WeChat plugin can run helper work beside the Gateway while it monitors the
-Tencent iLink API. In issue #68451, that helper path exposed a bug in OpenClaw’s
-generic stale-Gateway cleanup: a child process could try to clean up the parent
-Gateway process, causing restart loops under process managers such as systemd.Current OpenClaw startup cleanup excludes the current process and its ancestors,
-so a channel helper must not kill the Gateway that launched it. This fix is
-generic; it is not a WeChat-specific path in core.
-
-## [​](https://docs.openclaw.ai/channels/wechat\\#troubleshooting)  Troubleshooting
-
-Check install and status:
-
-```
-openclaw plugins list
-openclaw channels status --probe
-openclaw --version
-```
-
-If the channel shows as installed but does not connect, confirm that the plugin is
-enabled and restart:
-
-```
-openclaw config set plugins.entries.openclaw-weixin.enabled true
-openclaw gateway restart
-```
-
-If the Gateway restarts repeatedly after enabling WeChat, update both OpenClaw and
-the plugin:
-
-```
-npm view @tencent-weixin/openclaw-weixin version
-openclaw plugins install \"@tencent-weixin/openclaw-weixin\" --force
-openclaw gateway restart
-```
-
-Temporary disable:
-
-```
-openclaw config set plugins.entries.openclaw-weixin.enabled false
-openclaw gateway restart
-```
-
-## [​](https://docs.openclaw.ai/channels/wechat\\#related-docs)  Related docs
-
-- Channel overview: [Chat Channels](https://docs.openclaw.ai/channels)
-- Pairing: [Pairing](https://docs.openclaw.ai/channels/pairing)
-- Channel routing: [Channel Routing](https://docs.openclaw.ai/channels/channel-routing)
-- Plugin architecture: [Plugin Architecture](https://docs.openclaw.ai/plugins/architecture)
-- Channel plugin SDK: [Channel Plugin SDK](https://docs.openclaw.ai/plugins/sdk-channel-plugins)
-- External package: [@tencent-weixin/openclaw-weixin](https://www.npmjs.com/package/@tencent-weixin/openclaw-weixin)
-
-[LINE](https://docs.openclaw.ai/channels/line) [QQ bot](https://docs.openclaw.ai/channels/qqbot)
-
-Ctrl+I
-
----
-
-## BlueBubbles
-**Source:** https://docs.openclaw.ai/channels/bluebubbles
-
-[Skip to main content](https://docs.openclaw.ai/channels/bluebubbles#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Mainstream messaging
-
-BlueBubbles
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Bundled plugin](https://docs.openclaw.ai/channels/bluebubbles#bundled-plugin)
-- [Overview](https://docs.openclaw.ai/channels/bluebubbles#overview)
-- [Quick start](https://docs.openclaw.ai/channels/bluebubbles#quick-start)
-- [Keeping Messages.app alive (VM / headless setups)](https://docs.openclaw.ai/channels/bluebubbles#keeping-messages-app-alive-vm-%2F-headless-setups)
-- [1) Save the AppleScript](https://docs.openclaw.ai/channels/bluebubbles#1-save-the-applescript)
-- [2) Install a LaunchAgent](https://docs.openclaw.ai/channels/bluebubbles#2-install-a-launchagent)
-- [Onboarding](https://docs.openclaw.ai/channels/bluebubbles#onboarding)
-- [Access control (DMs + groups)](https://docs.openclaw.ai/channels/bluebubbles#access-control-dms-%2B-groups)
-- [Contact name enrichment (macOS, optional)](https://docs.openclaw.ai/channels/bluebubbles#contact-name-enrichment-macos-optional)
-- [Mention gating (groups)](https://docs.openclaw.ai/channels/bluebubbles#mention-gating-groups)
-- [Command gating](https://docs.openclaw.ai/channels/bluebubbles#command-gating)
-- [Per-group system prompt](https://docs.openclaw.ai/channels/bluebubbles#per-group-system-prompt)
-- [Worked example: threaded replies and tapback reactions (Private API)](https://docs.openclaw.ai/channels/bluebubbles#worked-example-threaded-replies-and-tapback-reactions-private-api)
-- [ACP conversation bindings](https://docs.openclaw.ai/channels/bluebubbles#acp-conversation-bindings)
-- [Typing + read receipts](https://docs.openclaw.ai/channels/bluebubbles#typing-%2B-read-receipts)
-- [Advanced actions](https://docs.openclaw.ai/channels/bluebubbles#advanced-actions)
-- [Message IDs (short vs full)](https://docs.openclaw.ai/channels/bluebubbles#message-ids-short-vs-full)
-- [Coalescing split-send DMs (command + URL in one composition)](https://docs.openclaw.ai/channels/bluebubbles#coalescing-split-send-dms-command-%2B-url-in-one-composition)
-- [When to enable](https://docs.openclaw.ai/channels/bluebubbles#when-to-enable)
-- [Enabling](https://docs.openclaw.ai/channels/bluebubbles#enabling)
-- [Trade-offs](https://docs.openclaw.ai/channels/bluebubbles#trade-offs)
-- [Scenarios and what the agent sees](https://docs.openclaw.ai/channels/bluebubbles#scenarios-and-what-the-agent-sees)
-- [Split-send coalescing troubleshooting](https://docs.openclaw.ai/channels/bluebubbles#split-send-coalescing-troubleshooting)
-- [Block streaming](https://docs.openclaw.ai/channels/bluebubbles#block-streaming)
-- [Media + limits](https://docs.openclaw.ai/channels/bluebubbles#media-%2B-limits)
-- [Configuration reference](https://docs.openclaw.ai/channels/bluebubbles#configuration-reference)
-- [Addressing / delivery targets](https://docs.openclaw.ai/channels/bluebubbles#addressing-%2F-delivery-targets)
-- [iMessage vs SMS routing](https://docs.openclaw.ai/channels/bluebubbles#imessage-vs-sms-routing)
-- [Security](https://docs.openclaw.ai/channels/bluebubbles#security)
-- [Troubleshooting](https://docs.openclaw.ai/channels/bluebubbles#troubleshooting)
-- [Related](https://docs.openclaw.ai/channels/bluebubbles#related)
-
-Status: bundled plugin that talks to the BlueBubbles macOS server over HTTP. **Recommended for iMessage integration** due to its richer API and easier setup compared to the legacy imsg channel.
-
-## [​](https://docs.openclaw.ai/channels/bluebubbles\\#bundled-plugin)  Bundled plugin
-
-Current OpenClaw releases bundle BlueBubbles, so normal packaged builds do not
-need a separate `openclaw plugins install` step.
-
-## [​](https://docs.openclaw.ai/channels/bluebubbles\\#overview)  Overview
-
-- Runs on macOS via the BlueBubbles helper app ( [bluebubbles.app](https://bluebubbles.app/)).
-- Recommended/tested: macOS Sequoia (15). macOS Tahoe (26) works; edit is currently broken on Tahoe, and group icon updates may report success but not sync.
-- OpenClaw talks to it through its REST API (`GET /api/v1/ping`, `POST /message/text`, `POST /chat/:id/*`).
-- Incoming messages arrive via webhooks; outgoing replies, typing indicators, read receipts, and tapbacks are REST calls.
-- Attachments and stickers are ingested as inbound media (and surfaced to the agent when possible).
-- Auto-TTS replies that synthesize MP3 or CAF audio are delivered as iMessage
-voice memo bubbles instead of plain file attachments.
-- Pairing/allowlist works the same way as other channels (`/channels/pairing` etc) with `channels.bluebubbles.allowFrom` \\+ pairing codes.
-- Reactions are surfaced as system events just like Slack/Telegram so agents can “mention” them before replying.
-- Advanced features: edit, unsend, reply threading, message effects, group management.
-
-## [​](https://docs.openclaw.ai/channels/bluebubbles\\#quick-start)  Quick start
-
-1. Install the BlueBubbles server on your Mac (follow the instructions at [bluebubbles.app/install](https://bluebubbles.app/install)).
-2. In the BlueBubbles config, enable the web API and set a password.
-3. Run `openclaw onboard` and select BlueBubbles, or configure manually:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```
-{
-     channels: {
-       bluebubbles: {
-         enabled: true,
-         serverUrl: \"http://192.168.1.100:1234\",
-         password: \"example-password\",
-         webhookPath: \"/bluebubbles-webhook\",
-       },
-     },
-}
-```
-
-4. Point BlueBubbles webhooks to your gateway (example: `https://your-gateway-host:3000/bluebubbles-webhook?password=<password>`).
-5. Start the gateway; it will register the webhook handler and start pairing.
-
-Security note:
-
-- Always set a webhook password.
-- Webhook authentication is always required. OpenClaw rejects BlueBubbles webhook requests unless they include a password/guid that matches `channels.bluebubbles.password` (for example `?password=<password>` or `x-password`), regardless of loopback/proxy topology.
-- Password authentication is checked before reading/parsing full webhook bodies.
-
-## [​](https://docs.openclaw.ai/channels/bluebubbles\\#keeping-messages-app-alive-vm-/-headless-setups)  Keeping Messages.app alive (VM / headless setups)
-
-Some macOS VM / always-on setups can end up with Messages.app going “idle” (incoming events stop until the app is opened/foregrounded). A simple workaround is to **poke Messages every 5 minutes** using an AppleScript + LaunchAgent.
-
-### [​](https://docs.openclaw.ai/channels/bluebubbles\\#1-save-the-applescript)  1) Save the AppleScript
-
-Save this as:
-
-- `~/Scripts/poke-messages.scpt`
-
-Example script (non-interactive; does not steal focus):
-
-```
-try
-  tell application \"Messages\"
-    if not running then
-      launch
-    end if
-
-    -- Touch the scripting interface to keep the process responsive.
-    set _chatCount to (count of chats)
-  end tell
-on error
-  -- Ignore transient failures (first-run prompts, locked session, etc).
-end try
-```
-
-### [​](https://docs.openclaw.ai/channels/bluebubbles\\#2-install-a-launchagent)  2) Install a LaunchAgent
-
-Save this as:
-
-- `~/Library/LaunchAgents/com.user.poke-messages.plist`
-
-```
-<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
-  <dict>
-    <key>Label</key>
-    <string>com.user.poke-messages</string>
-
-    <key>ProgramArguments</key>
-    <array>
-      <string>/bin/bash</string>
-      <string>-lc</string>
-      <string>/usr/bin/osascript &quot;$HOME/Scripts/poke-messages.scpt&quot;</string>
-    </array>
-
-    <key>RunAtLoad</key>
-    <true/>
-
-    <key>StartInterval</key>
-    <integer>300</integer>
-
-    <key>StandardOutPath</key>
-    <string>/tmp/poke-messages.log</string>
-    <key>StandardErrorPath</key>
-    <string>/tmp/poke-messages.err</string>
-  </dict>
-</plist>
-```
+These directives compile into Slack Block Kit and route clicks or selections back through the existing Slack interaction event path.
 
 Notes:
 
-- This runs **every 300 seconds** and **on login**.
-- The first run may trigger macOS **Automation** prompts (`osascript` → Messages). Approve them in the same user session that runs the LaunchAgent.
+* This is Slack-specific UI. Other channels do not translate Slack Block Kit directives into their own button systems.
+* The interactive callback values are OpenClaw-generated opaque tokens, not raw agent-authored values.
+* If generated interactive blocks would exceed Slack Block Kit limits, OpenClaw falls back to the original text reply instead of sending an invalid blocks payload.
 
-Load it:
+## Exec approvals in Slack
 
-```
-launchctl unload ~/Library/LaunchAgents/com.user.poke-messages.plist 2>/dev/null || true
-launchctl load ~/Library/LaunchAgents/com.user.poke-messages.plist
-```
+Slack can act as a native approval client with interactive buttons and interactions, instead of falling back to the Web UI or terminal.
 
-## [​](https://docs.openclaw.ai/channels/bluebubbles\\#onboarding)  Onboarding
+* Exec approvals use `channels.slack.execApprovals.*` for native DM/channel routing.
+* Plugin approvals can still resolve through the same Slack-native button surface when the request already lands in Slack and the approval id kind is `plugin:`.
+* Approver authorization is still enforced: only users identified as approvers can approve or deny requests through Slack.
 
-BlueBubbles is available in interactive onboarding:
+This uses the same shared approval button surface as other channels. When `interactivity` is enabled in your Slack app settings, approval prompts render as Block Kit buttons directly in the conversation.
+When those buttons are present, they are the primary approval UX; OpenClaw
+should only include a manual `/approve` command when the tool result says chat
+approvals are unavailable or manual approval is the only path.
 
-```
-openclaw onboard
-```
+Config path:
 
-The wizard prompts for:
+* `channels.slack.execApprovals.enabled`
+* `channels.slack.execApprovals.approvers` (optional; falls back to `commands.ownerAllowFrom` when possible)
+* `channels.slack.execApprovals.target` (`dm` | `channel` | `both`, default: `dm`)
+* `agentFilter`, `sessionFilter`
 
-- **Server URL** (required): BlueBubbles server address (e.g., `http://192.168.1.100:1234`)
-- **Password** (required): API password from BlueBubbles Server settings
-- **Webhook path** (optional): Defaults to `/bluebubbles-webhook`
-- **DM policy**: pairing, allowlist, open, or disabled
-- **Allow list**: Phone numbers, emails, or chat targets
+Slack auto-enables native exec approvals when `enabled` is unset or `"auto"` and at least one
+approver resolves. Set `enabled: false` to disable Slack as a native approval client explicitly.
+Set `enabled: true` to force native approvals on when approvers resolve.
 
-You can also add BlueBubbles via CLI:
+Default behavior with no explicit Slack exec approval config:
 
-```
-openclaw channels add bluebubbles --http-url http://192.168.1.100:1234 --password <password>
-```
-
-## [​](https://docs.openclaw.ai/channels/bluebubbles\\#access-control-dms-+-groups)  Access control (DMs + groups)
-
-DMs:
-
-- Default: `channels.bluebubbles.dmPolicy = \"pairing\"`.
-- Unknown senders receive a pairing code; messages are ignored until approved (codes expire after 1 hour).
-- Approve via:
-  - `openclaw pairing list bluebubbles`
-  - `openclaw pairing approve bluebubbles <CODE>`
-- Pairing is the default token exchange. Details: [Pairing](https://docs.openclaw.ai/channels/pairing)
-
-Groups:
-
-- `channels.bluebubbles.groupPolicy = open | allowlist | disabled` (default: `allowlist`).
-- `channels.bluebubbles.groupAllowFrom` controls who can trigger in groups when `allowlist` is set.
-
-### [​](https://docs.openclaw.ai/channels/bluebubbles\\#contact-name-enrichment-macos-optional)  Contact name enrichment (macOS, optional)
-
-BlueBubbles group webhooks often only include raw participant addresses. If you want `GroupMembers` context to show local contact names instead, you can opt in to local Contacts enrichment on macOS:
-
-- `channels.bluebubbles.enrichGroupParticipantsFromContacts = true` enables the lookup. Default: `false`.
-- Lookups run only after group access, command authorization, and mention gating have allowed the message through.
-- Only unnamed phone participants are enriched.
-- Raw phone numbers remain as the fallback when no local match is found.
-
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-  channels: {
-    bluebubbles: {
-      enrichGroupParticipantsFromContacts: true,
-    },
+  commands: {
+    ownerAllowFrom: ["slack:U12345678"],
   },
 }
 ```
 
-### [​](https://docs.openclaw.ai/channels/bluebubbles\\#mention-gating-groups)  Mention gating (groups)
+Explicit Slack-native config is only needed when you want to override approvers, add filters, or
+opt into origin-chat delivery:
 
-BlueBubbles supports mention gating for group chats, matching iMessage/WhatsApp behavior:
-
-- Uses `agents.list[].groupChat.mentionPatterns` (or `messages.groupChat.mentionPatterns`) to detect mentions.
-- When `requireMention` is enabled for a group, the agent only responds when mentioned.
-- Control commands from authorized senders bypass mention gating.
-
-Per-group configuration:
-
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    bluebubbles: {
-      groupPolicy: \"allowlist\",
-      groupAllowFrom: [\"+15555550123\"],
-      groups: {
-        \"*\": { requireMention: true }, // default for all groups
-        \"iMessage;-;chat123\": { requireMention: false }, // override for specific group
+    slack: {
+      execApprovals: {
+        enabled: true,
+        approvers: ["U12345678"],
+        target: "both",
       },
     },
   },
 }
 ```
 
-### [​](https://docs.openclaw.ai/channels/bluebubbles\\#command-gating)  Command gating
+Shared `approvals.exec` forwarding is separate. Use it only when exec approval prompts must also
+route to other chats or explicit out-of-band targets. Shared `approvals.plugin` forwarding is also
+separate; Slack-native buttons can still resolve plugin approvals when those requests already land
+in Slack.
 
-- Control commands (e.g., `/config`, `/model`) require authorization.
-- Uses `allowFrom` and `groupAllowFrom` to determine command authorization.
-- Authorized senders can run control commands even without mentioning in groups.
+Same-chat `/approve` also works in Slack channels and DMs that already support commands. See [Exec approvals](/tools/exec-approvals) for the full approval forwarding model.
 
-### [​](https://docs.openclaw.ai/channels/bluebubbles\\#per-group-system-prompt)  Per-group system prompt
+## Events and operational behavior
 
-Each entry under `channels.bluebubbles.groups.*` accepts an optional `systemPrompt` string. The value is injected into the agent’s system prompt on every turn that handles a message in that group, so you can set per-group persona or behavioral rules without editing agent prompts:
+* Message edits/deletes are mapped into system events.
+* Thread broadcasts ("Also send to channel" thread replies) are processed as normal user messages.
+* Reaction add/remove events are mapped into system events.
+* Member join/leave, channel created/renamed, and pin add/remove events are mapped into system events.
+* `channel_id_changed` can migrate channel config keys when `configWrites` is enabled.
+* Channel topic/purpose metadata is treated as untrusted context and can be injected into routing context.
+* Thread starter and initial thread-history context seeding are filtered by configured sender allowlists when applicable.
+* Block actions and modal interactions emit structured `Slack interaction: ...` system events with rich payload fields:
+  * block actions: selected values, labels, picker values, and `workflow_*` metadata
+  * modal `view_submission` and `view_closed` events with routed channel metadata and form inputs
 
+## Configuration reference
+
+Primary reference: [Configuration reference - Slack](/gateway/config-channels#slack).
+
+<Accordion title="High-signal Slack fields">
+  * mode/auth: `mode`, `botToken`, `appToken`, `signingSecret`, `webhookPath`, `accounts.*`
+  * DM access: `dm.enabled`, `dmPolicy`, `allowFrom` (legacy: `dm.policy`, `dm.allowFrom`), `dm.groupEnabled`, `dm.groupChannels`
+  * compatibility toggle: `dangerouslyAllowNameMatching` (break-glass; keep off unless needed)
+  * channel access: `groupPolicy`, `channels.*`, `channels.*.users`, `channels.*.requireMention`
+  * threading/history: `replyToMode`, `replyToModeByChatType`, `thread.*`, `historyLimit`, `dmHistoryLimit`, `dms.*.historyLimit`
+  * delivery: `textChunkLimit`, `chunkMode`, `mediaMaxMb`, `streaming`, `streaming.nativeTransport`, `streaming.preview.toolProgress`
+  * ops/features: `configWrites`, `commands.native`, `slashCommand.*`, `actions.*`, `userToken`, `userTokenReadOnly`
+</Accordion>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="No replies in channels">
+    Check, in order:
+
+    * `groupPolicy`
+    * channel allowlist (`channels.slack.channels`) — **keys must be channel IDs** (`C12345678`), not names (`#channel-name`). Name-based keys silently fail under `groupPolicy: "allowlist"` because channel routing is ID-first by default. To find an ID: right-click the channel in Slack → **Copy link** — the `C...` value at the end of the URL is the channel ID.
+    * `requireMention`
+    * per-channel `users` allowlist
+
+    Useful commands:
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw channels status --probe
+    openclaw logs --follow
+    openclaw doctor
+    ```
+  </Accordion>
+
+  <Accordion title="DM messages ignored">
+    Check:
+
+    * `channels.slack.dm.enabled`
+    * `channels.slack.dmPolicy` (or legacy `channels.slack.dm.policy`)
+    * pairing approvals / allowlist entries
+    * Slack Assistant DM events: verbose logs mentioning `drop message_changed`
+      usually mean Slack sent an edited Assistant-thread event without a
+      recoverable human sender in message metadata
+
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw pairing list slack
+    ```
+  </Accordion>
+
+  <Accordion title="Socket mode not connecting">
+    Validate bot + app tokens and Socket Mode enablement in Slack app settings.
+
+    If `openclaw channels status --probe --json` shows `botTokenStatus` or
+    `appTokenStatus: "configured_unavailable"`, the Slack account is
+    configured but the current runtime could not resolve the SecretRef-backed
+    value.
+  </Accordion>
+
+  <Accordion title="HTTP mode not receiving events">
+    Validate:
+
+    * signing secret
+    * webhook path
+    * Slack Request URLs (Events + Interactivity + Slash Commands)
+    * unique `webhookPath` per HTTP account
+
+    If `signingSecretStatus: "configured_unavailable"` appears in account
+    snapshots, the HTTP account is configured but the current runtime could not
+    resolve the SecretRef-backed signing secret.
+  </Accordion>
+
+  <Accordion title="Native/slash commands not firing">
+    Verify whether you intended:
+
+    * native command mode (`channels.slack.commands.native: true`) with matching slash commands registered in Slack
+    * or single slash command mode (`channels.slack.slashCommand.enabled: true`)
+
+    Also check `commands.useAccessGroups` and channel/user allowlists.
+  </Accordion>
+</AccordionGroup>
+
+## Attachment vision reference
+
+Slack can attach downloaded media to the agent turn when Slack file downloads succeed and size limits permit. Image files can be passed through the media understanding path or directly to a vision-capable reply model; other files are retained as downloadable file context rather than treated as image input.
+
+### Supported media types
+
+| Media type                     | Source               | Current behavior                                                                  | Notes                                                                     |
+| ------------------------------ | -------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| JPEG / PNG / GIF / WebP images | Slack file URL       | Downloaded and attached to the turn for vision-capable handling                   | Per-file cap: `channels.slack.mediaMaxMb` (default 20 MB)                 |
+| PDF files                      | Slack file URL       | Downloaded and exposed as file context for tools such as `download-file` or `pdf` | Slack inbound does not convert PDFs into image-vision input automatically |
+| Other files                    | Slack file URL       | Downloaded when possible and exposed as file context                              | Binary files are not treated as image input                               |
+| Thread replies                 | Thread starter files | Root-message files can be hydrated as context when the reply has no direct media  | File-only starters use an attachment placeholder                          |
+| Multi-image messages           | Multiple Slack files | Each file is evaluated independently                                              | Slack processing is capped at eight files per message                     |
+
+### Inbound pipeline
+
+When a Slack message with file attachments arrives:
+
+1. OpenClaw downloads the file from Slack's private URL using the bot token (`xoxb-...`).
+2. The file is written to the media store on success.
+3. Downloaded media paths and content types are added to the inbound context.
+4. Image-capable model/tool paths can use image attachments from that context.
+5. Non-image files remain available as file metadata or media references for tools that can handle them.
+
+### Thread-root attachment inheritance
+
+When a message arrives in a thread (has a `thread_ts` parent):
+
+* If the reply itself has no direct media and the included root message has files, Slack can hydrate the root files as thread-starter context.
+* Direct reply attachments take precedence over root-message attachments.
+* A root message that has only files and no text is represented with an attachment placeholder so the fallback can still include its files.
+
+### Multi-attachment handling
+
+When a single Slack message contains multiple file attachments:
+
+* Each attachment is processed independently through the media pipeline.
+* Downloaded media references are aggregated into the message context.
+* Processing order follows Slack's file order in the event payload.
+* A failure in one attachment's download does not block others.
+
+### Size, download, and model limits
+
+* **Size cap**: Default 20 MB per file. Configurable via `channels.slack.mediaMaxMb`.
+* **Download failures**: Files that Slack cannot serve, expired URLs, inaccessible files, oversize files, and Slack auth/login HTML responses are skipped instead of being reported as unsupported formats.
+* **Vision model**: Image analysis uses the active reply model when it supports vision, or the image model configured at `agents.defaults.imageModel`.
+
+### Known limits
+
+| Scenario                               | Current behavior                                                             | Workaround                                                                 |
+| -------------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Expired Slack file URL                 | File skipped; no error shown                                                 | Re-upload the file in Slack                                                |
+| Vision model not configured            | Image attachments are stored as media references, but not analyzed as images | Configure `agents.defaults.imageModel` or use a vision-capable reply model |
+| Very large images (> 20 MB by default) | Skipped per size cap                                                         | Increase `channels.slack.mediaMaxMb` if Slack allows                       |
+| Forwarded/shared attachments           | Text and Slack-hosted image/file media are best-effort                       | Re-share directly in the OpenClaw thread                                   |
+| PDF attachments                        | Stored as file/media context, not automatically routed through image vision  | Use `download-file` for file metadata or the `pdf` tool for PDF analysis   |
+
+### Related documentation
+
+* [Media understanding pipeline](/nodes/media-understanding)
+* [PDF tool](/tools/pdf)
+* Epic: [#51349](https://github.com/openclaw/openclaw/issues/51349) — Slack attachment vision enablement
+* Regression tests: [#51353](https://github.com/openclaw/openclaw/issues/51353)
+* Live verification: [#51354](https://github.com/openclaw/openclaw/issues/51354)
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Pairing" icon="link" href="/channels/pairing">
+    Pair a Slack user to the gateway.
+  </Card>
+
+  <Card title="Groups" icon="users" href="/channels/groups">
+    Channel and group DM behavior.
+  </Card>
+
+  <Card title="Channel routing" icon="route" href="/channels/channel-routing">
+    Route inbound messages to agents.
+  </Card>
+
+  <Card title="Security" icon="shield" href="/gateway/security">
+    Threat model and hardening.
+  </Card>
+
+  <Card title="Configuration" icon="sliders" href="/gateway/configuration">
+    Config layout and precedence.
+  </Card>
+
+  <Card title="Slash commands" icon="terminal" href="/tools/slash-commands">
+    Command catalog and behavior.
+  </Card>
+</CardGroup>
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Synology Chat
+
+Status: bundled plugin direct-message channel using Synology Chat webhooks.
+The plugin accepts inbound messages from Synology Chat outgoing webhooks and sends replies
+through a Synology Chat incoming webhook.
+
+## Bundled plugin
+
+Synology Chat ships as a bundled plugin in current OpenClaw releases, so normal
+packaged builds do not need a separate install.
+
+If you are on an older build or a custom install that excludes Synology Chat,
+install it manually:
+
+Install from a local checkout:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw plugins install ./path/to/local/synology-chat-plugin
 ```
+
+Details: [Plugins](/tools/plugin)
+
+## Quick setup
+
+1. Ensure the Synology Chat plugin is available.
+   * Current packaged OpenClaw releases already bundle it.
+   * Older/custom installs can add it manually from a source checkout with the command above.
+   * `openclaw onboard` now shows Synology Chat in the same channel setup list as `openclaw channels add`.
+   * Non-interactive setup: `openclaw channels add --channel synology-chat --token <token> --url <incoming-webhook-url>`
+2. In Synology Chat integrations:
+   * Create an incoming webhook and copy its URL.
+   * Create an outgoing webhook with your secret token.
+3. Point the outgoing webhook URL to your OpenClaw gateway:
+   * `https://gateway-host/webhook/synology` by default.
+   * Or your custom `channels.synology-chat.webhookPath`.
+4. Finish setup in OpenClaw.
+   * Guided: `openclaw onboard`
+   * Direct: `openclaw channels add --channel synology-chat --token <token> --url <incoming-webhook-url>`
+5. Restart gateway and send a DM to the Synology Chat bot.
+
+Webhook auth details:
+
+* OpenClaw accepts the outgoing webhook token from `body.token`, then
+  `?token=...`, then headers.
+* Accepted header forms:
+  * `x-synology-token`
+  * `x-webhook-token`
+  * `x-openclaw-token`
+  * `Authorization: Bearer <token>`
+* Empty or missing tokens fail closed.
+
+Minimal config:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    bluebubbles: {
-      groups: {
-        \"iMessage;-;chat123\": {
-          systemPrompt: \"Keep responses under 3 sentences. Mirror the group's casual tone.\",
-        },
-      },
-    },
-  },
-}
-```
-
-The key matches whatever BlueBubbles reports as `chatGuid` / `chatIdentifier` / numeric `chatId` for the group, and a `\"*\"` wildcard entry provides a default for every group without an exact match (same pattern used by `requireMention` and per-group tool policies). Exact matches always win over the wildcard. DMs ignore this field; use agent-level or account-level prompt customization instead.
-
-#### [​](https://docs.openclaw.ai/channels/bluebubbles\\#worked-example-threaded-replies-and-tapback-reactions-private-api)  Worked example: threaded replies and tapback reactions (Private API)
-
-With the BlueBubbles Private API enabled, inbound messages arrive with short message IDs (for example `[[reply_to:5]]`) and the agent can call `action=reply` to thread into a specific message or `action=react` to drop a tapback. A per-group `systemPrompt` is a reliable way to keep the agent choosing the right tool:
-
-```
-{
-  channels: {
-    bluebubbles: {
-      groups: {
-        \"iMessage;+;chat-family\": {
-          systemPrompt: [\\\n            \"When replying in this group, always call action=reply with the\",\\\n            \"[[reply_to:N]] messageId from context so your response threads\",\\\n            \"under the triggering message. Never send a new unlinked message.\",\\\n            \"\",\\\n            \"For short acknowledgements ('ok', 'got it', 'on it'), use\",\\\n            \"action=react with an appropriate tapback emoji (❤️, 👍, 😂, ‼️, ❓)\",\\\n            \"instead of sending a text reply.\",\\\n          ].join(\" \"),
-        },
-      },
-    },
-  },
-}
-```
-
-Tapback reactions and threaded replies both require the BlueBubbles Private API; see [Advanced actions](https://docs.openclaw.ai/channels/bluebubbles#advanced-actions) and [Message IDs](https://docs.openclaw.ai/channels/bluebubbles#message-ids-short-vs-full) for the underlying mechanics.
-
-## [​](https://docs.openclaw.ai/channels/bluebubbles\\#acp-conversation-bindings)  ACP conversation bindings
-
-BlueBubbles chats can be turned into durable ACP workspaces without changing the transport layer.Fast operator flow:
-
-- Run `/acp spawn codex --bind here` inside the DM or allowed group chat.
-- Future messages in that same BlueBubbles conversation route to the spawned ACP session.
-- `/new` and `/reset` reset the same bound ACP session in place.
-- `/acp close` closes the ACP session and removes the binding.
-
-Configured persistent bindings are also supported through top-level `bindings[]` entries with `type: \"acp\"` and `match.channel: \"bluebubbles\"`.`match.peer.id` can use any supported BlueBubbles target form:
-
-- normalized DM handle such as `+15555550123` or `user@example.com`
-- `chat_id:<id>`
-- `chat_guid:<guid>`
-- `chat_identifier:<identifier>`
-
-For stable group bindings, prefer `chat_id:*` or `chat_identifier:*`.Example:
-
-```
-{
-  agents: {
-    list: [\\\n      {\\\
-        id: \"codex\",\\\n        runtime: {\\\n          type: \"acp\",\\\n          acp: { agent: \"codex\", backend: \"acpx\", mode: \"persistent\" },\\\n        },\\\n      },\\\n    ],
-  },
-  bindings: [\\\n    {\\\
-      type: \"acp\",\\\n      agentId: \"codex\",\\\n      match: {\\\n        channel: \"bluebubbles\",\\\n        accountId: \"default\",\\\n        peer: { kind: \"dm\", id: \"+15555550123\" },\\\n      },\\\n      acp: { label: \"codex-imessage\" },\\\n    },\\\n  ],
-}
-```
-
-See [ACP Agents](https://docs.openclaw.ai/tools/acp-agents) for shared ACP binding behavior.
-
-## [​](https://docs.openclaw.ai/channels/bluebubbles\\#typing-+-read-receipts)  Typing + read receipts
-
-- **Typing indicators**: Sent automatically before and during response generation.
-- **Read receipts**: Controlled by `channels.bluebubbles.sendReadReceipts` (default: `true`).
-- **Typing indicators**: OpenClaw sends typing start events; BlueBubbles clears typing automatically on send or timeout (manual stop via DELETE is unreliable).
-
-```
-{
-  channels: {
-    bluebubbles: {
-      sendReadReceipts: false, // disable read receipts
-    },
-  },
-}
-```
-
-## [​](https://docs.openclaw.ai/channels/bluebubbles\\#advanced-actions)  Advanced actions
-
-BlueBubbles supports advanced message actions when enabled in config:
-
-```
-{
-  channels: {
-    bluebubbles: {
-      actions: {
-        reactions: true, // tapbacks (default: true)
-        edit: true, // edit sent messages (macOS 13+, broken on macOS 26 Tahoe)
-        unsend: true, // unsend messages (macOS 13+)
-        reply: true, // reply threading by message GUID
-        sendWithEffect: true, // message effects (slam, loud, etc.)
-        renameGroup: true, // rename group chats
-        setGroupIcon: true, // set group chat icon/photo (flaky on macOS 26 Tahoe)
-        addParticipant: true, // add participants to groups
-        removeParticipant: true, // remove participants from groups
-        leaveGroup: true, // leave group chats
-        sendAttachment: true, // send attachments/media
-      },
-    },
-  },
-}
-```
-
-Available actions:
-
-- **react**: Add/remove tapback reactions (`messageId`, `emoji`, `remove`). iMessage’s native tapback set is `love`, `like`, `dislike`, `laugh`, `emphasize`, and `question`. When an agent picks an emoji outside that set (for example `👀`), the reaction tool falls back to `love` so the tapback still renders instead of failing the whole request. Configured ack reactions still validate strictly and error on unknown values.
-- **edit**: Edit a sent message (`messageId`, `text`)
-- **unsend**: Unsend a message (`messageId`)
-- **reply**: Reply to a specific message (`messageId`, `text`, `to`)
-- **sendWithEffect**: Send with iMessage effect (`text`, `to`, `effectId`)
-- **renameGroup**: Rename a group chat (`chatGuid`, `displayName`)
-- **setGroupIcon**: Set a group chat’s icon/photo (`chatGuid`, `media`) — flaky on macOS 26 Tahoe (API may return success but the icon does not sync).
-- **addParticipant**: Add someone to a group (`chatGuid`, `address`)
-- **removeParticipant**: Remove someone from a group (`chatGuid`, `address`)
-- **leaveGroup**: Leave a group chat (`chatGuid`)
-- **upload-file**: Send media/files (`to`, `buffer`, `filename`, `asVoice`)
-
-  - Voice memos: set `asVoice: true` with **MP3** or **CAF** audio to send as an iMessage voice message. BlueBubbles ...(content truncated)
-
----
-
-## Google Chat - OpenClaw
-**Source:** https://docs.openclaw.ai/channels/googlechat
-
-[Skip to main content](https://docs.openclaw.ai/channels/googlechat#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Mainstream messaging
-
-Google Chat
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Quick setup (beginner)](https://docs.openclaw.ai/channels/googlechat#quick-setup-beginner)
-- [Add to Google Chat](https://docs.openclaw.ai/channels/googlechat#add-to-google-chat)
-- [Public URL (Webhook-only)](https://docs.openclaw.ai/channels/googlechat#public-url-webhook-only)
-- [Option A: Tailscale Funnel (Recommended)](https://docs.openclaw.ai/channels/googlechat#option-a-tailscale-funnel-recommended)
-- [Option B: Reverse Proxy (Caddy)](https://docs.openclaw.ai/channels/googlechat#option-b-reverse-proxy-caddy)
-- [Option C: Cloudflare Tunnel](https://docs.openclaw.ai/channels/googlechat#option-c-cloudflare-tunnel)
-- [How it works](https://docs.openclaw.ai/channels/googlechat#how-it-works)
-- [Targets](https://docs.openclaw.ai/channels/googlechat#targets)
-- [Config highlights](https://docs.openclaw.ai/channels/googlechat#config-highlights)
-- [Troubleshooting](https://docs.openclaw.ai/channels/googlechat#troubleshooting)
-- [405 Method Not Allowed](https://docs.openclaw.ai/channels/googlechat#405-method-not-allowed)
-- [Other issues](https://docs.openclaw.ai/channels/googlechat#other-issues)
-- [Related](https://docs.openclaw.ai/channels/googlechat#related)
-
-Status: ready for DMs + spaces via Google Chat API webhooks (HTTP only).
-
-## [​](https://docs.openclaw.ai/channels/googlechat\\#quick-setup-beginner)  Quick setup (beginner)
-
-1. Create a Google Cloud project and enable the **Google Chat API**.
-
-   - Go to: [Google Chat API Credentials](https://console.cloud.google.com/apis/api/chat.googleapis.com/credentials)
-   - Enable the API if it is not already enabled.
-2. Create a **Service Account**:
-
-   - Press **Create Credentials** \\> **Service Account**.
-   - Name it whatever you want (e.g., `openclaw-chat`).
-   - Leave permissions blank (press **Continue**).
-   - Leave principals with access blank (press **Done**).
-3. Create and download the **JSON Key**:
-
-   - In the list of service accounts, click on the one you just created.
-   - Go to the **Keys** tab.
-   - Click **Add Key** \\> **Create new key**.
-   - Select **JSON** and press **Create**.
-4. Store the downloaded JSON file on your gateway host (e.g., `~/.openclaw/googlechat-service-account.json`).
-5. Create a Google Chat app in the [Google Cloud Console Chat Configuration](https://console.cloud.google.com/apis/api/chat.googleapis.com/hangouts-chat):
-
-   - Fill in the **Application info**:
-
-     - **App name**: (e.g. `OpenClaw`)
-     - **Avatar URL**: (e.g. `https://openclaw.ai/logo.png`)
-     - **Description**: (e.g. `Personal AI Assistant`)
-   - Enable **Interactive features**.
-   - Under **Functionality**, check **Join spaces and group conversations**.
-   - Under **Connection settings**, select **HTTP endpoint URL**.
-   - Under **Triggers**, select **Use a common HTTP endpoint URL for all triggers** and set it to your gateway’s public URL followed by `/googlechat`.
-
-     - _Tip: Run `openclaw status` to find your gateway’s public URL._
-   - Under **Visibility**, check **Make this Chat app available to specific people and groups in `<Your Domain>`**.
-   - Enter your email address (e.g., `user@example.com`) in the text box.
-   - Click **Save** at the bottom.
-6. **Enable the app status**:
-
-   - After saving, **refresh the page**.
-   - Look for the **App status** section (usually near the top or bottom after saving).
-   - Change the status to **Live - available to users**.
-   - Click **Save** again.
-7. Configure OpenClaw with the service account path + webhook audience:
-   - Env: `GOOGLE_CHAT_SERVICE_ACCOUNT_FILE=/path/to/service-account.json`
-   - Or config: `channels.googlechat.serviceAccountFile: \"/path/to/service-account.json\"`.
-8. Set the webhook audience type + value (matches your Chat app config).
-9. Start the gateway. Google Chat will POST to your webhook path.
-
-## [​](https://docs.openclaw.ai/channels/googlechat\\#add-to-google-chat)  Add to Google Chat
-
-Once the gateway is running and your email is added to the visibility list:
-
-1. Go to [Google Chat](https://chat.google.com/).
-2. Click the **+** (plus) icon next to **Direct Messages**.
-3. In the search bar (where you usually add people), type the **App name** you configured in the Google Cloud Console.
-
-   - **Note**: The bot will _not_ appear in the “Marketplace” browse list because it is a private app. You must search for it by name.
-4. Select your bot from the results.
-5. Click **Add** or **Chat** to start a 1:1 conversation.
-6. Send “Hello” to trigger the assistant!
-
-## [​](https://docs.openclaw.ai/channels/googlechat\\#public-url-webhook-only)  Public URL (Webhook-only)
-
-Google Chat webhooks require a public HTTPS endpoint. For security, **only expose the `/googlechat` path** to the internet. Keep the OpenClaw dashboard and other sensitive endpoints on your private network.
-
-### [​](https://docs.openclaw.ai/channels/googlechat\\#option-a-tailscale-funnel-recommended)  Option A: Tailscale Funnel (Recommended)
-
-Use Tailscale Serve for the private dashboard and Funnel for the public webhook path. This keeps `/` private while exposing only `/googlechat`.
-
-1. **Check what address your gateway is bound to:**
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```
-ss -tlnp | grep 18789
-```
-
-
-
-
-
-
-
-
-
-
-
-Note the IP address (e.g., `127.0.0.1`, `0.0.0.0`, or your Tailscale IP like `100.x.x.x`).
-2. **Expose the dashboard to the tailnet only (port 8443):**
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```
-# If bound to localhost (127.0.0.1 or 0.0.0.0):
-tailscale serve --bg --https 8443 http://127.0.0.1:18789
-
-# If bound to Tailscale IP only (e.g., 100.106.161.80):
-tailscale serve --bg --https 8443 http://100.106.161.80:18789
-```
-
-3. **Expose only the webhook path publicly:**
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```
-# If bound to localhost (127.0.0.1 or 0.0.0.0):
-tailscale funnel --bg --set-path /googlechat http://127.0.0.1:18789/googlechat
-
-# If bound to Tailscale IP only (e.g., 100.106.161.80):
-tailscale funnel --bg --set-path /googlechat http://100.106.161.80:18789/googlechat
-```
-
-4. **Authorize the node for Funnel access:**
-If prompted, visit the authorization URL shown in the output to enable Funnel for this node in your tailnet policy.
-5. **Verify the configuration:**
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```
-tailscale serve status
-tailscale funnel status
-```
-
-
-Your public webhook URL will be:
-`https://<node-name>.<tailnet>.ts.net/googlechat`Your private dashboard stays tailnet-only:
-`https://<node-name>.<tailnet>.ts.net:8443/`Use the public URL (without `:8443`) in the Google Chat app config.
-
-> Note: This configuration persists across reboots. To remove it later, run `tailscale funnel reset` and `tailscale serve reset`.
-
-### [​](https://docs.openclaw.ai/channels/googlechat\\#option-b-reverse-proxy-caddy)  Option B: Reverse Proxy (Caddy)
-
-If you use a reverse proxy like Caddy, only proxy the specific path:
-
-```
-your-domain.com {
-    reverse_proxy /googlechat* localhost:18789
-}
-```
-
-With this config, any request to `your-domain.com/` will be ignored or returned as 404, while `your-domain.com/googlechat` is safely routed to OpenClaw.
-
-### [​](https://docs.openclaw.ai/channels/googlechat\\#option-c-cloudflare-tunnel)  Option C: Cloudflare Tunnel
-
-Configure your tunnel’s ingress rules to only route the webhook path:
-
-- **Path**: `/googlechat` -\\> `http://localhost:18789/googlechat`
-- **Default Rule**: HTTP 404 (Not Found)
-
-## [​](https://docs.openclaw.ai/channels/googlechat\\#how-it-works)  How it works
-
-1. Google Chat sends webhook POSTs to the gateway. Each request includes an `Authorization: Bearer <token>` header.
-
-   - OpenClaw verifies bearer auth before reading/parsing full webhook bodies when the header is present.
-   - Google Workspace Add-on requests that carry `authorizationEventObject.systemIdToken` in the body are supported via a stricter pre-auth body budget.
-2. OpenClaw verifies the token against the configured `audienceType` \\+ `audience`:
-
-   - `audienceType: \"app-url\"` → audience is your HTTPS webhook URL.
-   - `audienceType: \"project-number\"` → audience is the Cloud project number.
-3. Messages are routed by space:
-   - DMs use session key `agent:<agentId>:googlechat:direct:<spaceId>`.
-   - Spaces use session key `agent:<agentId>:googlechat:group:<spaceId>`.
-4. DM access is pairing by default. Unknown senders receive a pairing code; approve with:
-   - `openclaw pairing approve googlechat <code>`
-5. Group spaces require @-mention by default. Use `botUser` if mention detection needs the app’s user name.
-
-## [​](https://docs.openclaw.ai/channels/googlechat\\#targets)  Targets
-
-Use these identifiers for delivery and allowlists:
-
-- Direct messages: `users/<userId>` (recommended).
-- Raw email `name@example.com` is mutable and only used for direct allowlist matching when `channels.googlechat.dangerouslyAllowNameMatching: true`.
-- Deprecated: `users/<email>` is treated as a user id, not an email allowlist.
-- Spaces: `spaces/<spaceId>`.
-
-## [​](https://docs.openclaw.ai/channels/googlechat\\#config-highlights)  Config highlights
-
-```
-{
-  channels: {
-    googlechat: {
+    "synology-chat": {
       enabled: true,
-      serviceAccountFile: \"/path/to/service-account.json\",
-      // or serviceAccountRef: { source: \"file\", provider: \"filemain\", id: \"/channels/googlechat/serviceAccount\" }
-      audienceType: \"app-url\",
-      audience: \"https://gateway.example.com/googlechat\",
-      webhookPath: \"/googlechat\",
-      botUser: \"users/1234567890\", // optional; helps mention detection
-      dm: {
-        policy: \"pairing\",
-        allowFrom: [\"users/1234567890\"],
-      },
-      groupPolicy: \"allowlist\",
-      groups: {
-        \"spaces/AAAA\": {
-          allow: true,
-          requireMention: true,
-          users: [\"users/1234567890\"],
-          systemPrompt: \"Short answers only.\",
-        },
-      },
-      actions: { reactions: true },
-      typingIndicator: \"message\",
-      mediaMaxMb: 20,
+      token: "synology-outgoing-token",
+      incomingUrl: "https://nas.example.com/webapi/entry.cgi?api=SYNO.Chat.External&method=incoming&version=2&token=...",
+      webhookPath: "/webhook/synology",
+      dmPolicy: "allowlist",
+      allowedUserIds: ["123456"],
+      rateLimitPerMinute: 30,
+      allowInsecureSsl: false,
     },
   },
 }
 ```
 
-Notes:
+## Environment variables
 
-- Service account credentials can also be passed inline with `serviceAccount` (JSON string).
-- `serviceAccountRef` is also supported (env/file SecretRef), including per-account refs under `channels.googlechat.accounts.<id>.serviceAccountRef`.
-- Default webhook path is `/googlechat` if `webhookPath` isn’t set.
-- `dangerouslyAllowNameMatching` re-enables mutable email principal matching for allowlists (break-glass compatibility mode).
-- Reactions are available via the `reactions` tool and `channels action` when `actions.reactions` is enabled.
-- Message actions expose `send` for text and `upload-file` for explicit attachment sends. `upload-file` accepts `media` / `filePath` / `path` plus optional `message`, `filename`, and thread targeting.
-- `typingIndicator` supports `none`, `message` (default), and `reaction` (reaction requires user OAuth).
-- Attachments are downloaded through the Chat API and stored in the media pipeline (size capped by `mediaMaxMb`).
+For the default account, you can use env vars:
 
-Secrets reference details: [Secrets Management](https://docs.openclaw.ai/gateway/secrets).
+* `SYNOLOGY_CHAT_TOKEN`
+* `SYNOLOGY_CHAT_INCOMING_URL`
+* `SYNOLOGY_NAS_HOST`
+* `SYNOLOGY_ALLOWED_USER_IDS` (comma-separated)
+* `SYNOLOGY_RATE_LIMIT`
+* `OPENCLAW_BOT_NAME`
 
-## [​](https://docs.openclaw.ai/channels/googlechat\\#troubleshooting)  Troubleshooting
+Config values override env vars.
 
-### [​](https://docs.openclaw.ai/channels/googlechat\\#405-method-not-allowed)  405 Method Not Allowed
+`SYNOLOGY_CHAT_INCOMING_URL` cannot be set from a workspace `.env`; see [Workspace `.env` files](/gateway/security).
 
-If Google Cloud Logs Explorer shows errors like:
+## DM policy and access control
 
-```
-status code: 405, reason phrase: HTTP error response: HTTP/1.1 405 Method Not Allowed
-```
+* `dmPolicy: "allowlist"` is the recommended default.
+* `allowedUserIds` accepts a list (or comma-separated string) of Synology user IDs.
+* In `allowlist` mode, an empty `allowedUserIds` list is treated as misconfiguration and the webhook route will not start (use `dmPolicy: "open"` with `allowedUserIds: ["*"]` for allow-all).
+* `dmPolicy: "open"` allows public DMs only when `allowedUserIds` includes `"*"`; with restrictive entries, only matching users can chat.
+* `dmPolicy: "disabled"` blocks DMs.
+* Reply recipient binding stays on stable numeric `user_id` by default. `channels.synology-chat.dangerouslyAllowNameMatching: true` is break-glass compatibility mode that re-enables mutable username/nickname lookup for reply delivery.
+* Pairing approvals work with:
+  * `openclaw pairing list synology-chat`
+  * `openclaw pairing approve synology-chat <CODE>`
 
-This means the webhook handler isn’t registered. Common causes:
+## Outbound delivery
 
-1. **Channel not configured**: The `channels.googlechat` section is missing from your config. Verify with:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```
-openclaw config get channels.googlechat
-```
-
-
-
-
-
-
-
-
-
-
-
-If it returns “Config path not found”, add the configuration (see [Config highlights](https://docs.openclaw.ai/channels/googlechat#config-highlights)).
-2. **Plugin not enabled**: Check plugin status:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```
-openclaw plugins list | grep googlechat
-```
-
-
-
-
-
-
-
-
-
-
-
-If it shows “disabled”, add `plugins.entries.googlechat.enabled: true` to your config.
-3. **Gateway not restarted**: After adding config, restart the gateway:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```
-openclaw gateway restart
-```
-
-
-Verify the channel is running:
-
-```
-openclaw channels status
-# Should show: Google Chat default: enabled, configured, ...
-```
-
-### [​](https://docs.openclaw.ai/channels/googlechat\\#other-issues)  Other issues
-
-- Check `openclaw channels status --probe` for auth errors or missing audience config.
-- If no messages arrive, confirm the Chat app’s webhook URL + event subscriptions.
-- If mention gating blocks replies, set `botUser` to the app’s user resource name and verify `requireMention`.
-- Use `openclaw logs --follow` while sending a test message to see if requests reach the gateway.
-
-Related docs:
-
-- [Gateway configuration](https://docs.openclaw.ai/gateway/configuration)
-- [Security](https://docs.openclaw.ai/gateway/security)
-- [Reactions](https://docs.openclaw.ai/tools/reactions)
-
-## [​](https://docs.openclaw.ai/channels/googlechat\\#related)  Related
-
-- [Channels Overview](https://docs.openclaw.ai/channels) — all supported channels
-- [Pairing](https://docs.openclaw.ai/channels/pairing) — DM authentication and pairing flow
-- [Groups](https://docs.openclaw.ai/channels/groups) — group chat behavior and mention gating
-- [Channel Routing](https://docs.openclaw.ai/channels/channel-routing) — session routing for messages
-- [Security](https://docs.openclaw.ai/gateway/security) — access model and hardening
-
-[Microsoft Teams](https://docs.openclaw.ai/channels/msteams) [iMessage](https://docs.openclaw.ai/channels/imessage)
-
-Ctrl+I
-
----
-
-## Matrix
-**Source:** https://docs.openclaw.ai/channels/matrix
-
-[Skip to main content](https://docs.openclaw.ai/channels/matrix#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Mainstream messaging
-
-Matrix
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Bundled plugin](https://docs.openclaw.ai/channels/matrix#bundled-plugin)
-- [Setup](https://docs.openclaw.ai/channels/matrix#setup)
-- [Interactive setup](https://docs.openclaw.ai/channels/matrix#interactive-setup)
-- [Minimal config](https://docs.openclaw.ai/channels/matrix#minimal-config)
-- [Auto-join](https://docs.openclaw.ai/channels/matrix#auto-join)
-- [Allowlist target formats](https://docs.openclaw.ai/channels/matrix#allowlist-target-formats)
-- [Account ID normalization](https://docs.openclaw.ai/channels/matrix#account-id-normalization)
-- [Cached credentials](https://docs.openclaw.ai/channels/matrix#cached-credentials)
-- [Environment variables](https://docs.openclaw.ai/channels/matrix#environment-variables)
-- [Configuration example](https://docs.openclaw.ai/channels/matrix#configuration-example)
-- [Streaming previews](https://docs.openclaw.ai/channels/matrix#streaming-previews)
-- [Self-hosted push rules for quiet finalized previews](https://docs.openclaw.ai/channels/matrix#self-hosted-push-rules-for-quiet-finalized-previews)
-- [Bot-to-bot rooms](https://docs.openclaw.ai/channels/matrix#bot-to-bot-rooms)
-- [Encryption and verification](https://docs.openclaw.ai/channels/matrix#encryption-and-verification)
-- [Enable encryption](https://docs.openclaw.ai/channels/matrix#enable-encryption)
-- [Status and trust signals](https://docs.openclaw.ai/channels/matrix#status-and-trust-signals)
-- [Verify this device with a recovery key](https://docs.openclaw.ai/channels/matrix#verify-this-device-with-a-recovery-key)
-- [Bootstrap or repair cross-signing](https://docs.openclaw.ai/channels/matrix#bootstrap-or-repair-cross-signing)
-- [Room-key backup](https://docs.openclaw.ai/channels/matrix#room-key-backup)
-- [Listing, requesting, and responding to verifications](https://docs.openclaw.ai/channels/matrix#listing-requesting-and-responding-to-verifications)
-- [Multi-account notes](https://docs.openclaw.ai/channels/matrix#multi-account-notes)
-- [Profile management](https://docs.openclaw.ai/channels/matrix#profile-management)
-- [Threads](https://docs.openclaw.ai/channels/matrix#threads)
-- [Session routing (sessionScope)](https://docs.openclaw.ai/channels/matrix#session-routing-sessionscope)
-- [Reply threading (threadReplies)](https://docs.openclaw.ai/channels/matrix#reply-threading-threadreplies)
-- [Thread inheritance and slash commands](https://docs.openclaw.ai/channels/matrix#thread-inheritance-and-slash-commands)
-- [ACP conversation bindings](https://docs.openclaw.ai/channels/matrix#acp-conversation-bindings)
-- [Thread binding config](https://docs.openclaw.ai/channels/matrix#thread-binding-config)
-- [Reactions](https://docs.openclaw.ai/channels/matrix#reactions)
-- [History context](https://docs.openclaw.ai/channels/matrix#history-context)
-- [Context visibility](https://docs.openclaw.ai/channels/matrix#context-visibility)
-- [DM and room policy](https://docs.openclaw.ai/channels/matrix#dm-and-room-policy)
-- [Direct room repair](https://docs.openclaw.ai/channels/matrix#direct-room-repair)
-- [Exec approvals](https://docs.openclaw.ai/channels/matrix#exec-approvals)
-- [Slash commands](https://docs.openclaw.ai/channels/matrix#slash-commands)
-- [Multi-account](https://docs.openclaw.ai/channels/matrix#multi-account)
-- [Private/LAN homeservers](https://docs.openclaw.ai/channels/matrix#private%2Flan-homeservers)
-- [Proxying Matrix traffic](https://docs.openclaw.ai/channels/matrix#proxying-matrix-traffic)
-- [Target resolution](https://docs.openclaw.ai/channels/matrix#target-resolution)
-- [Configuration reference](https://docs.openclaw.ai/channels/matrix#configuration-reference)
-- [Account and connection](https://docs.openclaw.ai/channels/matrix#account-and-connection)
-- [Encryption](https://docs.openclaw.ai/channels/matrix#encryption)
-- [Access and policy](https://docs.openclaw.ai/channels/matrix#access-and-policy)
-- [Reply behavior](https://docs.openclaw.ai/channels/matrix#reply-behavior)
-- [Reaction settings](https://docs.openclaw.ai/channels/matrix#reaction-settings)
-- [Tooling and per-room overrides](https://docs.openclaw.ai/channels/matrix#tooling-and-per-room-overrides)
-- [Exec approval settings](https://docs.openclaw.ai/channels/matrix#exec-approval-settings)
-- [Related](https://docs.openclaw.ai/channels/matrix#related)
-
-Matrix is a bundled channel plugin for OpenClaw.
-It uses the official `matrix-js-sdk` and supports DMs, rooms, threads, media, reactions, polls, location, and E2EE.
-
-## [​](https://docs.openclaw.ai/channels/matrix\\#bundled-plugin)  Bundled plugin
-
-Current packaged OpenClaw releases ship the Matrix plugin in the box. You do not need to install anything; configuring `channels.matrix.*` (see [Setup](https://docs.openclaw.ai/channels/matrix#setup)) is what activates it.For older builds or custom installs that exclude Matrix, install manually first:
-
-```
-openclaw plugins install @openclaw/matrix
-# or, from a local checkout
-openclaw plugins install ./path/to/local/matrix-plugin
-```
-
-`plugins install` registers and enables the plugin, so no separate `openclaw plugins enable matrix` step is needed. The plugin still does nothing until you configure the channel below. See [Plugins](https://docs.openclaw.ai/tools/plugin) for general plugin behavior and install rules.
-
-## [​](https://docs.openclaw.ai/channels/matrix\\#setup)  Setup
-
-1. Create a Matrix account on your homeserver.
-2. Configure `channels.matrix` with either `homeserver` \\+ `accessToken`, or `homeserver` \\+ `userId` \\+ `password`.
-3. Restart the gateway.
-4. Start a DM with the bot, or invite it to a room (see [auto-join](https://docs.openclaw.ai/channels/matrix#auto-join) — fresh invites only land when `autoJoin` allows them).
-
-### [​](https://docs.openclaw.ai/channels/matrix\\#interactive-setup)  Interactive setup
-
-```
-openclaw channels add
-openclaw configure --section channels
-```
-
-The wizard asks for: homeserver URL, auth method (access token or password), user ID (password auth only), optional device name, whether to enable E2EE, and whether to configure room access and auto-join.If matching `MATRIX_*` env vars already exist and the selected account has no saved auth, the wizard offers an env-var shortcut. To resolve room names before saving an allowlist, run `openclaw channels resolve --channel matrix \"Project Room\"`. When E2EE is enabled, the wizard writes the config and runs the same bootstrap as [`openclaw matrix encryption setup`](https://docs.openclaw.ai/channels/matrix#encryption-and-verification).
-
-### [​](https://docs.openclaw.ai/channels/matrix\\#minimal-config)  Minimal config
-
-Token-based:
-
-```
-{
-  channels: {
-    matrix: {
-      enabled: true,
-      homeserver: \"https://matrix.example.org\",
-      accessToken: \"syt_xxx\",
-      dm: { policy: \"pairing\" },
-    },
-  },
-}
-```
-
-Password-based (the token is cached after first login):
-
-```
-{
-  channels: {
-    matrix: {
-      enabled: true,
-      homeserver: \"https://matrix.example.org\",
-      userId: \"@bot:example.org\",
-      password: \"replace-me\", // pragma: allowlist secret
-      deviceName: \"OpenClaw Gateway\",
-    },
-  },
-}
-```
-
-### [​](https://docs.openclaw.ai/channels/matrix\\#auto-join)  Auto-join
-
-`channels.matrix.autoJoin` defaults to `off`. With the default, the bot will not appear in new rooms or DMs from fresh invites until you join manually.OpenClaw cannot tell at invite time whether an invited room is a DM or a group, so all invites — including DM-style invites — go through `autoJoin` first. `dm.policy` only applies later, after the bot has joined and the room has been classified.
-
-Set `autoJoin: \"allowlist\"` plus `autoJoinAllowlist` to restrict which invites the bot accepts, or `autoJoin: \"always\"` to accept every invite.`autoJoinAllowlist` only accepts stable targets: `!roomId:server`, `#alias:server`, or `*`. Plain room names are rejected; alias entries are resolved against the homeserver, not against state claimed by the invited room.
-
-```
-{
-  channels: {
-    matrix: {
-      autoJoin: \"allowlist\",
-      autoJoinAllowlist: [\"!ops:example.org\", \"#support:example.org\"],
-      groups: {
-        \"!ops:example.org\": { requireMention: true },
-      },
-    },
-  },
-}
-```
-
-To accept every invite, use `autoJoin: \"always\"`.
-
-### [​](https://docs.openclaw.ai/channels/matrix\\#allowlist-target-formats)  Allowlist target formats
-
-DM and room allowlists are best populated with stable IDs:
-
-- DMs (`dm.allowFrom`, `groupAllowFrom`, `groups.<room>.users`): use `@user:server`. Display names only resolve when the homeserver directory returns exactly one match.
-- Rooms (`groups`, `autoJoinAllowlist`): use `!room:server` or `#alias:server`. Names are resolved best-effort against joined rooms; unresolved entries are ignored at runtime.
-
-### [​](https://docs.openclaw.ai/channels/matrix\\#account-id-normalization)  Account ID normalization
-
-The wizard converts a friendly name into a normalized account ID. For example, `Ops Bot` becomes `ops-bot`. Punctuation is escaped in scoped env-var names so that two accounts cannot collide: `-` → `_X2D_`, so `ops-prod` maps to `MATRIX_OPS_X2D_PROD_*`.
-
-### [​](https://openclaw.ai/channels/matrix\\#cached-credentials)  Cached credentials
-
-Matrix stores cached credentials under `~/.openclaw/credentials/matrix/`:
-
-- default account: `credentials.json`
-- named accounts: `credentials-<account>.json`
-
-When cached credentials exist there, OpenClaw treats Matrix as configured even if the access token is not in the config file — that covers setup, `openclaw doctor`, and channel-status probes.
-
-### [​](https://docs.openclaw.ai/channels/matrix\\#environment-variables)  Environment variables
-
-Used when the equivalent config key is not set. The default account uses unprefixed names; named accounts use the account ID inserted before the suffix.
-
-| Default account | Named account (`<ID>` is the normalized account ID) |
-| --- | --- |
-| `MATRIX_HOMESERVER` | `MATRIX_<ID>_HOMESERVER` |
-| `MATRIX_ACCESS_TOKEN` | `MATRIX_<ID>_ACCESS_TOKEN` |
-| `MATRIX_USER_ID` | `MATRIX_<ID>_USER_ID` |
-| `MATRIX_PASSWORD` | `MATRIX_<ID>_PASSWORD` |
-| `MATRIX_DEVICE_ID` | `MATRIX_<ID>_DEVICE_ID` |
-| `MATRIX_DEVICE_NAME` | `MATRIX_<ID>_DEVICE_NAME` |
-| `MATRIX_RECOVERY_KEY` | `MATRIX_<ID>_RECOVERY_KEY` |
-
-For account `ops`, the names become `MATRIX_OPS_HOMESERVER`, `MATRIX_OPS_ACCESS_TOKEN`, and so on. The recovery-key env vars are read by recovery-aware CLI flows (`verify backup restore`, `verify device`, `verify bootstrap`) when you pipe the key in via `--recovery-key-stdin`.`MATRIX_HOMESERVER` cannot be set from a workspace `.env`; see [Workspace `.env` files](https://docs.openclaw.ai/gateway/security).
-
-## [​](https://docs.openclaw.ai/channels/matrix\\#configuration-example)  Configuration example
-
-A practical baseline with DM pairing, room allowlist, and E2EE:
-
-```
-{
-  channels: {
-    matrix: {
-      enabled: true,
-      homeserver: \"https://matrix.example.org\",
-      accessToken: \"syt_xxx\",
-      encryption: true,
-
-      dm: {
-        policy: \"pairing\",
-        sessionScope: \"per-room\",
-        threadReplies: \"off\",
-      },
-
-      groupPolicy: \"allowlist\",
-      groupAllowFrom: [\"@admin:example.org\"],
-      groups: {
-        \"!roomid:example.org\": { requireMention: true },
-      },
-
-      autoJoin: \"allowlist\",
-      autoJoinAllowlist: [\"!roomid:example.org\"],
-      threadReplies: \"inbound\",
-      replyToMode: \"off\",
-      streaming: \"partial\",
-    },
-  },
-}
-```
-
-## [​](https://docs.openclaw.ai/channels/matrix\\#streaming-previews)  Streaming previews
-
-Matrix reply streaming is opt-in. `streaming` controls how OpenClaw delivers the in-flight assistant reply; `blockStreaming` controls whether each completed block is preserved as its own Matrix message.
-
-```
-{
-  channels: {
-    matrix: {
-      streaming: \"partial\",
-    },
-  },
-}
-```
-
-| `streaming` | Behavior |
-| --- | --- |
-| `\"off\"` (default) | Wait for the full reply, send once. `true` ↔ `\"partial\"`, `false` ↔ `\"off\"`. |
-| `\"partial\"` | Edit one normal text message in place as the model writes the current block. Stock Matrix clients may notify on the first preview, not the final edit. |
-| `\"quiet\"` | Same as `\"partial\"` but the message is a non-notifying notice. Recipients only get a notification once a per-user push rule matches the finalized edit (see below). |
-
-`blockStreaming` is independent of `streaming`:
-
-| `streaming` | `blockStreaming: true` | `blockStreaming: false` (default) |
-| --- | --- | --- |
-| `\"partial\"` / `\"quiet\"` | Live draft for the current block, completed blocks kept as messages | Live draft for the current block, finalized in place |
-| `\"off\"` | One notifying Matrix message per finished block | One notifying Matrix message for the full reply |
-
-Notes:
-
-- If a preview grows past Matrix’s per-event size limit, OpenClaw stops preview streaming and falls back to final-only delivery.
-- Media replies always send attachments normally. If a stale preview can no longer be reused safely, OpenClaw redacts it before sending the final media reply.
-- Preview edits cost extra Matrix API calls. Leave `streaming: \"off\"` if you want the most conservative rate-limit profile.
-
-### [​](https://docs.openclaw.ai/channels/matrix\\#self-hosted-push-rules-for-quiet-finalized-previews)  Self-hosted push rules for quiet finalized previews
-
-`streaming: \"quiet\"` only notifies recipients once a block or turn is finalized — a per-user push rule has to match the finalized preview marker. See [Matrix push rules for quiet previews](https://docs.openclaw.ai/channels/matrix-push-rules) for the full recipe (recipient token, pusher check, rule install, per-homeserver notes).
-
-## [​](https://docs.openclaw.ai/channels/matrix\\#bot-to-bot-rooms)  Bot-to-bot rooms
-
-By default, Matrix messages from other configured OpenClaw Matrix accounts are ignored.Use `allowBots` when you intentionally want inter-agent Matrix traffic:
-
-```
-{
-  channels: {
-    matrix: {
-      allowBots: \"mentions\", // true | \"mentions\"
-      groups: {
-        \"!roomid:example.org\": {
-          requireMention: true,
-        },
-      },
-    },
-  },
-}
-```
-
-- `allowBots: true` accepts messages from other configured Matrix bot accounts in allowed rooms and DMs.
-- `allowBots: \"mentions\"` accepts those messages only when they visibly mention this bot in rooms. DMs are still allowed.
-- `groups.<room>.allowBots` overrides the account-level setting for one room.
-- OpenClaw still ignores messages from the same Matrix user ID to avoid self-reply loops.
-- Matrix does not expose a native bot flag here; OpenClaw treats “bot-authored” as “sent by another configured Matrix account on this OpenClaw gateway”.
-
-Use strict room allowlists and mention requirements when enabling bot-to-bot traffic in shared rooms.
-
-## [​](https://docs.openclaw.ai/channels/matrix\\#encryption-and-verification)  Encryption and verification
-
-In encrypted (E2EE) rooms, outbound image events use `thumbnail_file` so image previews are encrypted alongside the full attachment. Unencrypted rooms still use plain `thumbnail_url`. No configuration is needed — the plugin detects E2EE state automatically.All `openclaw matrix` commands accept `--verbose` (full diagnostics), `--json` (machine-readable output), and `--account <id>` (multi-account setups). Output is concise by default with quiet internal SDK logging. The examples below show the canonical form; add the flags as needed.
-
-### [​](https://docs.openclaw.ai/channels/matrix\\#enable-encryption)  Enable encryption
-
-```
-openclaw matrix encryption setup
-```
-
-Bootstraps secret storage and cross-signing, creates a room-key backup if needed, then prints status and next steps. Useful flags:
-
-- `--recovery-key <key>` apply a recovery key before bootstrapping (prefer the stdin form documented below)
-- `--force-reset-cross-signing` discard the current cross-signing identity and create a new one (use only intentionally)
-
-For a new account, enable E2EE at creation time:
-
-```
-openclaw matrix account add \\\n  --homeserver https://matrix.example.org \\\n  --access-token syt_xxx \\\n  --enable-e2ee
-```
-
-`--encryption` is an alias for `--enable-e2ee`.Manual config equivalent:
-
-```
-{
-  channels: {
-    matrix: {
-      enabled: true,
-      homeserver: \"https://matrix.example.org\",
-      accessToken: \"syt_xxx\",
-      encryption: true,
-      dm: { policy: \"pairing\" },
-    },
-  },
-}
-```
-
-### [​](https://docs.openclaw.ai/channels/matrix\\#status-and-trust-signals)  Status and trust signals
-
-```
-openclaw matrix verify status
-openclaw matrix verify status --include-recovery-key --json
-```
-
-`verify status` reports three independent trust signals (`--verbose` shows all of them):
-
-- `Locally trusted`: trusted by this client only
-- `Cross-signing verified`: the SDK reports verification via cross-signing
-- `Signed by owner`: signed by your own self-signing key (diagnostic only)
-
-`Verified by owner` becomes `yes` only when `Cross-signing verified` is `yes`. Local trust or an owner signature alone is not enough.`--allow-degraded-local-state` returns best-effort diagnostics without preparing the Matrix account first; useful for offline or partially-configured probes.
-
-### [​](https://docs.openclaw.ai/channels/matrix\\#verify-this-device-with-a-recovery-key)  Verify this device with a recovery key
-
-The recovery key is sensitive — pipe it via stdin instead of passing it on the command line. Set `MATRIX_RECOVERY_KEY` (or `MATRIX_<ID>_RECOVERY_KEY` for a named account):
-
-```
-printf ‘%s\\n’ \"$MATRIX_RECOVERY_KEY\" | openclaw matrix verify device --recovery-key-stdin
-```
-
-The command reports three states:
-
-- `Recovery key accepted`: Matrix accepted the key for secret storage or device trust.
-- `Backup usable`: room-key backup can be loaded with the trusted recovery material.
-- `Device verified by owner`: this device has full Matrix cross-signing identity trust.
-
-It exits non-zero when full identity trust is incomplete, even if the recovery key unlocked backup material. In that case, finish self-verification from another Matrix client:
-
-```
-openclaw matrix verify self
-```
-
-`verify self` waits for `Cross-signing verified: yes` before it exits successfully. Use `--timeout-ms <ms>` to tune the wai...(content truncated)
-
----
-
-## Channel routing - OpenClaw
-**Source:** https://docs.openclaw.ai/channels/channel-routing
-
-[Skip to main content](https://docs.openclaw.ai/channels/channel-routing#content-area)
-
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
-
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
-
-English
-
-Search...
-
-Ctrl K
-
-Search...
-
-Navigation
-
-Configuration
-
-Channel routing
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Channels & routing](https://docs.openclaw.ai/channels/channel-routing#channels-%26-routing)
-- [Key terms](https://docs.openclaw.ai/channels/channel-routing#key-terms)
-- [Session key shapes (examples)](https://docs.openclaw.ai/channels/channel-routing#session-key-shapes-examples)
-- [Main DM route pinning](https://docs.openclaw.ai/channels/channel-routing#main-dm-route-pinning)
-- [Routing rules (how an agent is chosen)](https://docs.openclaw.ai/channels/channel-routing#routing-rules-how-an-agent-is-chosen)
-- [Broadcast groups (run multiple agents)](https://docs.openclaw.ai/channels/channel-routing#broadcast-groups-run-multiple-agents)
-- [Config overview](https://docs.openclaw.ai/channels/channel-routing#config-overview)
-- [Session storage](https://docs.openclaw.ai/channels/channel-routing#session-storage)
-- [WebChat behavior](https://docs.openclaw.ai/channels/channel-routing#webchat-behavior)
-- [Reply context](https://docs.openclaw.ai/channels/channel-routing#reply-context)
-- [Related](https://docs.openclaw.ai/channels/channel-routing#related)
-
-# [​](https://docs.openclaw.ai/channels/channel-routing\\#channels-&-routing)  Channels & routing
-
-OpenClaw routes replies **back to the channel where a message came from**. The
-model does not choose a channel; routing is deterministic and controlled by the
-host configuration.
-
-## [​](https://docs.openclaw.ai/channels/channel-routing\\#key-terms)  Key terms
-
-- **Channel**: `telegram`, `whatsapp`, `discord`, `irc`, `googlechat`, `slack`, `signal`, `imessage`, `line`, plus plugin channels. `webchat` is the internal WebChat UI channel and is not a configurable outbound channel.
-- **AccountId**: per‑channel account instance (when supported).
-- Optional channel default account: `channels.<channel>.defaultAccount` chooses
-which account is used when an outbound path does not specify `accountId`.
-
-  - In multi-account setups, set an explicit default (`defaultAccount` or `accounts.default`) when two or more accounts are configured. Without it, fallback routing may pick the first normalized account ID.
-- **AgentId**: an isolated workspace + session store (“brain”).
-- **SessionKey**: the bucket key used to store context and control concurrency.
-
-## [​](https://docs.openclaw.ai/channels/channel-routing\\#session-key-shapes-examples)  Session key shapes (examples)
-
-Direct messages collapse to the agent’s **main** session by default:
-
-- `agent:<agentId>:<mainKey>` (default: `agent:main:main`)
-
-Even when direct-message conversation history is shared with main, sandbox and
-tool policy use a derived per-account direct-chat runtime key for external DMs
-so channel-originated messages are not treated like local main-session runs.Groups and channels remain isolated per channel:
-
-- Groups: `agent:<agentId>:<channel>:group:<id>`
-- Channels/rooms: `agent:<agentId>:<channel>:channel:<id>`
-
-Threads:
-
-- Slack/Discord threads append `:thread:<threadId>` to the base key.
-- Telegram forum topics embed `:topic:<topicId>` in the group key.
+Use numeric Synology Chat user IDs as targets.
 
 Examples:
 
-- `agent:main:telegram:group:-1001234567890:topic:42`
-- `agent:main:discord:channel:123456:thread:987654`
-
-## [​](https://docs.openclaw.ai/channels/channel-routing\\#main-dm-route-pinning)  Main DM route pinning
-
-When `session.dmScope` is `main`, direct messages may share one main session.
-To prevent the session’s `lastRoute` from being overwritten by non-owner DMs,
-OpenClaw infers a pinned owner from `allowFrom` when all of these are true:
-
-- `allowFrom` has exactly one non-wildcard entry.
-- The entry can be normalized to a concrete sender ID for that channel.
-- The inbound DM sender does not match that pinned owner.
-
-In that mismatch case, OpenClaw still records inbound session metadata, but it
-skips updating the main session `lastRoute`.
-
-## [​](https://docs.openclaw.ai/channels/channel-routing\\#routing-rules-how-an-agent-is-chosen)  Routing rules (how an agent is chosen)
-
-Routing picks **one agent** for each inbound message:
-
-1. **Exact peer match** (`bindings` with `peer.kind` \\+ `peer.id`).
-2. **Parent peer match** (thread inheritance).
-3. **Guild + roles match** (Discord) via `guildId` \\+ `roles`.
-4. **Guild match** (Discord) via `guildId`.
-5. **Team match** (Slack) via `teamId`.
-6. **Account match** (`accountId` on the channel).
-7. **Channel match** (any account on that channel, `accountId: \"*\"`).
-8. **Default agent** (`agents.list[].default`, else first list entry, fallback to `main`).
-
-When a binding includes multiple match fields (`peer`, `guildId`, `teamId`, `roles`), **all provided fields must match** for that binding to apply.The matched agent determines which workspace and session store are used.
-
-## [​](https://docs.openclaw.ai/channels/channel-routing\\#broadcast-groups-run-multiple-agents)  Broadcast groups (run multiple agents)
-
-Broadcast groups let you run **multiple agents** for the same peer **when OpenClaw would normally reply** (for example: in WhatsApp groups, after mention/activation gating).Config:
-
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw message send --channel synology-chat --target 123456 --text "Hello from OpenClaw"
+openclaw message send --channel synology-chat --target synology-chat:123456 --text "Hello again"
+openclaw message send --channel synology-chat --target synology:123456 --text "Short prefix"
 ```
+
+Media sends are supported by URL-based file delivery.
+Outbound file URLs must use `http` or `https`, and private or otherwise blocked network targets are rejected before OpenClaw forwards the URL to the NAS webhook.
+
+## Multi-account
+
+Multiple Synology Chat accounts are supported under `channels.synology-chat.accounts`.
+Each account can override token, incoming URL, webhook path, DM policy, and limits.
+Direct-message sessions are isolated per account and user, so the same numeric `user_id`
+on two different Synology accounts does not share transcript state.
+Give each enabled account a distinct `webhookPath`. OpenClaw now rejects duplicate exact paths
+and refuses to start named accounts that only inherit a shared webhook path in multi-account setups.
+If you intentionally need legacy inheritance for a named account, set
+`dangerouslyAllowInheritedWebhookPath: true` on that account or at `channels.synology-chat`,
+but duplicate exact paths are still rejected fail-closed. Prefer explicit per-account paths.
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-  broadcast: {
-    strategy: \"parallel\",
-    \"120363403215116621@g.us\": [\"alfred\", \"baerbel\"],
-    \"+15555550123\": [\"support\", \"logger\"],
+  channels: {
+    "synology-chat": {
+      enabled: true,
+      accounts: {
+        default: {
+          token: "token-a",
+          incomingUrl: "https://nas-a.example.com/...token=...",
+        },
+        alerts: {
+          token: "token-b",
+          incomingUrl: "https://nas-b.example.com/...token=...",
+          webhookPath: "/webhook/synology-alerts",
+          dmPolicy: "allowlist",
+          allowedUserIds: ["987654"],
+        },
+      },
+    },
   },
 }
 ```
 
-See: [Broadcast Groups](https://docs.openclaw.ai/channels/broadcast-groups).
+## Security notes
 
-## [​](https://docs.openclaw.ai/channels/channel-routing\\#config-overview)  Config overview
+* Keep `token` secret and rotate it if leaked.
+* Keep `allowInsecureSsl: false` unless you explicitly trust a self-signed local NAS cert.
+* Inbound webhook requests are token-verified and rate-limited per sender.
+* Invalid token checks use constant-time secret comparison and fail closed.
+* Prefer `dmPolicy: "allowlist"` for production.
+* Keep `dangerouslyAllowNameMatching` off unless you explicitly need legacy username-based reply delivery.
+* Keep `dangerouslyAllowInheritedWebhookPath` off unless you explicitly accept shared-path routing risk in a multi-account setup.
 
-- `agents.list`: named agent definitions (workspace, model, etc.).
-- `bindings`: map inbound channels/accounts/peers to agents.
+## Troubleshooting
+
+* `Missing required fields (token, user_id, text)`:
+  * the outgoing webhook payload is missing one of the required fields
+  * if Synology sends the token in headers, make sure the gateway/proxy preserves those headers
+* `Invalid token`:
+  * the outgoing webhook secret does not match `channels.synology-chat.token`
+  * the request is hitting the wrong account/webhook path
+  * a reverse proxy stripped the token header before the request reached OpenClaw
+* `Rate limit exceeded`:
+  * too many invalid token attempts from the same source can temporarily lock that source out
+  * authenticated senders also have a separate per-user message rate limit
+* `Allowlist is empty. Configure allowedUserIds or use dmPolicy=open with allowedUserIds=["*"].`:
+  * `dmPolicy="allowlist"` is enabled but no users are configured
+* `User not authorized`:
+  * the sender's numeric `user_id` is not in `allowedUserIds`
+
+## Related
+
+* [Channels Overview](/channels) — all supported channels
+* [Pairing](/channels/pairing) — DM authentication and pairing flow
+* [Groups](/channels/groups) — group chat behavior and mention gating
+* [Channel Routing](/channels/channel-routing) — session routing for messages
+* [Security](/gateway/security) — access model and hardening
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Tlon
+
+Tlon is a decentralized messenger built on Urbit. OpenClaw connects to your Urbit ship and can
+respond to DMs and group chat messages. Group replies require an @ mention by default and can
+be further restricted via allowlists.
+
+Status: bundled plugin. DMs, group mentions, thread replies, rich text formatting, and
+image uploads are supported. Reactions and polls are not yet supported.
+
+## Bundled plugin
+
+Tlon ships as a bundled plugin in current OpenClaw releases, so normal packaged
+builds do not need a separate install.
+
+If you are on an older build or a custom install that excludes Tlon, install a
+current npm package:
+
+Install via CLI (npm registry):
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw plugins install @openclaw/tlon
+```
+
+Use the bare package to follow the current official release tag. Pin an exact
+version only when you need a reproducible install.
+
+Local checkout (when running from a git repo):
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw plugins install ./path/to/local/tlon-plugin
+```
+
+Details: [Plugins](/tools/plugin)
+
+## Setup
+
+1. Ensure the Tlon plugin is available.
+   * Current packaged OpenClaw releases already bundle it.
+   * Older/custom installs can add it manually with the commands above.
+2. Gather your ship URL and login code.
+3. Configure `channels.tlon`.
+4. Restart the gateway.
+5. DM the bot or mention it in a group channel.
+
+Minimal config (single account):
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    tlon: {
+      enabled: true,
+      ship: "~sampel-palnet",
+      url: "https://your-ship-host",
+      code: "lidlut-tabwed-pillex-ridrup",
+      ownerShip: "~your-main-ship", // recommended: your ship, always allowed
+    },
+  },
+}
+```
+
+## Private/LAN ships
+
+By default, OpenClaw blocks private/internal hostnames and IP ranges for SSRF protection.
+If your ship is running on a private network (localhost, LAN IP, or internal hostname),
+you must explicitly opt in:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    tlon: {
+      url: "http://localhost:8080",
+      allowPrivateNetwork: true,
+    },
+  },
+}
+```
+
+This applies to URLs like:
+
+* `http://localhost:8080`
+* `http://192.168.x.x:8080`
+* `http://my-ship.local:8080`
+
+⚠️ Only enable this if you trust your local network. This setting disables SSRF protections
+for requests to your ship URL.
+
+## Group channels
+
+Auto-discovery is enabled by default. You can also pin channels manually:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    tlon: {
+      groupChannels: ["chat/~host-ship/general", "chat/~host-ship/support"],
+    },
+  },
+}
+```
+
+Disable auto-discovery:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    tlon: {
+      autoDiscoverChannels: false,
+    },
+  },
+}
+```
+
+## Access control
+
+DM allowlist (empty = no DMs allowed, use `ownerShip` for approval flow):
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    tlon: {
+      dmAllowlist: ["~zod", "~nec"],
+    },
+  },
+}
+```
+
+Group authorization (restricted by default):
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    tlon: {
+      defaultAuthorizedShips: ["~zod"],
+      authorization: {
+        channelRules: {
+          "chat/~host-ship/general": {
+            mode: "restricted",
+            allowedShips: ["~zod", "~nec"],
+          },
+          "chat/~host-ship/announcements": {
+            mode: "open",
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+## Owner and approval system
+
+Set an owner ship to receive approval requests when unauthorized users try to interact:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    tlon: {
+      ownerShip: "~your-main-ship",
+    },
+  },
+}
+```
+
+The owner ship is **automatically authorized everywhere** — DM invites are auto-accepted and
+channel messages are always allowed. You don't need to add the owner to `dmAllowlist` or
+`defaultAuthorizedShips`.
+
+When set, the owner receives DM notifications for:
+
+* DM requests from ships not in the allowlist
+* Mentions in channels without authorization
+* Group invite requests
+
+## Auto-accept settings
+
+Auto-accept DM invites (for ships in dmAllowlist):
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    tlon: {
+      autoAcceptDmInvites: true,
+    },
+  },
+}
+```
+
+Auto-accept group invites from trusted ships:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    tlon: {
+      autoAcceptGroupInvites: true,
+      groupInviteAllowlist: ["~zod"],
+    },
+  },
+}
+```
+
+`autoAcceptGroupInvites` fails closed when `groupInviteAllowlist` is empty. Set the
+allowlist to the ships whose group invites should be accepted automatically.
+
+## Delivery targets (CLI/cron)
+
+Use these with `openclaw message send` or cron delivery:
+
+* DM: `~sampel-palnet` or `dm/~sampel-palnet`
+* Group: `chat/~host-ship/channel` or `group:~host-ship/channel`
+
+## Bundled skill
+
+The Tlon plugin includes a bundled skill ([`@tloncorp/tlon-skill`](https://github.com/tloncorp/tlon-skill))
+that provides CLI access to Tlon operations:
+
+* **Contacts**: get/update profiles, list contacts
+* **Channels**: list, create, post messages, fetch history
+* **Groups**: list, create, manage members
+* **DMs**: send messages, react to messages
+* **Reactions**: add/remove emoji reactions to posts and DMs
+* **Settings**: manage plugin permissions via slash commands
+
+The skill is automatically available when the plugin is installed.
+
+## Capabilities
+
+| Feature         | Status                                 |
+| --------------- | -------------------------------------- |
+| Direct messages | ✅ Supported                            |
+| Groups/channels | ✅ Supported (mention-gated by default) |
+| Threads         | ✅ Supported (auto-replies in thread)   |
+| Rich text       | ✅ Markdown converted to Tlon format    |
+| Images          | ✅ Uploaded to Tlon storage             |
+| Reactions       | ✅ Via [bundled skill](#bundled-skill)  |
+| Polls           | ❌ Not yet supported                    |
+| Native commands | ✅ Supported (owner-only by default)    |
+
+## Troubleshooting
+
+Run this ladder first:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw status
+openclaw gateway status
+openclaw logs --follow
+openclaw doctor
+```
+
+Common failures:
+
+* **DMs ignored**: sender not in `dmAllowlist` and no `ownerShip` configured for approval flow.
+* **Group messages ignored**: channel not discovered or sender not authorized.
+* **Connection errors**: check ship URL is reachable; enable `allowPrivateNetwork` for local ships.
+* **Auth errors**: verify login code is current (codes rotate).
+
+## Configuration reference
+
+Full configuration: [Configuration](/gateway/configuration)
+
+Provider options:
+
+* `channels.tlon.enabled`: enable/disable channel startup.
+* `channels.tlon.ship`: bot's Urbit ship name (e.g. `~sampel-palnet`).
+* `channels.tlon.url`: ship URL (e.g. `https://sampel-palnet.tlon.network`).
+* `channels.tlon.code`: ship login code.
+* `channels.tlon.allowPrivateNetwork`: allow localhost/LAN URLs (SSRF bypass).
+* `channels.tlon.ownerShip`: owner ship for approval system (always authorized).
+* `channels.tlon.dmAllowlist`: ships allowed to DM (empty = none).
+* `channels.tlon.autoAcceptDmInvites`: auto-accept DMs from allowlisted ships.
+* `channels.tlon.autoAcceptGroupInvites`: auto-accept group invites from allowlisted ships.
+* `channels.tlon.groupInviteAllowlist`: ships whose group invites may be auto-accepted.
+* `channels.tlon.autoDiscoverChannels`: auto-discover group channels (default: true).
+* `channels.tlon.groupChannels`: manually pinned channel nests.
+* `channels.tlon.defaultAuthorizedShips`: ships authorized for all channels.
+* `channels.tlon.authorization.channelRules`: per-channel auth rules.
+* `channels.tlon.showModelSignature`: append model name to messages.
+
+## Notes
+
+* Group replies require a mention (e.g. `~your-bot-ship`) to respond.
+* Thread replies: if the inbound message is in a thread, OpenClaw replies in-thread.
+* Rich text: Markdown formatting (bold, italic, code, headers, lists) is converted to Tlon's native format.
+* Images: URLs are uploaded to Tlon storage and embedded as image blocks.
+
+## Related
+
+* [Channels Overview](/channels) — all supported channels
+* [Pairing](/channels/pairing) — DM authentication and pairing flow
+* [Groups](/channels/groups) — group chat behavior and mention gating
+* [Channel Routing](/channels/channel-routing) — session routing for messages
+* [Security](/gateway/security) — access model and hardening
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Channel troubleshooting
+
+Use this page when a channel connects but behavior is wrong.
+
+## Command ladder
+
+Run these in order first:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw status
+openclaw gateway status
+openclaw logs --follow
+openclaw doctor
+openclaw channels status --probe
+```
+
+Healthy baseline:
+
+* `Runtime: running`
+* `Connectivity probe: ok`
+* `Capability: read-only`, `write-capable`, or `admin-capable`
+* Channel probe shows transport connected and, where supported, `works` or `audit ok`
+
+## WhatsApp
+
+### WhatsApp failure signatures
+
+| Symptom                             | Fastest check                                       | Fix                                                                                                                              |
+| ----------------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Connected but no DM replies         | `openclaw pairing list whatsapp`                    | Approve sender or switch DM policy/allowlist.                                                                                    |
+| Group messages ignored              | Check `requireMention` + mention patterns in config | Mention the bot or relax mention policy for that group.                                                                          |
+| QR login times out with 408         | Check gateway `HTTPS_PROXY` / `HTTP_PROXY` env      | Set a reachable proxy; use `NO_PROXY` only for bypasses.                                                                         |
+| Random disconnect/relogin loops     | `openclaw channels status --probe` + logs           | Recent reconnects are flagged even when currently connected; watch logs, restart the gateway, then relink if flapping continues. |
+| Replies arrive seconds/minutes late | `openclaw doctor --fix`                             | Doctor stops verified stale local TUI clients when they are degrading the Gateway event loop.                                    |
+
+Full troubleshooting: [WhatsApp troubleshooting](/channels/whatsapp#troubleshooting)
+
+## Telegram
+
+### Telegram failure signatures
+
+| Symptom                              | Fastest check                                    | Fix                                                                                                                        |
+| ------------------------------------ | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `/start` but no usable reply flow    | `openclaw pairing list telegram`                 | Approve pairing or change DM policy.                                                                                       |
+| Bot online but group stays silent    | Verify mention requirement and bot privacy mode  | Disable privacy mode for group visibility or mention bot.                                                                  |
+| Send failures with network errors    | Inspect logs for Telegram API call failures      | Fix DNS/IPv6/proxy routing to `api.telegram.org`.                                                                          |
+| Startup reports `getMe returned 401` | Check configured token source                    | Re-copy or regenerate the BotFather token and update `botToken`, `tokenFile`, or default-account `TELEGRAM_BOT_TOKEN`.     |
+| Polling stalls or reconnects slowly  | `openclaw logs --follow` for polling diagnostics | Upgrade; if restarts are false positives, tune `pollingStallThresholdMs`. Persistent stalls still point to proxy/DNS/IPv6. |
+| `setMyCommands` rejected at startup  | Inspect logs for `BOT_COMMANDS_TOO_MUCH`         | Reduce plugin/skill/custom Telegram commands or disable native menus.                                                      |
+| Upgraded and allowlist blocks you    | `openclaw security audit` and config allowlists  | Run `openclaw doctor --fix` or replace `@username` with numeric sender IDs.                                                |
+
+Full troubleshooting: [Telegram troubleshooting](/channels/telegram#troubleshooting)
+
+## Discord
+
+### Discord failure signatures
+
+| Symptom                                   | Fastest check                                                          | Fix                                                                                                                                                                     |
+| ----------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bot online but no guild replies           | `openclaw channels status --probe`                                     | Allow guild/channel and verify message content intent.                                                                                                                  |
+| Group messages ignored                    | Check logs for mention gating drops                                    | Mention bot or set guild/channel `requireMention: false`.                                                                                                               |
+| Typing/token usage but no Discord message | Session log shows assistant text with `didSendViaMessagingTool: false` | The model answered privately instead of calling the message tool. Use a tool-call-reliable model, or set `messages.groupChat.visibleReplies: "automatic"` to auto-post. |
+| DM replies missing                        | `openclaw pairing list discord`                                        | Approve DM pairing or adjust DM policy.                                                                                                                                 |
+
+Full troubleshooting: [Discord troubleshooting](/channels/discord#troubleshooting)
+
+## Slack
+
+### Slack failure signatures
+
+| Symptom                                | Fastest check                             | Fix                                                                                                                                                  |
+| -------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Socket mode connected but no responses | `openclaw channels status --probe`        | Verify app token + bot token and required scopes; watch for `botTokenStatus` / `appTokenStatus = configured_unavailable` on SecretRef-backed setups. |
+| DMs blocked                            | `openclaw pairing list slack`             | Approve pairing or relax DM policy.                                                                                                                  |
+| Channel message ignored                | Check `groupPolicy` and channel allowlist | Allow the channel or switch policy to `open`.                                                                                                        |
+
+Full troubleshooting: [Slack troubleshooting](/channels/slack#troubleshooting)
+
+## iMessage and BlueBubbles
+
+### iMessage and BlueBubbles failure signatures
+
+| Symptom                          | Fastest check                                                           | Fix                                                   |
+| -------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------- |
+| No inbound events                | Verify webhook/server reachability and app permissions                  | Fix webhook URL or BlueBubbles server state.          |
+| Can send but no receive on macOS | Check macOS privacy permissions for Messages automation                 | Re-grant TCC permissions and restart channel process. |
+| DM sender blocked                | `openclaw pairing list imessage` or `openclaw pairing list bluebubbles` | Approve pairing or update allowlist.                  |
+
+Full troubleshooting:
+
+* [iMessage troubleshooting](/channels/imessage#troubleshooting)
+* [BlueBubbles troubleshooting](/channels/bluebubbles#troubleshooting)
+
+## Signal
+
+### Signal failure signatures
+
+| Symptom                         | Fastest check                              | Fix                                                      |
+| ------------------------------- | ------------------------------------------ | -------------------------------------------------------- |
+| Daemon reachable but bot silent | `openclaw channels status --probe`         | Verify `signal-cli` daemon URL/account and receive mode. |
+| DM blocked                      | `openclaw pairing list signal`             | Approve sender or adjust DM policy.                      |
+| Group replies do not trigger    | Check group allowlist and mention patterns | Add sender/group or loosen gating.                       |
+
+Full troubleshooting: [Signal troubleshooting](/channels/signal#troubleshooting)
+
+## QQ Bot
+
+### QQ Bot failure signatures
+
+| Symptom                         | Fastest check                               | Fix                                                             |
+| ------------------------------- | ------------------------------------------- | --------------------------------------------------------------- |
+| Bot replies "gone to Mars"      | Verify `appId` and `clientSecret` in config | Set credentials or restart the gateway.                         |
+| No inbound messages             | `openclaw channels status --probe`          | Verify credentials on the QQ Open Platform.                     |
+| Voice not transcribed           | Check STT provider config                   | Configure `channels.qqbot.stt` or `tools.media.audio`.          |
+| Proactive messages not arriving | Check QQ platform interaction requirements  | QQ may block bot-initiated messages without recent interaction. |
+
+Full troubleshooting: [QQ Bot troubleshooting](/channels/qqbot#troubleshooting)
+
+## Matrix
+
+### Matrix failure signatures
+
+| Symptom                             | Fastest check                          | Fix                                                                       |
+| ----------------------------------- | -------------------------------------- | ------------------------------------------------------------------------- |
+| Logged in but ignores room messages | `openclaw channels status --probe`     | Check `groupPolicy`, room allowlist, and mention gating.                  |
+| DMs do not process                  | `openclaw pairing list matrix`         | Approve sender or adjust DM policy.                                       |
+| Encrypted rooms fail                | `openclaw matrix verify status`        | Re-verify the device, then check `openclaw matrix verify backup status`.  |
+| Backup restore is pending/broken    | `openclaw matrix verify backup status` | Run `openclaw matrix verify backup restore` or rerun with a recovery key. |
+| Cross-signing/bootstrap looks wrong | `openclaw matrix verify bootstrap`     | Repair secret storage, cross-signing, and backup state in one pass.       |
+
+Full setup and config: [Matrix](/channels/matrix)
+
+## Related
+
+* [Pairing](/channels/pairing)
+* [Channel routing](/channels/channel-routing)
+* [Gateway troubleshooting](/gateway/troubleshooting)
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Twitch
+
+Twitch chat support via IRC connection. OpenClaw connects as a Twitch user (bot account) to receive and send messages in channels.
+
+## Bundled plugin
+
+<Note>
+  Twitch ships as a bundled plugin in current OpenClaw releases, so normal packaged builds do not need a separate install.
+</Note>
+
+If you are on an older build or a custom install that excludes Twitch, install the npm package directly:
+
+<Tabs>
+  <Tab title="npm registry">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw plugins install @openclaw/twitch
+    ```
+  </Tab>
+
+  <Tab title="Local checkout">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw plugins install ./path/to/local/twitch-plugin
+    ```
+  </Tab>
+</Tabs>
+
+Use the bare package to follow the current official release tag. Pin an exact
+version only when you need a reproducible install.
+
+Details: [Plugins](/tools/plugin)
+
+## Quick setup (beginner)
+
+<Steps>
+  <Step title="Ensure plugin is available">
+    Current packaged OpenClaw releases already bundle it. Older/custom installs can add it manually with the commands above.
+  </Step>
+
+  <Step title="Create a Twitch bot account">
+    Create a dedicated Twitch account for the bot (or use an existing account).
+  </Step>
+
+  <Step title="Generate credentials">
+    Use [Twitch Token Generator](https://twitchtokengenerator.com/):
+
+    * Select **Bot Token**
+    * Verify scopes `chat:read` and `chat:write` are selected
+    * Copy the **Client ID** and **Access Token**
+  </Step>
+
+  <Step title="Find your Twitch user ID">
+    Use [https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/](https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/) to convert a username to a Twitch user ID.
+  </Step>
+
+  <Step title="Configure the token">
+    * Env: `OPENCLAW_TWITCH_ACCESS_TOKEN=...` (default account only)
+    * Or config: `channels.twitch.accessToken`
+
+    If both are set, config takes precedence (env fallback is default-account only).
+  </Step>
+
+  <Step title="Start the gateway">
+    Start the gateway with the configured channel.
+  </Step>
+</Steps>
+
+<Warning>
+  Add access control (`allowFrom` or `allowedRoles`) to prevent unauthorized users from triggering the bot. `requireMention` defaults to `true`.
+</Warning>
+
+Minimal config:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    twitch: {
+      enabled: true,
+      username: "openclaw", // Bot's Twitch account
+      accessToken: "oauth:abc123...", // OAuth Access Token (or use OPENCLAW_TWITCH_ACCESS_TOKEN env var)
+      clientId: "xyz789...", // Client ID from Token Generator
+      channel: "vevisk", // Which Twitch channel's chat to join (required)
+      allowFrom: ["123456789"], // (recommended) Your Twitch user ID only - get it from https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/
+    },
+  },
+}
+```
+
+## What it is
+
+* A Twitch channel owned by the Gateway.
+* Deterministic routing: replies always go back to Twitch.
+* Each account maps to an isolated session key `agent:<agentId>:twitch:<accountName>`.
+* `username` is the bot's account (who authenticates), `channel` is which chat room to join.
+
+## Setup (detailed)
+
+### Generate credentials
+
+Use [Twitch Token Generator](https://twitchtokengenerator.com/):
+
+* Select **Bot Token**
+* Verify scopes `chat:read` and `chat:write` are selected
+* Copy the **Client ID** and **Access Token**
+
+<Note>
+  No manual app registration needed. Tokens expire after several hours.
+</Note>
+
+### Configure the bot
+
+<Tabs>
+  <Tab title="Env var (default account only)">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    OPENCLAW_TWITCH_ACCESS_TOKEN=oauth:abc123...
+    ```
+  </Tab>
+
+  <Tab title="Config">
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        twitch: {
+          enabled: true,
+          username: "openclaw",
+          accessToken: "oauth:abc123...",
+          clientId: "xyz789...",
+          channel: "vevisk",
+        },
+      },
+    }
+    ```
+  </Tab>
+</Tabs>
+
+If both env and config are set, config takes precedence.
+
+### Access control (recommended)
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    twitch: {
+      allowFrom: ["123456789"], // (recommended) Your Twitch user ID only
+    },
+  },
+}
+```
+
+Prefer `allowFrom` for a hard allowlist. Use `allowedRoles` instead if you want role-based access.
+
+**Available roles:** `"moderator"`, `"owner"`, `"vip"`, `"subscriber"`, `"all"`.
+
+<Note>
+  **Why user IDs?** Usernames can change, allowing impersonation. User IDs are permanent.
+
+  Find your Twitch user ID: [https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/](https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/) (Convert your Twitch username to ID)
+</Note>
+
+## Token refresh (optional)
+
+Tokens from [Twitch Token Generator](https://twitchtokengenerator.com/) cannot be automatically refreshed - regenerate when expired.
+
+For automatic token refresh, create your own Twitch application at [Twitch Developer Console](https://dev.twitch.tv/console) and add to config:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    twitch: {
+      clientSecret: "your_client_secret",
+      refreshToken: "your_refresh_token",
+    },
+  },
+}
+```
+
+The bot automatically refreshes tokens before expiration and logs refresh events.
+
+## Multi-account support
+
+Use `channels.twitch.accounts` with per-account tokens. See [Configuration](/gateway/configuration) for the shared pattern.
+
+Example (one bot account in two channels):
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    twitch: {
+      accounts: {
+        channel1: {
+          username: "openclaw",
+          accessToken: "oauth:abc123...",
+          clientId: "xyz789...",
+          channel: "vevisk",
+        },
+        channel2: {
+          username: "openclaw",
+          accessToken: "oauth:def456...",
+          clientId: "uvw012...",
+          channel: "secondchannel",
+        },
+      },
+    },
+  },
+}
+```
+
+<Note>
+  Each account needs its own token (one token per channel).
+</Note>
+
+## Access control
+
+<Tabs>
+  <Tab title="User ID allowlist (most secure)">
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        twitch: {
+          accounts: {
+            default: {
+              allowFrom: ["123456789", "987654321"],
+            },
+          },
+        },
+      },
+    }
+    ```
+  </Tab>
+
+  <Tab title="Role-based">
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        twitch: {
+          accounts: {
+            default: {
+              allowedRoles: ["moderator", "vip"],
+            },
+          },
+        },
+      },
+    }
+    ```
+
+    `allowFrom` is a hard allowlist. When set, only those user IDs are allowed. If you want role-based access, leave `allowFrom` unset and configure `allowedRoles` instead.
+  </Tab>
+
+  <Tab title="Disable @mention requirement">
+    By default, `requireMention` is `true`. To disable and respond to all messages:
+
+    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    {
+      channels: {
+        twitch: {
+          accounts: {
+            default: {
+              requireMention: false,
+            },
+          },
+        },
+      },
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Troubleshooting
+
+First, run diagnostic commands:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw doctor
+openclaw channels status --probe
+```
+
+<AccordionGroup>
+  <Accordion title="Bot does not respond to messages">
+    * **Check access control:** Ensure your user ID is in `allowFrom`, or temporarily remove `allowFrom` and set `allowedRoles: ["all"]` to test.
+    * **Check the bot is in the channel:** The bot must join the channel specified in `channel`.
+  </Accordion>
+
+  <Accordion title="Token issues">
+    "Failed to connect" or authentication errors:
+
+    * Verify `accessToken` is the OAuth access token value (typically starts with `oauth:` prefix)
+    * Check token has `chat:read` and `chat:write` scopes
+    * If using token refresh, verify `clientSecret` and `refreshToken` are set
+  </Accordion>
+
+  <Accordion title="Token refresh not working">
+    Check logs for refresh events:
+
+    ```
+    Using env token source for mybot
+    Access token refreshed for user 123456 (expires in 14400s)
+    ```
+
+    If you see "token refresh disabled (no refresh token)":
+
+    * Ensure `clientSecret` is provided
+    * Ensure `refreshToken` is provided
+  </Accordion>
+</AccordionGroup>
+
+## Config
+
+### Account config
+
+<ParamField path="username" type="string">
+  Bot username.
+</ParamField>
+
+<ParamField path="accessToken" type="string">
+  OAuth access token with `chat:read` and `chat:write`.
+</ParamField>
+
+<ParamField path="clientId" type="string">
+  Twitch Client ID (from Token Generator or your app).
+</ParamField>
+
+<ParamField path="channel" type="string" required>
+  Channel to join.
+</ParamField>
+
+<ParamField path="enabled" type="boolean" default="true">
+  Enable this account.
+</ParamField>
+
+<ParamField path="clientSecret" type="string">
+  Optional: for automatic token refresh.
+</ParamField>
+
+<ParamField path="refreshToken" type="string">
+  Optional: for automatic token refresh.
+</ParamField>
+
+<ParamField path="expiresIn" type="number">
+  Token expiry in seconds.
+</ParamField>
+
+<ParamField path="obtainmentTimestamp" type="number">
+  Token obtained timestamp.
+</ParamField>
+
+<ParamField path="allowFrom" type="string[]">
+  User ID allowlist.
+</ParamField>
+
+<ParamField path="allowedRoles" type="Array<&#x22;moderator&#x22; | &#x22;owner&#x22; | &#x22;vip&#x22; | &#x22;subscriber&#x22; | &#x22;all&#x22;>">
+  Role-based access control.
+</ParamField>
+
+<ParamField path="requireMention" type="boolean" default="true">
+  Require @mention.
+</ParamField>
+
+### Provider options
+
+* `channels.twitch.enabled` - Enable/disable channel startup
+* `channels.twitch.username` - Bot username (simplified single-account config)
+* `channels.twitch.accessToken` - OAuth access token (simplified single-account config)
+* `channels.twitch.clientId` - Twitch Client ID (simplified single-account config)
+* `channels.twitch.channel` - Channel to join (simplified single-account config)
+* `channels.twitch.accounts.<accountName>` - Multi-account config (all account fields above)
+
+Full example:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    twitch: {
+      enabled: true,
+      username: "openclaw",
+      accessToken: "oauth:abc123...",
+      clientId: "xyz789...",
+      channel: "vevisk",
+      clientSecret: "secret123...",
+      refreshToken: "refresh456...",
+      allowFrom: ["123456789"],
+      allowedRoles: ["moderator", "vip"],
+      accounts: {
+        default: {
+          username: "mybot",
+          accessToken: "oauth:abc123...",
+          clientId: "xyz789...",
+          channel: "your_channel",
+          enabled: true,
+          clientSecret: "secret123...",
+          refreshToken: "refresh456...",
+          expiresIn: 14400,
+          obtainmentTimestamp: 1706092800000,
+          allowFrom: ["123456789", "987654321"],
+          allowedRoles: ["moderator"],
+        },
+      },
+    },
+  },
+}
+```
+
+## Tool actions
+
+The agent can call `twitch` with action:
+
+* `send` - Send a message to a channel
 
 Example:
 
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  action: "twitch",
+  params: {
+    message: "Hello Twitch!",
+    to: "#mychannel",
+  },
+}
 ```
+
+## Safety and ops
+
+* **Treat tokens like passwords** — Never commit tokens to git.
+* **Use automatic token refresh** for long-running bots.
+* **Use user ID allowlists** instead of usernames for access control.
+* **Monitor logs** for token refresh events and connection status.
+* **Scope tokens minimally** — Only request `chat:read` and `chat:write`.
+* **If stuck**: Restart the gateway after confirming no other process owns the session.
+
+## Limits
+
+* **500 characters** per message (auto-chunked at word boundaries).
+* Markdown is stripped before chunking.
+* No rate limiting (uses Twitch's built-in rate limits).
+
+## Related
+
+* [Channel Routing](/channels/channel-routing) — session routing for messages
+* [Channels Overview](/channels) — all supported channels
+* [Groups](/channels/groups) — group chat behavior and mention gating
+* [Pairing](/channels/pairing) — DM authentication and pairing flow
+* [Security](/gateway/security) — access model and hardening
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Yuanbao
+
+Tencent Yuanbao is Tencent's AI assistant platform. The OpenClaw channel plugin
+connects Yuanbao bots to OpenClaw over WebSocket so they can interact with users
+through direct messages and group chats.
+
+**Status:** production-ready for bot DMs + group chats. WebSocket is the only supported connection mode.
+
+***
+
+## Quick start
+
+> **Requires OpenClaw 2026.4.10 or above.** Run `openclaw --version` to check. Upgrade with `openclaw update`.
+
+<Steps>
+  <Step title="Add the Yuanbao channel with your credentials">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw channels add --channel yuanbao --token "appKey:appSecret"
+    ```
+
+    The `--token` value uses colon-separated `appKey:appSecret` format. You can obtain these from the Yuanbao app by creating a robot in your application settings.
+  </Step>
+
+  <Step title="After setup completes, restart the gateway to apply the changes">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw gateway restart
+    ```
+  </Step>
+</Steps>
+
+### Interactive setup (alternative)
+
+You can also use the interactive wizard:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw channels login --channel yuanbao
+```
+
+Follow the prompts to enter your App ID and App Secret.
+
+***
+
+## Access control
+
+### Direct messages
+
+Configure `dmPolicy` to control who can DM the bot:
+
+* `"pairing"` - unknown users receive a pairing code; approve via CLI
+* `"allowlist"` - only users listed in `allowFrom` can chat
+* `"open"` - allow all users (default)
+* `"disabled"` - disable all DMs
+
+**Approve a pairing request:**
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw pairing list yuanbao
+openclaw pairing approve yuanbao <CODE>
+```
+
+### Group chats
+
+**Mention requirement** (`channels.yuanbao.requireMention`):
+
+* `true` - require @mention (default)
+* `false` - respond without @mention
+
+Replying to the bot's message in a group chat is treated as an implicit mention.
+
+***
+
+## Configuration examples
+
+### Basic setup with open DM policy
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    yuanbao: {
+      appKey: "your_app_key",
+      appSecret: "your_app_secret",
+      dm: {
+        policy: "open",
+      },
+    },
+  },
+}
+```
+
+### Restrict DMs to specific users
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    yuanbao: {
+      appKey: "your_app_key",
+      appSecret: "your_app_secret",
+      dm: {
+        policy: "allowlist",
+        allowFrom: ["user_id_1", "user_id_2"],
+      },
+    },
+  },
+}
+```
+
+### Disable @mention requirement in groups
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    yuanbao: {
+      requireMention: false,
+    },
+  },
+}
+```
+
+### Optimize outbound message delivery
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    yuanbao: {
+      // Send each chunk immediately without buffering
+      outboundQueueStrategy: "immediate",
+    },
+  },
+}
+```
+
+### Tune merge-text strategy
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    yuanbao: {
+      outboundQueueStrategy: "merge-text",
+      minChars: 2800, // buffer until this many chars
+      maxChars: 3000, // force split above this limit
+      idleMs: 5000, // auto-flush after idle timeout (ms)
+    },
+  },
+}
+```
+
+***
+
+## Common commands
+
+| Command    | Description                 |
+| ---------- | --------------------------- |
+| `/help`    | Show available commands     |
+| `/status`  | Show bot status             |
+| `/new`     | Start a new session         |
+| `/stop`    | Stop the current run        |
+| `/restart` | Restart OpenClaw            |
+| `/compact` | Compact the session context |
+
+> Yuanbao supports native slash-command menus. Commands are synced to the platform automatically when the gateway starts.
+
+***
+
+## Troubleshooting
+
+### Bot does not respond in group chats
+
+1. Ensure the bot is added to the group
+2. Ensure you @mention the bot (required by default)
+3. Check logs: `openclaw logs --follow`
+
+### Bot does not receive messages
+
+1. Ensure the bot is created and approved in the Yuanbao app
+2. Ensure `appKey` and `appSecret` are correctly configured
+3. Ensure the gateway is running: `openclaw gateway status`
+4. Check logs: `openclaw logs --follow`
+
+### Bot sends empty or fallback replies
+
+1. Check if the AI model is returning valid content
+2. The default fallback reply is: "暂时无法解答，你可以换个问题问问我哦"
+3. Customize it via `channels.yuanbao.fallbackReply`
+
+### App Secret leaked
+
+1. Reset the App Secret in YuanBao APP
+2. Update the value in your config
+3. Restart the gateway: `openclaw gateway restart`
+
+***
+
+## Advanced configuration
+
+### Multiple accounts
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    yuanbao: {
+      defaultAccount: "main",
+      accounts: {
+        main: {
+          appKey: "key_xxx",
+          appSecret: "secret_xxx",
+          name: "Primary bot",
+        },
+        backup: {
+          appKey: "key_yyy",
+          appSecret: "secret_yyy",
+          name: "Backup bot",
+          enabled: false,
+        },
+      },
+    },
+  },
+}
+```
+
+`defaultAccount` controls which account is used when outbound APIs do not specify an `accountId`.
+
+### Message limits
+
+* `maxChars` - single message max character count (default: `3000` chars)
+* `mediaMaxMb` - media upload/download limit (default: `20` MB)
+* `overflowPolicy` - behavior when message exceeds limit: `"split"` (default) or `"stop"`
+
+### Streaming
+
+Yuanbao supports block-level streaming output. When enabled, the bot sends text in chunks as it generates.
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    yuanbao: {
+      disableBlockStreaming: false, // block streaming enabled (default)
+    },
+  },
+}
+```
+
+Set `disableBlockStreaming: true` to send the complete reply in one message.
+
+### Group chat history context
+
+Control how many historical messages are included in the AI context for group chats:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    yuanbao: {
+      historyLimit: 100, // default: 100, set 0 to disable
+    },
+  },
+}
+```
+
+### Reply-to mode
+
+Control how the bot quotes messages when replying in group chats:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    yuanbao: {
+      replyToMode: "first", // "off" | "first" | "all" (default: "first")
+    },
+  },
+}
+```
+
+| Value     | Behavior                                                 |
+| --------- | -------------------------------------------------------- |
+| `"off"`   | No quote reply                                           |
+| `"first"` | Quote only the first reply per inbound message (default) |
+| `"all"`   | Quote every reply                                        |
+
+### Markdown hint injection
+
+By default, the bot injects instructions in the system prompt to prevent the AI model from wrapping the entire reply in markdown code blocks.
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    yuanbao: {
+      markdownHintEnabled: true, // default: true
+    },
+  },
+}
+```
+
+### Debug mode
+
+Enable unsanitized log output for specific bot IDs:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    yuanbao: {
+      debugBotIds: ["bot_user_id_1", "bot_user_id_2"],
+    },
+  },
+}
+```
+
+### Multi-agent routing
+
+Use `bindings` to route Yuanbao DMs or groups to different agents.
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   agents: {
-    list: [{ id: \"support\", name: \"Support\", workspace: \"~/.openclaw/workspace-support\" }],
+    list: [
+      { id: "main" },
+      { id: "agent-a", workspace: "/home/user/agent-a" },
+      { id: "agent-b", workspace: "/home/user/agent-b" },
+    ],
   },
-  bindings: [\\\
-    { match: { channel: \"slack\", teamId: \"T123\" }, agentId: \"support\" },\\\
-    { match: { channel: \"telegram\", peer: { kind: \"group\", id: \"-100123\" } }, agentId: \"support\" },\\\
+  bindings: [
+    {
+      agentId: "agent-a",
+      match: {
+        channel: "yuanbao",
+        peer: { kind: "direct", id: "user_xxx" },
+      },
+    },
+    {
+      agentId: "agent-b",
+      match: {
+        channel: "yuanbao",
+        peer: { kind: "group", id: "group_zzz" },
+      },
+    },
   ],
 }
 ```
 
-## [​](https://docs.openclaw.ai/channels/channel-routing\\#session-storage)  Session storage
+Routing fields:
 
-Session stores live under the state directory (default `~/.openclaw`):
+* `match.channel`: `"yuanbao"`
+* `match.peer.kind`: `"direct"` (DM) or `"group"` (group chat)
+* `match.peer.id`: user ID or group code
 
-- `~/.openclaw/agents/<agentId>/sessions/sessions.json`
-- JSONL transcripts live alongside the store
+***
 
-You can override the store path via `session.store` and `{agentId}` templating.Gateway and ACP session discovery also scans disk-backed agent stores under the
-default `agents/` root and under templated `session.store` roots. Discovered
-stores must stay inside that resolved agent root and use a regular
-`sessions.json` file. Symlinks and out-of-root paths are ignored.
+## Configuration reference
 
-## [​](https://docs.openclaw.ai/channels/channel-routing\\#webchat-behavior)  WebChat behavior
+Full configuration: [Gateway configuration](/gateway/configuration)
 
-WebChat attaches to the **selected agent** and defaults to the agent’s main
-session. Because of this, WebChat lets you see cross‑channel context for that
-agent in one place.
+| Setting                                    | Description                                       | Default              |
+| ------------------------------------------ | ------------------------------------------------- | -------------------- |
+| `channels.yuanbao.enabled`                 | Enable/disable the channel                        | `true`               |
+| `channels.yuanbao.defaultAccount`          | Default account for outbound routing              | `default`            |
+| `channels.yuanbao.accounts.<id>.appKey`    | App Key (used for signing and ticket generation)  | -                    |
+| `channels.yuanbao.accounts.<id>.appSecret` | App Secret (used for signing)                     | -                    |
+| `channels.yuanbao.accounts.<id>.token`     | Pre-signed token (skips automatic ticket signing) | -                    |
+| `channels.yuanbao.accounts.<id>.name`      | Account display name                              | -                    |
+| `channels.yuanbao.accounts.<id>.enabled`   | Enable/disable a specific account                 | `true`               |
+| `channels.yuanbao.dm.policy`               | DM policy                                         | `open`               |
+| `channels.yuanbao.dm.allowFrom`            | DM allowlist (user ID list)                       | -                    |
+| `channels.yuanbao.requireMention`          | Require @mention in groups                        | `true`               |
+| `channels.yuanbao.overflowPolicy`          | Long message handling (`split` or `stop`)         | `split`              |
+| `channels.yuanbao.replyToMode`             | Group reply-to strategy (`off`, `first`, `all`)   | `first`              |
+| `channels.yuanbao.outboundQueueStrategy`   | Outbound strategy (`merge-text` or `immediate`)   | `merge-text`         |
+| `channels.yuanbao.minChars`                | Merge-text: min chars to trigger send             | `2800`               |
+| `channels.yuanbao.maxChars`                | Merge-text: max chars per message                 | `3000`               |
+| `channels.yuanbao.idleMs`                  | Merge-text: idle timeout before auto-flush (ms)   | `5000`               |
+| `channels.yuanbao.mediaMaxMb`              | Media size limit (MB)                             | `20`                 |
+| `channels.yuanbao.historyLimit`            | Group chat history context entries                | `100`                |
+| `channels.yuanbao.disableBlockStreaming`   | Disable block-level streaming output              | `false`              |
+| `channels.yuanbao.fallbackReply`           | Fallback reply when AI returns no content         | `暂时无法解答，你可以换个问题问问我哦` |
+| `channels.yuanbao.markdownHintEnabled`     | Inject markdown anti-wrapping instructions        | `true`               |
+| `channels.yuanbao.debugBotIds`             | Debug whitelist bot IDs (unsanitized logs)        | `[]`                 |
 
-## [​](https://docs.openclaw.ai/channels/channel-routing\\#reply-context)  Reply context
+***
 
-Inbound replies include:
+## Supported message types
 
-- `ReplyToId`, `ReplyToBody`, and `ReplyToSender` when available.
-- Quoted context is appended to `Body` as a `[Replying to ...]` block.
+### Receive
 
-This is consistent across channels.
+* ✅ Text
+* ✅ Images
+* ✅ Files
+* ✅ Audio / Voice
+* ✅ Video
+* ✅ Stickers / Custom emoji
+* ✅ Custom elements (link cards, etc.)
 
-## [​](https://docs.openclaw.ai/channels/channel-routing\\#related)  Related
+### Send
 
-- [Groups](https://docs.openclaw.ai/channels/groups)
-- [Broadcast groups](https://docs.openclaw.ai/channels/broadcast-groups)
-- [Pairing](https://docs.openclaw.ai/channels/pairing)
+* ✅ Text (with markdown support)
+* ✅ Images
+* ✅ Files
+* ✅ Audio
+* ✅ Video
+* ✅ Stickers
 
-[Broadcast groups](https://docs.openclaw.ai/channels/broadcast-groups) [Channel location parsing](https://docs.openclaw.ai/channels/location)
+### Threads and replies
 
-Ctrl+I
+* ✅ Quote replies (configurable via `replyToMode`)
+* ❌ Thread replies (not supported by platform)
 
----
+***
 
-## Signal - OpenClaw
-**Source:** https://docs.openclaw.ai/channels/signal
+## Related
 
-[Skip to main content](https://docs.openclaw.ai/channels/signal#content-area)\n\n[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)\n\n![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)\n\nEnglish\n\nSearch...\n\nCtrl K\n\nSearch...\n\nNavigation\n\nMainstream messaging\n\nSignal\n\n[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)\n\nOn this page\n\n- [Prerequisites](https://docs.openclaw.ai/channels/signal#prerequisites)\n- [Quick setup (beginner)](https://docs.openclaw.ai/channels/signal#quick-setup-beginner)\n- [What it is](https://docs.openclaw.ai/channels/signal#what-it-is)\n- [Config writes](https://docs.openclaw.ai/channels/signal#config-writes)\n- [The number model (important)](https://docs.openclaw.ai/channels/signal#the-number-model-important)\n- [Setup path A: link existing Signal account (QR)](https://docs.openclaw.ai/channels/signal#setup-path-a-link-existing-signal-account-qr)\n- [Setup path B: register dedicated bot number (SMS, Linux)](https://docs.openclaw.ai/channels/signal#setup-path-b-register-dedicated-bot-number-sms-linux)\n- [External daemon mode (httpUrl)](https://docs.openclaw.ai/channels/signal#external-daemon-mode-httpurl)\n- [Access control (DMs + groups)](https://docs.openclaw.ai/channels/signal#access-control-dms-%2B-groups)\n- [How it works (behavior)](https://docs.openclaw.ai/channels/signal#how-it-works-behavior)\n- [Media + limits](https://docs.openclaw.ai/channels/signal#media-%2B-limits)\n- [Typing + read receipts](https://docs.openclaw.ai/channels/signal#typing-%2B-read-receipts)\n- [Reactions (message tool)](https://docs.openclaw.ai/channels/signal#reactions-message-tool)\n- [Delivery targets (CLI/cron)](https://docs.openclaw.ai/channels/signal#delivery-targets-cli%2Fcron)\n- [Troubleshooting](https://docs.openclaw.ai/channels/signal#troubleshooting)\n- [Security notes](https://docs.openclaw.ai/channels/signal#security-notes)\n- [Configuration reference (Signal)](https://docs.openclaw.ai/channels/signal#configuration-reference-signal)\n- [Related](https://docs.openclaw.ai/channels/signal#related)\n\nStatus: external CLI integration. Gateway talks to `signal-cli` over HTTP JSON-RPC + SSE.\n\n## [​](https://docs.openclaw.ai/channels/signal\\#prerequisites)  Prerequisites\n\n- OpenClaw installed on your server (Linux flow below tested on Ubuntu 24).\n- `signal-cli` available on the host where the gateway runs.\n- A phone number that can receive one verification SMS (for SMS registration path).\n- Browser access for Signal captcha (`signalcaptchas.org`) during registration.\n\n## [​](https://docs.openclaw.ai/channels/signal\\#quick-setup-beginner)  Quick setup (beginner)\n\n1. Use a **separate Signal number** for the bot (recommended).\n2. Install `signal-cli` (Java required if you use the JVM build).\n3. Choose one setup path:\n   - **Path A (QR link):**`signal-cli link -n \"OpenClaw\"` and scan with Signal.\n   - **Path B (SMS register):** register a dedicated number with captcha + SMS verification.\n4. Configure OpenClaw and restart the gateway.\n5. Send a first DM and approve pairing (`openclaw pairing approve signal <CODE>`).\n\nMinimal config:\n\n```\n{\n  channels: {\n    signal: {\n      enabled: true,\n      account: \"+15551234567\",\n      cliPath: \"signal-cli\",\n      dmPolicy: \"pairing\",\n      allowFrom: [\"+15557654321\"],\n    },\n  },\n}\n```\n\nField reference:\n\n| Field | Description |\n| --- | --- |\n| `account` | Bot phone number in E.164 format (`+15551234567`) |\n| `cliPath` | Path to `signal-cli` (`signal-cli` if on `PATH`) |\n| `dmPolicy` | DM access policy (`pairing` recommended) |\n| `allowFrom` | Phone numbers or `uuid:<id>` values allowed to DM |\n\n## [​](https://docs.openclaw.ai/channels/signal\\#what-it-is)  What it is\n\n- Signal channel via `signal-cli` (not embedded libsignal).\n- Deterministic routing: replies always go back to Signal.\n- DMs share the agent’s main session; groups are isolated (`agent:<agentId>:signal:group:<groupId>`).\n\n## [​](https://docs.openclaw.ai/channels/signal\\#config-writes)  Config writes\n\nBy default, Signal is allowed to write config updates triggered by `/config set|unset` (requires `commands.config: true`).Disable with:\n\n```\n{\n  channels: { signal: { configWrites: false } },\n}\n```\n\n## [​](https://openclaw.ai/channels/signal\\#the-number-model-important)  The number model (important)\n\n- The gateway connects to a **Signal device** (the `signal-cli` account).\n- If you run the bot on **your personal Signal account**, it will ignore your own messages (loop protection).\n- For “I text the bot and it replies,” use a **separate bot number**.\n\n## [​](https://docs.openclaw.ai/channels/signal\\#setup-path-a-link-existing-signal-account-qr)  Setup path A: link existing Signal account (QR)\n\n1. Install `signal-cli` (JVM or native build).\n2. Link a bot account:\n   - `signal-cli link -n \"OpenClaw\"` then scan the QR in Signal.\n3. Configure Signal and start the gateway.\n\nExample:\n\n```\n{\n  channels: {\n    signal: {\n      enabled: true,\n      account: \"+15551234567\",\n      cliPath: \"signal-cli\",\n      dmPolicy: \"pairing\",\n      allowFrom: [\"+15557654321\"],\n    },\n  },\n}\n```\n\nMulti-account support: use `channels.signal.accounts` with per-account config and optional `name`. See [`gateway/configuration`](https://docs.openclaw.ai/gateway/config-channels#multi-account-all-channels) for the shared pattern.\n\n## [​](https://docs.openclaw.ai/channels/signal\\#setup-path-b-register-dedicated-bot-number-sms-linux)  Setup path B: register dedicated bot number (SMS, Linux)\n\nUse this when you want a dedicated bot number instead of linking an existing Signal app account.\n\n1. Get a number that can receive SMS (or voice verification for landlines).\n   - Use a dedicated bot number to avoid account/session conflicts.\n2. Install `signal-cli` on the gateway host:\n\n```\nVERSION=$(curl -Ls -o /dev/null -w %{url_effective} https://github.com/AsamK/signal-cli/releases/latest | sed -e \'s/^.*\\/v//\')\ncurl -L -O \"https://github.com/AsamK/signal-cli/releases/download/v${VERSION}/signal-cli-${VERSION}-Linux-native.tar.gz\"\nsudo tar xf \"signal-cli-${VERSION}-Linux-native.tar.gz\" -C /opt\nsudo ln -sf /opt/signal-cli /usr/local/bin/\nsignal-cli --version\n```\n\nIf you use the JVM build (`signal-cli-${VERSION}.tar.gz`), install JRE 25+ first.\nKeep `signal-cli` updated; upstream notes that old releases can break as Signal server APIs change.\n\n3. Register and verify the number:\n\n```\nsignal-cli -a +<BOT_PHONE_NUMBER> register\n```\n\nIf captcha is required:\n\n1. Open `https://signalcaptchas.org/registration/generate.html`.\n2. Complete captcha, copy the `signalcaptcha://...` link target from “Open Signal”.\n3. Run from the same external IP as the browser session when possible.\n4. Run registration again immediately (captcha tokens expire quickly):\n\n```\nsignal-cli -a +<BOT_PHONE_NUMBER> register --captcha \'<SIGNALCAPTCHA_URL>\''\nsignal-cli -a +<BOT_PHONE_NUMBER> verify <VERIFICATION_CODE>\n```\n\n4. Configure OpenClaw, restart gateway, verify channel:\n\n```\n# If you run the gateway as a user systemd service:\nsystemctl --user restart openclaw-gateway.service\n\n# Then verify:\nopenclaw doctor\nopenclaw channels status --probe\n```\n\n5. Pair your DM sender:\n   - Send any message to the bot number.\n   - Approve code on the server: `openclaw pairing approve signal <PAIRING_CODE>`.\n   - Save the bot number as a contact on your phone to avoid “Unknown contact”.\n\nRegistering a phone number account with `signal-cli` can de-authenticate the main Signal app session for that number. Prefer a dedicated bot number, or use QR link mode if you need to keep your existing phone app setup.\n\nUpstream references:\n\n- `signal-cli` README: `https://github.com/AsamK/signal-cli`\n- Captcha flow: `https://github.com/AsamK/signal-cli/wiki/Registration-with-captcha`\n- Linking flow: `https://github.com/AsamK/signal-cli/wiki/Linking-other-devices-(Provisioning)`\n\n## [​](https://docs.openclaw.ai/channels/signal\\#external-daemon-mode-httpurl)  External daemon mode (httpUrl)\n\nIf you want to manage `signal-cli` yourself (slow JVM cold starts, container init, or shared CPUs), run the daemon separately and point OpenClaw at it:\n\n```\n{\n  channels: {\n    signal: {\n      httpUrl: \"http://127.0.0.1:8080\",\n      autoStart: false,\n    },\n  },\n}\n```\n\nThis skips auto-spawn and the startup wait inside OpenClaw. For slow starts when auto-spawning, set `channels.signal.startupTimeoutMs`.\n\n## [​](https://docs.openclaw.ai/channels/signal\\#access-control-dms-+-groups)  Access control (DMs + groups)\n\nDMs:\n\n- Default: `channels.signal.dmPolicy = \"pairing\"`.\n- Unknown senders receive a pairing code; messages are ignored until approved (codes expire after 1 hour).\n- Approve via:\n  - `openclaw pairing list signal`\n  - `openclaw pairing approve signal <CODE>`\n- Pairing is the default token exchange for Signal DMs. Details: [Pairing](https://docs.openclaw.ai/channels/pairing)\n- UUID-only senders (from `sourceUuid`) are stored as `uuid:<id>` in `channels.signal.allowFrom`.\n\nGroups:\n\n- `channels.signal.groupPolicy = open | allowlist | disabled`.\n- `channels.signal.groupAllowFrom` controls who can trigger in groups when `allowlist` is set.\n- `channels.signal.groups[\"<group-id>\" | \"*\"]` can override group behavior with `requireMention`, `tools`, and `toolsBySender`.\n- Use `channels.signal.accounts.<id>.groups` for per-account overrides in multi-account setups.\n- Runtime note: if `channels.signal` is completely missing, runtime falls back to `groupPolicy=\"allowlist\"` for group checks (even if `channels.defaults.groupPolicy` is set).\n\n## [​](https://docs.openclaw.ai/channels/signal\\#how-it-works-behavior)  How it works (behavior)\n\n- `signal-cli` runs as a daemon; the gateway reads events via SSE.\n- Inbound messages are normalized into the shared channel envelope.\n- Replies always route back to the same number or group.\n\n## [​](https://docs.openclaw.ai/channels/signal\\#media-+-limits)  Media + limits\n\n- Outbound text is chunked to `channels.signal.textChunkLimit` (default 4000).\n- Optional newline chunking: set `channels.signal.chunkMode=\"newline\"` to split on blank lines (paragraph boundaries) before length chunking.\n- Attachments supported (base64 fetched from `signal-cli`).\n- Voice-note attachments use the `signal-cli` filename as a MIME fallback when `contentType` is missing, so audio transcription can still classify AAC voice memos.\n- Default media cap: `channels.signal.mediaMaxMb` (default 8).\n- Use `channels.signal.ignoreAttachments` to skip downloading media.\n- Group history context uses `channels.signal.historyLimit` (or `channels.signal.accounts.*.historyLimit`), falling back to `messages.groupChat.historyLimit`. Set `0` to disable (default 50).\n\n## [​](https://docs.openclaw.ai/channels/signal\\#typing-+-read-receipts)  Typing + read receipts\n\n- **Typing indicators**: OpenClaw sends typing signals via `signal-cli sendTyping` and refreshes them while a reply is running.\n- **Read receipts**: when `channels.signal.sendReadReceipts` is true, OpenClaw forwards read receipts for allowed DMs.\n- Signal-cli does not expose read receipts for groups.\n\n## [​](https://docs.openclaw.ai/channels/signal\\#reactions-message-tool)  Reactions (message tool)\n\n- Use `message action=react` with `channel=signal`.\n- Targets: sender E.164 or UUID (use `uuid:<id>` from pairing output; bare UUID works too).\n- `messageId` is the Signal timestamp for the message you’re reacting to.\n- Group reactions require `targetAuthor` or `targetAuthorUuid`.\n\nExamples:\n\n```\nmessage action=react channel=signal target=uuid:123e4567-e89b-12d3-a456-426614174000 messageId=1737630212345 emoji=🔥\nmessage action=react channel=signal target=+15551234567 messageId=1737630212345 emoji=🔥 remove=true\nmessage action=react channel=signal target=signal:group:<groupId> targetAuthor=uuid:<sender-uuid> messageId=1737630212345 emoji=✅\n```\n\nConfig:\n\n- `channels.signal.actions.reactions`: enable/disable reaction actions (default true).\n- `channels.signal.reactionLevel`: `off | ack | minimal | extensive`.\n\n  - `off`/`ack` disables agent reactions (message tool `react` will error).\n  - `minimal`/`extensive` enables agent reactions and sets the guidance level.\n- Per-account overrides: `channels.signal.accounts.<id>.actions.reactions`, `channels.signal.accounts.<id>.reactionLevel`.\n\n## [​](https://docs.openclaw.ai/channels/signal\\#delivery-targets-cli/cron)  Delivery targets (CLI/cron)\n\n- DMs: `signal:+15551234567` (or plain E.164).\n- UUID DMs: `uuid:<id>` (or bare UUID).\n- Groups: `signal:group:<groupId>`.\n- Usernames: `username:<name>` (if supported by your Signal account).\n\n## [​](https://docs.openclaw.ai/channels/signal\\#troubleshooting)  Troubleshooting\n\nRun this ladder first:\n\n```\nopenclaw status\nopenclaw gateway status\nopenclaw logs --follow\nopenclaw doctor\nopenclaw channels status --probe\n```\n\nThen confirm DM pairing state if needed:\n\n```\nopenclaw pairing list signal\n```\n\nCommon failures:\n\n- Daemon reachable but no replies: verify account/daemon settings (`httpUrl`, `account`) and receive mode.\n- DMs ignored: sender is pending pairing approval.\n- Group messages ignored: group sender/mention gating blocks delivery.\n- Config validation errors after edits: run `openclaw doctor --fix`.\n- Signal missing from diagnostics: confirm `channels.signal.enabled: true`.\n\nExtra checks:\n\n```\nopenclaw pairing list signal\npgrep -af signal-cli\ngrep -i \"signal\" \"/tmp/openclaw/openclaw-$(date +%Y-%m-%d).log\" | tail -20\n```\n\nFor triage flow: [/channels/troubleshooting](https://docs.openclaw.ai/channels/troubleshooting).\n\n## [​](https://docs.openclaw.ai/channels/signal\\#security-notes)  Security notes\n\n- `signal-cli` stores account keys locally (typically `~/.local/share/signal-cli/data/`).\n- Back up Signal account state before server migration or rebuild.\n- Keep `channels.signal.dmPolicy: \"pairing\"` unless you explicitly want broader DM access.\n- SMS verification is only needed for registration or recovery flows, but losing control of the number/account can complicate re-registration.\n\n## [​](https://docs.openclaw.ai/channels/signal\\#configuration-reference-signal)  Configuration reference (Signal)\n\nFull configuration: [Configuration](https://docs.openclaw.ai/gateway/configuration)Provider options:\n\n- `channels.signal.enabled`: enable/disable channel startup.\n- `channels.signal.account`: E.164 for the bot account.\n- `channels.signal.cliPath`: path to `signal-cli`.\n- `channels.signal.httpUrl`: full daemon URL (overrides host/port).\n- `channels.signal.httpHost`, `channels.signal.httpPort`: daemon bind (default 127.0.0.1:8080).\n- `channels.signal.autoStart`: auto-spawn daemon (default true if `httpUrl` unset).\n- `channels.signal.startupTimeoutMs`: startup wait timeout in ms (cap 120000).\n- `channels.signal.receiveMode`: `on-start | manual`.\n- `channels.signal.ignoreAttachments`: skip attachment downloads.\n- `channels.signal.ignoreStories`: ignore stories from the daemon.\n- `channels.signal.sendReadReceipts`: forward read receipts.\n- `channels.signal.dmPolicy`: `pairing | allowlist | open | disabled` (default: pairing).\n- `channels.signal.allowFrom`: DM allowlist (E.164 or `uuid:<id>`). `open` requires `\"*\"`. Signal has no usernames; use phone/UUID ids.\n- `channels.signal.groupPolicy`: `open | allowlist | disabled` (default: allowlist).\n- `channels.signal.groupAllowFrom`: group sender allowlist.\n- `channels.signal.groups`: per-group overrides keyed by Signal group id (or `\"*\"`). Supported fields: `requireMention`, `tools`, `toolsBySender`.\n- `channels.signal.accounts.<id>.groups`: per-account version of `channels.signal.groups` for multi-account setups.\n- `channels.signal.historyLimit`: max group messages to include as context (0 disables).\n- `channels.signal.dmHistoryLimit`: DM history limit in user turns. Per-user overrides: `channels.signal.dms[\"<phone_or_uuid>\"].historyLimit`.\n- `channels.signal.textChunkLimit`: outbound chunk size (chars).\n- `channels.signal.chunkMode`: `length` (default) or `newline` to split on blank lines (paragraph boundaries) before length chunking.\n- `channels.signal.mediaMaxMb`: inbound/outbound media cap (MB).\n\nRelated global options:\n\n- `agents.list[].groupChat.mentionPatterns` (Signal does not support native mentions).\n- `messages.groupChat.mentionPatterns` (global fallback).\n- `messages.responsePrefix`.\n\n## [​](https://docs.openclaw.ai/channels/signal\\#related)  Related\n\n- [Channels Overview](https://docs.openclaw.ai/channels) — all supported channels\n- [Pairing](https://docs.openclaw.ai/channels/pairing) — DM authentication and pairing flow\n- [Groups](https://docs.openclaw.ai/channels/groups) — group chat behavior and mention gating\n- [Channel Routing](https://docs.openclaw.ai/channels/channel-routing) — session routing for messages\n- [Security](https://docs.openclaw.ai/gateway/security) — access model and hardening\n\n[WhatsApp](https://docs.openclaw.ai/channels/whatsapp) [Microsoft Teams](https://docs.openclaw.ai/channels/msteams)\n\nCtrl+I
+* [Channels Overview](/channels) - all supported channels
+* [Pairing](/channels/pairing) - DM authentication and pairing flow
+* [Groups](/channels/groups) - group chat behavior and mention gating
+* [Channel Routing](/channels/channel-routing) - session routing for messages
+* [Security](/gateway/security) - access model and hardening
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
 
----
+# Zalo personal
 
-## Zalo - OpenClaw
-**Source:** https://docs.openclaw.ai/channels/zalo
+Status: experimental. This integration automates a **personal Zalo account** via native `zca-js` inside OpenClaw.
 
-[Skip to main content](https://docs.openclaw.ai/channels/zalo#content-area)
+<Warning>
+  This is an unofficial integration and may result in account suspension or ban. Use at your own risk.
+</Warning>
 
-[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)
+## Bundled plugin
 
-![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)
+Zalo Personal ships as a bundled plugin in current OpenClaw releases, so normal
+packaged builds do not need a separate install.
 
-English
+If you are on an older build or a custom install that excludes Zalo Personal,
+install the npm package directly:
 
-Search...
+* Install via CLI: `openclaw plugins install @openclaw/zalouser`
+* Pinned version: `openclaw plugins install @openclaw/zalouser@2026.5.2`
+* Or from a source checkout: `openclaw plugins install ./path/to/local/zalouser-plugin`
+* Details: [Plugins](/tools/plugin)
 
-Ctrl K
+No external `zca`/`openzca` CLI binary is required.
 
-Search...
+## Quick setup (beginner)
 
-Navigation
+1. Ensure the Zalo Personal plugin is available.
+   * Current packaged OpenClaw releases already bundle it.
+   * Older/custom installs can add it manually with the commands above.
+2. Login (QR, on the Gateway machine):
+   * `openclaw channels login --channel zalouser`
+   * Scan the QR code with the Zalo mobile app.
+3. Enable the channel:
 
-Regional platforms
-
-Zalo
-
-[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)
-
-On this page
-
-- [Bundled plugin](https://docs.openclaw.ai/channels/zalo#bundled-plugin)
-- [Quick setup (beginner)](https://docs.openclaw.ai/channels/zalo#quick-setup-beginner)
-- [What it is](https://docs.openclaw.ai/channels/zalo#what-it-is)
-- [Setup (fast path)](https://docs.openclaw.ai/channels/zalo#setup-fast-path)
-- [1) Create a bot token (Zalo Bot Platform)](https://docs.openclaw.ai/channels/zalo#1-create-a-bot-token-zalo-bot-platform)
-- [2) Configure the token (env or config)](https://docs.openclaw.ai/channels/zalo#2-configure-the-token-env-or-config)
-- [How it works (behavior)](https://docs.openclaw.ai/channels/zalo#how-it-works-behavior)
-- [Limits](https://docs.openclaw.ai/channels/zalo#limits)
-- [Access control (DMs)](https://docs.openclaw.ai/channels/zalo#access-control-dms)
-- [DM access](https://docs.openclaw.ai/channels/zalo#dm-access)
-- [Access control (Groups)](https://docs.openclaw.ai/channels/zalo#access-control-groups)
-- [Long-polling vs webhook](https://docs.openclaw.ai/channels/zalo#long-polling-vs-webhook)
-- [Supported message types](https://docs.openclaw.ai/channels/zalo#supported-message-types)
-- [Capabilities](https://docs.openclaw.ai/channels/zalo#capabilities)
-- [Delivery targets (CLI/cron)](https://docs.openclaw.ai/channels/zalo#delivery-targets-cli%2Fcron)
-- [Troubleshooting](https://docs.openclaw.ai/channels/zalo#troubleshooting)
-- [Configuration reference (Zalo)](https://docs.openclaw.ai/channels/zalo#configuration-reference-zalo)
-- [Related](https://docs.openclaw.ai/channels/zalo#related)
-
-Status: experimental. DMs are supported. The [Capabilities](https://docs.openclaw.ai/channels/zalo#capabilities) section below reflects current Marketplace-bot behavior.
-
-## [​](https://docs.openclaw.ai/channels/zalo\\#bundled-plugin)  Bundled plugin
-
-Zalo ships as a bundled plugin in current OpenClaw releases, so normal packaged
-builds do not need a separate install.If you are on an older build or a custom install that excludes Zalo, install it
-manually:
-
-- Install via CLI: `openclaw plugins install @openclaw/zalo`
-- Or from a source checkout: `openclaw plugins install ./path/to/local/zalo-plugin`
-- Details: [Plugins](https://docs.openclaw.ai/tools/plugin)
-
-## [​](https://docs.openclaw.ai/channels/zalo\\#quick-setup-beginner)  Quick setup (beginner)
-
-1. Ensure the Zalo plugin is available.
-   - Current packaged OpenClaw releases already bundle it.
-   - Older/custom installs can add it manually with the commands above.
-2. Set the token:
-   - Env: `ZALO_BOT_TOKEN=...`
-   - Or config: `channels.zalo.accounts.default.botToken: \"...\"`.
-3. Restart the gateway (or finish setup).
-4. DM access is pairing by default; approve the pairing code on first contact.
-
-Minimal config:
-
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    zalo: {
+    zalouser: {
       enabled: true,
-      accounts: {
-        default: {
-          botToken: \"12345689:abc-xyz\",
-          dmPolicy: \"pairing\",
-        },
-      },
+      dmPolicy: "pairing",
     },
   },
 }
 ```
 
-## [​](https://docs.openclaw.ai/channels/zalo\\#what-it-is)  What it is
+4. Restart the Gateway (or finish setup).
+5. DM access defaults to pairing; approve the pairing code on first contact.
 
-Zalo is a Vietnam-focused messaging app; its Bot API lets the Gateway run a bot for 1:1 conversations.
-It is a good fit for support or notifications where you want deterministic routing back to Zalo.This page reflects current OpenClaw behavior for **Zalo Bot Creator / Marketplace bots**.
-**Zalo Official Account (OA) bots** are a different Zalo product surface and may behave differently.
+## What it is
 
-- A Zalo Bot API channel owned by the Gateway.
-- Deterministic routing: replies go back to Zalo; the model never chooses channels.
-- DMs share the agent’s main session.
-- The [Capabilities](https://docs.openclaw.ai/channels/zalo#capabilities) section below shows current Marketplace-bot support.
+* Runs entirely in-process via `zca-js`.
+* Uses native event listeners to receive inbound messages.
+* Sends replies directly through the JS API (text/media/link).
+* Designed for "personal account" use cases where Zalo Bot API is not available.
 
-## [​](https://docs.openclaw.ai/channels/zalo\\#setup-fast-path)  Setup (fast path)
+## Naming
 
-### [​](https://docs.openclaw.ai/channels/zalo\\#1-create-a-bot-token-zalo-bot-platform)  1) Create a bot token (Zalo Bot Platform)
+Channel id is `zalouser` to make it explicit this automates a **personal Zalo user account** (unofficial). We keep `zalo` reserved for a potential future official Zalo API integration.
 
-1. Go to [https://bot.zaloplatforms.com](https://bot.zaloplatforms.com/) and sign in.
-2. Create a new bot and configure its settings.
-3. Copy the full bot token (typically `numeric_id:secret`). For Marketplace bots, the usable runtime token may appear in the bot’s welcome message after creation.
+## Finding IDs (directory)
 
-### [​](https://docs.openclaw.ai/channels/zalo\\#2-configure-the-token-env-or-config)  2) Configure the token (env or config)
+Use the directory CLI to discover peers/groups and their IDs:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw directory self --channel zalouser
+openclaw directory peers list --channel zalouser --query "name"
+openclaw directory groups list --channel zalouser --query "work"
+```
+
+## Limits
+
+* Outbound text is chunked to \~2000 characters (Zalo client limits).
+* Streaming is blocked by default.
+
+## Access control (DMs)
+
+`channels.zalouser.dmPolicy` supports: `pairing | allowlist | open | disabled` (default: `pairing`).
+
+`channels.zalouser.allowFrom` should use stable Zalo user IDs. During interactive setup, entered names can be resolved to IDs using the plugin's in-process contact lookup.
+
+If a raw name remains in config, startup resolves it only when `channels.zalouser.dangerouslyAllowNameMatching: true` is enabled. Without that opt-in, runtime sender checks are ID-only and raw names are ignored for authorization.
+
+Approve via:
+
+* `openclaw pairing list zalouser`
+* `openclaw pairing approve zalouser <code>`
+
+## Group access (optional)
+
+* Default: `channels.zalouser.groupPolicy = "open"` (groups allowed). Use `channels.defaults.groupPolicy` to override the default when unset.
+* Restrict to an allowlist with:
+  * `channels.zalouser.groupPolicy = "allowlist"`
+  * `channels.zalouser.groups` (keys should be stable group IDs; names are resolved to IDs on startup only when `channels.zalouser.dangerouslyAllowNameMatching: true` is enabled)
+  * `channels.zalouser.groupAllowFrom` (controls which senders in allowed groups can trigger the bot)
+* Block all groups: `channels.zalouser.groupPolicy = "disabled"`.
+* The configure wizard can prompt for group allowlists.
+* On startup, OpenClaw resolves group/user names in allowlists to IDs and logs the mapping only when `channels.zalouser.dangerouslyAllowNameMatching: true` is enabled.
+* Group allowlist matching is ID-only by default. Unresolved names are ignored for auth unless `channels.zalouser.dangerouslyAllowNameMatching: true` is enabled.
+* `channels.zalouser.dangerouslyAllowNameMatching: true` is a break-glass compatibility mode that re-enables mutable startup name resolution and runtime group-name matching.
+* If `groupAllowFrom` is unset, runtime falls back to `allowFrom` for group sender checks.
+* Sender checks apply to both normal group messages and control commands (for example `/new`, `/reset`).
 
 Example:
 
-```
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
   channels: {
-    zalo: {
-      enabled: true,
-      accounts: {
-        default: {
-          botToken: \"12345689:abc-xyz\",
-          dmPolicy: \"pairing\",
-        },
+    zalouser: {
+      groupPolicy: "allowlist",
+      groupAllowFrom: ["1471383327500481391"],
+      groups: {
+        "123456789": { allow: true },
+        "Work Chat": { allow: true },
       },
     },
   },
 }
 ```
 
-If you later move to a Zalo bot surface where groups are available, you can add group-specific config such as `groupPolicy` and `groupAllowFrom` explicitly. For current Marketplace-bot behavior, see [Capabilities](https://docs.openclaw.ai/channels/zalo#capabilities).Env option: `ZALO_BOT_TOKEN=...` (works for the default account only).Multi-account support: use `channels.zalo.accounts` with per-account tokens and optional `name`.
+### Group mention gating
 
-3. Restart the gateway. Zalo starts when a token is resolved (env or config).
-4. DM access defaults to pairing. Approve the code when the bot is first contacted.
+* `channels.zalouser.groups.<group>.requireMention` controls whether group replies require a mention.
+* Resolution order: exact group id/name -> normalized group slug -> `*` -> default (`true`).
+* This applies both to allowlisted groups and open group mode.
+* Quoting a bot message counts as an implicit mention for group activation.
+* Authorized control commands (for example `/new`) can bypass mention gating.
+* When a group message is skipped because mention is required, OpenClaw stores it as pending group history and includes it on the next processed group message.
+* Group history limit defaults to `messages.groupChat.historyLimit` (fallback `50`). You can override per account with `channels.zalouser.historyLimit`.
 
-## [​](https://docs.openclaw.ai/channels/zalo\\#how-it-works-behavior)  How it works (behavior)
+Example:
 
-- Inbound messages are normalized into the shared channel envelope with media placeholders.
-- Replies always route back to the same Zalo chat.
-- Long-polling by default; webhook mode available with `channels.zalo.webhookUrl`.
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    zalouser: {
+      groupPolicy: "allowlist",
+      groups: {
+        "*": { allow: true, requireMention: true },
+        "Work Chat": { allow: true, requireMention: false },
+      },
+    },
+  },
+}
+```
 
-## [​](https://docs.openclaw.ai/channels/zalo\\#limits)  Limits
+## Multi-account
 
-- Outbound text is chunked to 2000 characters (Zalo API limit).
-- Media downloads/uploads are capped by `channels.zalo.mediaMaxMb` (default 5).
-- Streaming is blocked by default due to the 2000 char limit making streaming less useful.
+Accounts map to `zalouser` profiles in OpenClaw state. Example:
 
-## [​](https://docs.openclaw.ai/channels/zalo\\#access-control-dms)  Access control (DMs)
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    zalouser: {
+      enabled: true,
+      defaultAccount: "default",
+      accounts: {
+        work: { enabled: true, profile: "work" },
+      },
+    },
+  },
+}
+```
 
-### [​](https://docs.openclaw.ai/channels/zalo\\#dm-access)  DM access
+## Typing, reactions, and delivery acknowledgements
 
-- Default: `channels.zalo.dmPolicy = \"pairing\"`. Unknown senders receive a pairing code; messages are ignored until approved (codes expire after 1 hour).
-- Approve via:
-  - `openclaw pairing list zalo`
-  - `openclaw pairing approve zalo <CODE>`
-- Pairing is the default token exchange. Details: [Pairing](https://docs.openclaw.ai/channels/pairing)
-- `channels.zalo.allowFrom` accepts numeric user IDs (no username lookup available).
+* OpenClaw sends a typing event before dispatching a reply (best-effort).
+* Message reaction action `react` is supported for `zalouser` in channel actions.
+  * Use `remove: true` to remove a specific reaction emoji from a message.
+  * Reaction semantics: [Reactions](/tools/reactions)
+* For inbound messages that include event metadata, OpenClaw sends delivered + seen acknowledgements (best-effort).
 
-## [​](https://docs.openclaw.ai/channels/zalo\\#access-control-groups)  Access control (Groups)
+## Troubleshooting
 
-For **Zalo Bot Creator / Marketplace bots**, group support was not available in practice because the bot could not be added to a group at all.That means the group-related config keys below exist in the schema, but were not usable for Marketplace bots:
+**Login doesn't stick:**
 
-- `channels.zalo.groupPolicy` controls group inbound handling: `open | allowlist | disabled`.
-- `channels.zalo.groupAllowFrom` restricts which sender IDs can trigger the bot in groups.
-- If `groupAllowFrom` is unset, Zalo falls back to `allowFrom` for sender checks.
-- Runtime note: if `channels.zalo` is missing entirely, runtime still falls back to `groupPolicy=\"allowlist\"` for safety.
+* `openclaw channels status --probe`
+* Re-login: `openclaw channels logout --channel zalouser && openclaw channels login --channel zalouser`
 
-The group policy values (when group access is available on your bot surface) are:
+**Allowlist/group name didn't resolve:**
 
-- `groupPolicy: \"disabled\"` — blocks all group messages.
-- `groupPolicy: \"open\"` — allows any group member (mention-gated).
-- `groupPolicy: \"allowlist\"` — fail-closed default; only allowed senders are accepted.
+* Use numeric IDs in `allowFrom`/`groupAllowFrom` and stable group IDs in `groups`. If you intentionally need exact friend/group names, enable `channels.zalouser.dangerouslyAllowNameMatching: true`.
 
-If you are using a different Zalo bot product surface and have verified working group behavior, document that separately rather than assuming it matches the Marketplace-bot flow.
+**Upgraded from old CLI-based setup:**
 
-## [​](https://docs.openclaw.ai/channels/zalo\\#long-polling-vs-webhook)  Long-polling vs webhook
+* Remove any old external `zca` process assumptions.
+* The channel now runs fully in OpenClaw without external CLI binaries.
 
-- Default: long-polling (no public URL required).
-- Webhook mode: set `channels.zalo.webhookUrl` and `channels.zalo.webhookSecret`.
+## Related
 
-  - The webhook secret must be 8-256 characters.
-  - Webhook URL must use HTTPS.
-  - Zalo sends events with `X-Bot-Api-Secret-Token` header for verification.
-  - Gateway HTTP handles webhook requests at `channels.zalo.webhookPath` (defaults to the webhook URL path).
-  - Requests must use `Content-Type: application/json` (or `+json` media types).
-  - Duplicate events (`event_name + message_id`) are ignored for a short replay window.
-  - Burst traffic is rate-limited per path/source and may return HTTP 429.
-
-**Note:** getUpdates (polling) and webhook are mutually exclusive per Zalo API docs.
-
-## [​](https://docs.openclaw.ai/channels/zalo\\#supported-message-types)  Supported message types
-
-For a quick support snapshot, see [Capabilities](https://docs.openclaw.ai/channels/zalo#capabilities). The notes below add detail where the behavior needs extra context.
-
-- **Text messages**: Full support with 2000 character chunking.
-- **Plain URLs in text**: Behave like normal text input.
-- **Link previews / rich link cards**: See the Marketplace-bot status in [Capabilities](https://docs.openclaw.ai/channels/zalo#capabilities); they did not reliably trigger a reply.
-- **Image messages**: See the Marketplace-bot status in [Capabilities](https://docs.openclaw.ai/channels/zalo#capabilities); inbound image handling was unreliable (typing indicator without a final reply).
-- **Stickers**: See the Marketplace-bot status in [Capabilities](https://docs.openclaw.ai/channels/zalo#capabilities).
-- **Voice notes / audio files / video / generic file attachments**: See the Marketplace-bot status in [Capabilities](https://docs.openclaw.ai/channels/zalo#capabilities).
-- **Unsupported types**: Logged (for example, messages from protected users).
-
-## [​](https://docs.openclaw.ai/channels/zalo\\#capabilities)  Capabilities
-
-This table summarizes current **Zalo Bot Creator / Marketplace bot** behavior in OpenClaw.
-
-| Feature | Status |
-| --- | --- |
-| Direct messages | ✅ Supported |
-| Groups | ❌ Not available for Marketplace bots |
-| Media (inbound images) | ⚠️ Limited / verify in your environment |
-| Media (outbound images) | ⚠️ Not re-tested for Marketplace bots |
-| Plain URLs in text | ✅ Supported |
-| Link previews | ⚠️ Unreliable for Marketplace bots |
-| Reactions | ❌ Not supported |
-| Stickers | ⚠️ No agent reply for Marketplace bots |
-| Voice notes / audio / video | ⚠️ No agent reply for Marketplace bots |
-| File attachments | ⚠️ No agent reply for Marketplace bots |
-| Threads | ❌ Not supported |
-| Polls | ❌ Not supported |
-| Native commands | ❌ Not supported |
-| Streaming | ⚠️ Blocked (2000 char limit) |
-
-## [​](https://docs.openclaw.ai/channels/zalo\\#delivery-targets-cli/cron)  Delivery targets (CLI/cron)
-
-- Use a chat id as the target.
-- Example: `openclaw message send --channel zalo --target 123456789 --message \"hi\"`.
-
-## [​](https://docs.openclaw.ai/channels/zalo\\#troubleshooting)  Troubleshooting
-
-**Bot doesn’t respond:**
-
-- Check that the token is valid: `openclaw channels status --probe`
-- Verify the sender is approved (pairing or allowFrom)
-- Check gateway logs: `openclaw logs --follow`
-
-**Webhook not receiving events:**
-
-- Ensure webhook URL uses HTTPS
-- Verify secret token is 8-256 characters
-- Confirm the gateway HTTP endpoint is reachable on the configured path
-- Check that getUpdates polling is not running (they’re mutually exclusive)
-
-## [​](https://docs.openclaw.ai/channels/zalo\\#configuration-reference-zalo)  Configuration reference (Zalo)
-
-Full configuration: [Configuration](https://docs.openclaw.ai/gateway/configuration)The flat top-level keys (`channels.zalo.botToken`, `channels.zalo.dmPolicy`, and similar) are a legacy single-account shorthand. Prefer `channels.zalo.accounts.<id>.*` for new configs. Both forms are still documented here because they exist in the schema.Provider options:
-
-- `channels.zalo.enabled`: enable/disable channel startup.
-- `channels.zalo.botToken`: bot token from Zalo Bot Platform.
-- `channels.zalo.tokenFile`: read token from a regular file path. Symlinks are rejected.
-- `channels.zalo.dmPolicy`: `pairing | allowlist | open | disabled` (default: pairing).
-- `channels.zalo.allowFrom`: DM allowlist (user IDs). `open` requires `\"*\"`. The wizard will ask for numeric IDs.
-- `channels.zalo.groupPolicy`: `open | allowlist | disabled` (default: allowlist). Present in config; see [Capabilities](https://docs.openclaw.ai/channels/zalo#capabilities) and [Access control (Groups)](https://docs.openclaw.ai/channels/zalo#access-control-groups) for current Marketplace-bot behavior.
-- `channels.zalo.groupAllowFrom`: group sender allowlist (user IDs). Falls back to `allowFrom` when unset.
-- `channels.zalo.mediaMaxMb`: inbound/outbound media cap (MB, default 5).
-- `channels.zalo.webhookUrl`: enable webhook mode (HTTPS required).
-- `channels.zalo.webhookSecret`: webhook secret (8-256 chars).
-- `channels.zalo.webhookPath`: webhook path on the gateway HTTP server.
-- `channels.zalo.proxy`: proxy URL for API requests.
-
-Multi-account options:
-
-- `channels.zalo.accounts.<id>.botToken`: per-account token.
-- `channels.zalo.accounts.<id>.tokenFile`: per-account regular token file. Symlinks are rejected.
-- `channels.zalo.accounts.<id>.name`: display name.
-- `channels.zalo.accounts.<id>.enabled`: enable/disable account.
-- `channels.zalo.accounts.<id>.dmPolicy`: per-account DM policy.
-- `channels.zalo.accounts.<id>.allowFrom`: per-account allowlist.
-- `channels.zalo.accounts.<id>.groupPolicy`: per-account group policy. Present in config; see [Capabilities](https://docs.openclaw.ai/channels/zalo#capabilities) and [Access control (Groups)](https://docs.openclaw.ai/channels/zalo#access-control-groups) for current Marketplace-bot behavior.
-- `channels.zalo.accounts.<id>.groupAllowFrom`: per-account group sender allowlist.
-- `channels.zalo.accounts.<id>.webhookUrl`: per-account webhook URL.
-- `channels.zalo.accounts.<id>.webhookSecret`: per-account webhook secret.
-- `channels.zalo.accounts.<id>.webhookPath`: per-account webhook path.
-- `channels.zalo.accounts.<id>.proxy`: per-account proxy URL.
-
-## [​](https://docs.openclaw.ai/channels/zalo\\#related)  Related
-
-- [Channels Overview](https://docs.openclaw.ai/channels) — all supported channels
-- [Pairing](https://docs.openclaw.ai/channels/pairing) — DM authentication and pairing flow
-- [Groups](https://docs.openclaw.ai/channels/groups) — group chat behavior and mention gating
-- [Channel Routing](https://docs.openclaw.ai/channels/channel-routing) — session routing for messages
-- [Security](https://docs.openclaw.ai/gateway/security) — access model and hardening
-
-[Feishu](https://docs.openclaw.ai/channels/feishu) [Zalo personal](https://docs.openclaw.ai/channels/zalouser)
-
-Ctrl+I
-
----
-
-## Telegram Channel - OpenClaw Documentation
-**Source:** https://docs.openclaw.ai/channels/telegram
-
-[Skip to main content](https://docs.openclaw.ai/channels/telegram#content-area)\n\n[OpenClaw home page![light logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)![dark logo](https://mintcdn.com/clawdhub/dpADRo8IUoiDztzJ/assets/pixel-lobster.svg?fit=max&auto=format&n=dpADRo8IUoiDztzJ&q=85&s=8fdf719fb6d3eaad7c65231385bf28e5)](https://docs.openclaw.ai/)\n\n![US](https://d3gk2c5xim1je2.cloudfront.net/flags/US.svg)\n\nEnglish\n\nSearch...\n\nCtrl K\n\nSearch...\n\nNavigation\n\nMainstream messaging\n\nTelegram\n\n[Get started](https://docs.openclaw.ai/) [Install](https://docs.openclaw.ai/install) [Channels](https://docs.openclaw.ai/channels) [Agents](https://docs.openclaw.ai/concepts/architecture) [Tools & Plugins](https://docs.openclaw.ai/tools) [Models](https://docs.openclaw.ai/providers) [Platforms](https://docs.openclaw.ai/platforms) [Gateway & Ops](https://docs.openclaw.ai/gateway) [Reference](https://docs.openclaw.ai/cli) [Help](https://docs.openclaw.ai/help)\n\nOn this page\n\n- [Quick setup](https://docs.openclaw.ai/channels/telegram#quick-setup)\n- [Telegram side settings](https://docs.openclaw.ai/channels/telegram#telegram-side-settings)\n- [Access control and activation](https://docs.openclaw.ai/channels/telegram#access-control-and-activation)\n- [Finding your Telegram user ID](https://docs.openclaw.ai/channels/telegram#finding-your-telegram-user-id)\n- [Runtime behavior](https://docs.openclaw.ai/channels/telegram#runtime-behavior)\n- [Feature reference](https://docs.openclaw.ai/channels/telegram#feature-reference)\n- [Error reply controls](https://docs.openclaw.ai/channels/telegram#error-reply-controls)\n- [Troubleshooting](https://docs.openclaw.ai/channels/telegram#troubleshooting)\n- [Configuration reference](https://docs.openclaw.ai/channels/telegram#configuration-reference)\n- [Related](https://docs.openclaw.ai/channels/telegram#related)\n\nProduction-ready for bot DMs and groups via grammY. Long polling is the default mode; webhook mode is optional.\n\n[**Pairing** \\\\\n\\\\\nDefault DM policy for Telegram is pairing.](https://docs.openclaw.ai/channels/pairing)\n\n[**Channel troubleshooting** \\\\\n\\\\\nCross-channel diagnostics and repair playbooks.](https://docs.openclaw.ai/channels/troubleshooting)\n\n[**Gateway configuration** \\\\\n\\\\\nFull channel config patterns and examples.](https://docs.openclaw.ai/gateway/configuration)\n\n## [​](https://docs.openclaw.ai/channels/telegram\\#quick-setup)  Quick setup\n\n1\n\n[Navigate to header](https://docs.openclaw.ai/channels/telegram#)\n\nCreate the bot token in BotFather\n\nOpen Telegram and chat with **@BotFather** (confirm the handle is exactly `@BotFather`).Run `/newbot`, follow prompts, and save the token.\n\n2\n\n[Navigate to header](https://docs.openclaw.ai/channels/telegram#)\n\nConfigure token and DM policy\n\n```\n{\n  channels: {\n    telegram: {\n      enabled: true,\n      botToken: \"123:abc\",\n      dmPolicy: \"pairing\",\n      groups: { \"*\": { requireMention: true } },\n    },\n  },\n}\n```\n\nEnv fallback: `TELEGRAM_BOT_TOKEN=...` (default account only).\nTelegram does **not** use `openclaw channels login telegram`; configure token in config/env, then start gateway.\n\n3\n\n[Navigate to header](https://docs.openclaw.ai/channels/telegram#)\n\nStart gateway and approve first DM\n\n```\nopenclaw gateway\nopenclaw pairing list telegram\nopenclaw pairing approve telegram <CODE>\n```\n\nPairing codes expire after 1 hour.\n\n4\n\n[Navigate to header](https://docs.openclaw.ai/channels/telegram#)\n\nAdd the bot to a group\n\nAdd the bot to your group, then set `channels.telegram.groups` and `groupPolicy` to match your access model.\n\nToken resolution order is account-aware. In practice, config values win over env fallback, and `TELEGRAM_BOT_TOKEN` only applies to the default account.\n\n## [​](https://docs.openclaw.ai/channels/telegram\\#telegram-side-settings)  Telegram side settings\n\nPrivacy mode and group visibility\n\nTelegram bots default to **Privacy Mode**, which limits what group messages they receive.If the bot must see all group messages, either:\n\n- disable privacy mode via `/setprivacy`, or\n- make the bot a group admin.\n\nWhen toggling privacy mode, remove + re-add the bot in each group so Telegram applies the change.\n\nGroup permissions\n\nAdmin status is controlled in Telegram group settings.Admin bots receive all group messages, which is useful for always-on group behavior.\n\nHelpful BotFather toggles\n\n- `/setjoingroups` to allow/deny group adds\n- `/setprivacy` for group visibility behavior\n\n## [​](https://docs.openclaw.ai/channels/telegram\\#access-control-and-activation)  Access control and activation\n\n- DM policy\n\n- Group policy and allowlists\n\n- Mention behavior\n\n\n`channels.telegram.dmPolicy` controls direct message access:\n\n- `pairing` (default)\n- `allowlist` (requires at least one sender ID in `allowFrom`)\n- `open` (requires `allowFrom` to include `\"*\"`)\n- `disabled`\n\n`channels.telegram.allowFrom` accepts numeric Telegram user IDs. `telegram:` / `tg:` prefixes are accepted and normalized.\n`dmPolicy: \"allowlist\"` with empty `allowFrom` blocks all DMs and is rejected by config validation.\nSetup asks for numeric user IDs only.\nIf you upgraded and your config contains `@username` allowlist entries, run `openclaw doctor --fix` to resolve them (best-effort; requires a Telegram bot token).\nIf you previously relied on pairing-store allowlist files, `openclaw doctor --fix` can recover entries into `channels.telegram.allowFrom` in allowlist flows (for example when `dmPolicy: \"allowlist\"` has no explicit IDs yet).For one-owner bots, prefer `dmPolicy: \"allowlist\"` with explicit numeric `allowFrom` IDs to keep access policy durable in config (instead of depending on previous pairing approvals).Common confusion: DM pairing approval does not mean “this sender is authorized everywhere”.\nPairing grants DM access only. Group sender authorization still comes from explicit config allowlists.\nIf you want “I am authorized once and both DMs and group commands work”, put your numeric Telegram user ID in `channels.telegram.allowFrom`.\n\n### [​](https://docs.openclaw.ai/channels/telegram\\#finding-your-telegram-user-id)  Finding your Telegram user ID\n\nSafer (no third-party bot):\n\n1. DM your bot.\n2. Run `openclaw logs --follow`.\n3. Read `from.id`.\n\nOfficial Bot API method:\n\n```\ncurl \"https://api.telegram.org/bot<bot_token>/getUpdates\"\n```\n\nThird-party method (less private): `@userinfobot` or `@getidsbot`.\n\nTwo controls apply together:\n\n1. **Which groups are allowed** (`channels.telegram.groups`)   - no `groups` config:\n\n     - with `groupPolicy: \"open\"`: any group can pass group-ID checks\n     - with `groupPolicy: \"allowlist\"` (default): groups are blocked until you add `groups` entries (or `\"*\"`)\n   - `groups` configured: acts as allowlist (explicit IDs or `\"*\"`)\n2. **Which senders are allowed in groups** (`channels.telegram.groupPolicy`)   - `open`\n   - `allowlist` (default)\n   - `disabled`\n\n`groupAllowFrom` is used for group sender filtering. If not set, Telegram falls back to `allowFrom`.\n`groupAllowFrom` entries should be numeric Telegram user IDs (`telegram:` / `tg:` prefixes are normalized).\nDo not put Telegram group or supergroup chat IDs in `groupAllowFrom`. Negative chat IDs belong under `channels.telegram.groups`.\nNon-numeric entries are ignored for sender authorization.\nSecurity boundary (`2026.2.25+`): group sender auth does **not** inherit DM pairing-store approvals.\nPairing stays DM-only. For groups, set `groupAllowFrom` or per-group/per-topic `allowFrom`.\nIf `groupAllowFrom` is unset, Telegram falls back to config `allowFrom`, not the pairing store.\nPractical pattern for one-owner bots: set your user ID in `channels.telegram.allowFrom`, leave `groupAllowFrom` unset, and allow the target groups under `channels.telegram.groups`.\nRuntime note: if `channels.telegram` is completely missing, runtime defaults to fail-closed `groupPolicy=\"allowlist\"` unless `channels.defaults.groupPolicy` is explicitly set.Example: allow any member in one specific group:\n\n```\n{\n  channels: {\n    telegram: {\n      groups: {\n        \"-1001234567890\": {\n          groupPolicy: \"open\",\n          requireMention: false,\n        },\n      },\n    },\n  },\n}\n```\n\nExample: allow only specific users inside one specific group:\n\n```\n{\n  channels: {\n    telegram: {\n      groups: {\n        \"-1001234567890\": {\n          requireMention: true,\n          allowFrom: [\"8734062810\", \"745123456\"],\n        },\n      },\n    },\n  },\n}\n```\n\nCommon mistake: `groupAllowFrom` is not a Telegram group allowlist.\n\n- Put negative Telegram group or supergroup chat IDs like `-1001234567890` under `channels.telegram.groups`.\n- Put Telegram user IDs like `8734062810` under `groupAllowFrom` when you want to limit which people inside an allowed group can trigger the bot.\n- Use `groupAllowFrom: [\"*\"]` only when you want any member of an allowed group to be able to talk to the bot.\n\nGroup replies require mention by default.Mention can come from:\n\n- native `@botusername` mention, or\n- mention patterns in:\n  - `agents.list[].groupChat.mentionPatterns`\n  - `messages.groupChat.mentionPatterns`\n\nSession-level command toggles:\n\n- `/activation always`\n- `/activation mention`\n\nThese update session state only. Use config for persistence.Persistent config example:\n\n```\n{\n  channels: {\n    telegram: {\n      groups: {\n        \"*\": { requireMention: false },\n      },\n    },\n  },\n}\n```\n\nGetting the group chat ID:\n\n- forward a group message to `@userinfobot` / `@getidsbot`\n- or read `chat.id` from `openclaw logs --follow`\n- or inspect Bot API `getUpdates`\n\n## [​](https://docs.openclaw.ai/channels/telegram\\#runtime-behavior)  Runtime behavior\n\n- Telegram is owned by the gateway process.\n- Routing is deterministic: Telegram inbound replies back to Telegram (the model does not pick channels).\n- Inbound messages normalize into the shared channel envelope with reply metadata and media placeholders.\n- Group sessions are isolated by group ID. Forum topics append `:topic:<threadId>` to keep topics isolated.\n- DM messages can carry `message_thread_id`; OpenClaw routes them with thread-aware session keys and preserves thread ID for replies.\n- Long polling uses grammY runner with per-chat/per-thread sequencing. Overall runner sink concurrency uses `agents.defaults.maxConcurrent`.\n- Long polling is guarded inside each gateway process so only one active poller can use a bot token at a time. If you still see `getUpdates` 409 conflicts, another OpenClaw gateway, script, or external poller is likely using the same token.\n- Long-polling watchdog restarts trigger after 120 seconds without completed `getUpdates` liveness by default. Increase `channels.telegram.pollingStallThresholdMs` only if your deployment still sees false polling-stall restarts during long-running work. The value is in milliseconds and is allowed from `30000` to `600000`; per-account overrides are supported.\n- Telegram Bot API has no read-receipt support (`sendReadReceipts` does not apply).\n\n## [​](https://docs.openclaw.ai/channels/telegram\\#feature-reference)  Feature reference\n\nLive stream preview (message edits)\n\nOpenClaw can stream partial replies in real time:\n\n- direct chats: preview message + `editMessageText`\n- groups/topics: preview message + `editMessageText`\n\nRequirement:\n\n- `channels.telegram.streaming` is `off | partial | block | progress` (default: `partial`)\n- `progress` maps to `partial` on Telegram (compat with cross-channel naming)\n- `streaming.preview.toolProgress` controls whether tool/progress updates reuse the same edited preview message (default: `true` when preview streaming is active)\n- legacy `channels.telegram.streamMode` and boolean `streaming` values are detected; run `openclaw doctor --fix` to migrate them to `channels.telegram.streaming.mode`\n\nTool-progress preview updates are the short “Working…” lines shown while tools run, for example command execution, file reads, planning updates, or patch summaries. Telegram keeps these enabled by default to match released OpenClaw behavior from `v2026.4.22` and later. To keep the edited preview for answer text but hide tool-progress lines, set:\n\n```\n{\n  \"channels\": {\n    \"telegram\": {\n      \"streaming\": {\n        \"mode\": \"partial\",\n        \"preview\": {\n          \"toolProgress\": false\n        }\n      }\n    }\n  }\n}\n```\n\nUse `streaming.mode: \"off\"` only when you want to disable Telegram preview edits entirely. Use `streaming.preview.toolProgress: false` when you only want to disable the tool-progress status lines.For text-only replies:\n\n- short DM/group/topic previews: OpenClaw keeps the same preview message and performs a final edit in place\n- previews older than about one minute: OpenClaw sends the completed reply as a fresh final message and then cleans up the preview, so Telegram’s visible timestamp reflects completion time instead of the preview creation time\n\nFor complex replies (for example media payloads), OpenClaw falls back to normal final delivery and then cleans up the preview message.Preview streaming is separate from block streaming. When block streaming is explicitly enabled for Telegram, OpenClaw skips the preview stream to avoid double-streaming.If native draft transport is unavailable/rejected, OpenClaw automatically falls back to `sendMessage` \\+ `editMessageText`.Telegram-only reasoning stream:\n\n- `/reasoning stream` sends reasoning to the live preview while generating\n- final answer is sent without reasoning text\n\nFormatting and HTML fallback\n\nOutbound text uses Telegram `parse_mode: \"HTML\"`.\n\n- Markdown-ish text is rendered to Telegram-safe HTML.\n- Raw model HTML is escaped to reduce Telegram parse failures.\n- If Telegram rejects parsed HTML, OpenClaw retries as plain text.\n\nLink previews are enabled by default and can be disabled with `channels.telegram.linkPreview: false`.\n\nNative commands and custom commands\n\nTelegram command menu registration is handled at startup with `setMyCommands`.Native command defaults:\n\n- `commands.native: \"auto\"` enables native commands for Telegram\n\nAdd custom command menu entries:\n\n```\n{\n  channels: {\n    telegram: {\n      customCommands: [\\\n        { command: \"backup\", description: \"Git backup\" },\\\n        { command: \"generate\", description: \"Create an image\" },\\\n      ],\n    },\n  },\n}\n```\n\nRules:\n\n- names are normalized (strip leading `/`, lowercase)\n- valid pattern: `a-z`, `0-9`, `_`, length `1..32`\n- custom commands cannot override native commands\n- conflicts/duplicates are skipped and logged\n\nNotes:\n\n- custom commands are menu entries only; they do not auto-implement behavior\n- plugin/skill commands can still work when typed even if not shown in Telegram menu\n\nIf native commands are disabled, built-ins are removed. Custom/plugin commands may still register if configured.Common setup failures:\n\n- `setMyCommands failed` with `BOT_COMMANDS_TOO_MUCH` means the Telegram menu still overflowed after trimming; reduce plugin/skill/custom commands or disable `channels.telegram.commands.native`.\n- `deleteWebhook`, `deleteMyCommands`, or `setMyCommands` failing with `404: Not Found` while direct Bot API curl commands work can mean `channels.telegram.apiRoot` was set to the full `/bot<TOKEN>` endpoint. `apiRoot` must be only the Bot API root, and `openclaw doctor --fix` removes an accidental trailing `/bot<TOKEN>`.\n- `getMe returned 401` means Telegram rejected the configured bot token. Update `botToken`, `tokenFile`, or `TELEGRAM_BOT_TOKEN` with the current BotFather token; OpenClaw stops before polling so this is not reported as a webhook cleanup failure.\n- `setMyCommands failed` with network/fetch errors usually means outbound DNS/HTTPS to `api.telegram.org` is blocked.\n\n### [​](https://docs.openclaw.ai/channels/telegram\\#device-pairing-commands-device-pair-plugin)  Device pairing commands (`device-pair` plugin)\n\nWhen the `device-pair` plugin is installed:\n\n1. `/pair` generates setup code\n2. paste code in iOS app\n3. `/pair pending` lists pending requests (including role/scopes)\n4. approve the request:\n   - `/pair approve <requestId>` for explicit approval\n   - `/pair approve` when there is only one pending request\n   - `/pair approve latest` for most recent\n\nThe setup code carries a short-lived bootstrap token. Built-in bootstrap handoff keeps the primary node token at `scopes: []`; any handed-off operator token stays bounded to `operator.approvals`, `operator.read`, `operator.talk.secrets`, and `operator.write`. Bootstrap scope checks are role-prefixed, so that operator allowlist only satisfies operator requests; non-operator roles still need scopes under their own role prefix.If a device retries with changed auth details (for example role/scopes/public key), the previous pending request is superseded and the new request uses a different `requestId`. Re-run `/pair pending` before approving.More details: [Pairing](https://docs.openclaw.ai/channels/pairing#pair-via-telegram-recommended-for-ios).\n\nInline buttons\n\nConfigure inline keyboard scope:\n\n```\n{\n  channels: {\n    telegram: {\n      capabilities: {\n        inlineButtons: \"allowlist\",\n      },\n    },\n  },\n}\n```\n\nPer-account override:\n\n```\n{\n  channels: {\n    telegram: {\n      accounts: {\n        main: {\n          capabilities: {\n            inlineButtons: \"allowlist\",\n          },\n        },\n      },\n    },\n  },\n}\n```\n\nScopes:\n\n- `off`\n- `dm`\n- `group`\n- `all`\n- `allowlist` (default)\n\nLegacy `capabilities: [\"inlineButtons\"]` maps to `inlineButtons: \"all\"`.Message action example:\n\n```\n{\n  action: \"send\",\n  channel: \"telegram\",\n  to: \"123456789\",\n  message: \"Choose an option:\",\n  buttons: [\\\n    [\\\n      { text: \"Yes\", callback_data: \"yes\" },\\\n      { text: \"No\", callback_data: \"no\" },\\\n    ],\\\n    [{ text: \"Cancel\", callback_data: \"cancel\" }],\\\n  ],\n}\n```\n\nCallback clicks are passed to the agent as text:\n`callback_data: <value>`\n\nTelegram message actions for agents and automation\n\nTelegram tool actions include:\n\n- `sendMessage` (`to`, `content`, optional `mediaUrl`, `replyToMessageId`, `messageThreadId`)\n- `react` (`chatId`, `messageId`, `emoji`)\n- `deleteMessage` (`chatId`, `messageId`)\n- `editMessage` (`chatId`, `messageId`, `content`)\n- `createForumTopic` (`chatId`, `name`, optional `iconColor`, `iconCustomEmojiId`)\n\nChannel message actions expose ergonomic aliases (`send`, `react`, `delete`, `edit`, `sticker`, `sticker-search`, `topic-create`).Gating controls:\n\n- `channels.telegram.actions.sendMessage`\n- `channels.telegram.actions.deleteMessage`\n- `channels.telegram.actions.reactions`\n- `channels.telegram.actions.sticker` (default: disabled)\n\nNote: `edit` and `topic-create` are currently enabled by default and do not have separate `channels.telegram.actions.*` toggles.\nRuntime sends use the active config/secrets snapshot (startup/reload), so action paths do not perform ad-hoc SecretRef re-resolution per send.Reaction removal semantics: [/tools/reactions](https://docs.openclaw.ai/tools/reactions)\n\nReply threading tags\n\nTelegram supports explicit reply threading tags in generated output:\n\n- `[[reply_to_curr...
-
----
-
+* [Channels Overview](/channels) — all supported channels
+* [Pairing](/channels/pairing) — DM authentication and pairing flow
+* [Groups](/channels/groups) — group chat behavior and mention gating
+* [Channel Routing](/channels/channel-routing) — session routing for messages
+* [Security](/gateway/security) — access model and hardening

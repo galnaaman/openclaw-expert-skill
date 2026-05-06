@@ -11,11 +11,12 @@ This skill provides comprehensive documentation and expert knowledge for working
 
 Use this skill whenever you need to:
 - Configure or deploy an OpenClaw Gateway
-- Build or configure Channel Plugins (WhatsApp, Telegram, Slack, etc.)
+- Build or configure Channel Plugins (WhatsApp, Telegram, Slack, Discord, Teams, and many more)
 - Set up and manage Agents and Multi-Agent routing
 - Develop or integrate Tools and Plugins
 - Troubleshoot OpenClaw operations (CLI, memory, security, telemetry)
 - Understand OpenClaw's core concepts (Delegate architecture, QMD memory, Dreaming)
+- Configure LLM providers (Anthropic, OpenAI, Google, DeepSeek, xAI, Groq, Mistral, Ollama, and 40+ more)
 
 ## Reference Documentation
 
@@ -31,7 +32,7 @@ Read this file for configuring and running the OpenClaw Gateway.
 
 ### 3. Channels (`references/channels.md`)
 Read this file when configuring messaging platforms and channel integrations.
-- **Topics covered:** WhatsApp, WeChat, IRC, Nostr, QQ bot, Broadcast groups, Location parsing, and Channel troubleshooting.
+- **Topics covered:** Discord, Slack, WhatsApp, Telegram, Microsoft Teams, Feishu/Lark, LINE, Mattermost, Matrix, Nextcloud Talk, Synology Chat, Tlon (Urbit), Twitch, Yuanbao, Zalo, Zalo Personal, WeChat, QQ Bot, Nostr, IRC, Signal, BlueBubbles, iMessage (legacy), Google Chat, Groups, Access Groups, Pairing, Channel routing, Broadcast groups, Location parsing, and Channel troubleshooting.
 
 ### 4. Agents & CLI (`references/cli.md`)
 Read this file for managing agents and using the OpenClaw CLI.
@@ -46,8 +47,13 @@ Read this file for developing and managing OpenClaw plugins.
 - **Topics covered:** Plugin manifest, Plugin bundles, SDK channel plugins, Architecture internals, Webhooks, Voice calls, Memory wiki, and SDK testing.
 
 ### 7. Model Providers (`references/providers.md`)
-Read this file for configuring LLM providers.
-- **Topics covered:** OpenAI, Google (Gemini), Deepgram, LiteLLM, Fireworks, Qwen, and Chutes.
+Read this file for configuring LLM providers. This file covers all 40+ supported providers.
+- **Topics covered:**
+  - **Frontier models:** Anthropic (Claude Opus 4.6/4.7, adaptive thinking, prompt caching), OpenAI (GPT-5.5, Codex OAuth, image/video generation), Google Gemini (Gemini 2.5 Flash/Pro, image/video/music generation), xAI (Grok models), DeepSeek, Mistral
+  - **Inference & routing:** Groq (LPU inference), Ollama (local models), OpenRouter, LiteLLM (unified gateway), Cerebras, NVIDIA, Together AI, Fireworks, Perplexity (web search)
+  - **Specialized:** ElevenLabs (TTS/STT), Deepgram (audio transcription), Moonshot AI (Kimi + Kimi Coding), GitHub Copilot, Amazon Bedrock, Alibaba Model Studio (Wan video models)
+  - **Regional/other:** Qwen Cloud, Volcengine (Doubao), GLM (Zhipu), MiniMax, Z.AI, Tencent Cloud (TokenHub), StepFun, Arcee AI, Gradium, Hugging Face, Inferrs, LM Studio, SGLang, vLLM, Vercel AI Gateway, Cloudflare AI Gateway, Runway, Fal, ComfyUI, Venice AI, Vydra, Xiaomi MiMo, Inworld, Qianfan, SenseAudio, BytePlus, OpenCode, OpenCode Go, Synthetic, DeepInfra, Kilocode, Bedrock Mantle, Azure Speech
+  - **Model provider quickstart:** Quick-start guide for picking a provider and setting the default model
 
 ### 8. Installation (`references/install.md`)
 Read this file for setup and deployment guides.
@@ -67,7 +73,7 @@ Read this file for security guidelines and models.
 
 ### 12. Platforms (`references/platforms.md`)
 Read this file for platform-specific guides.
-- **Topics covered:** macOS (Peekaboo, Canvas, Child process, Voice overlay, Bundled gateway), Windows, Android, Raspberry Pi.
+- **Topics covered:** macOS (Peekaboo, Canvas, Child process, Voice overlay, Bundled gateway), Windows, Android, Raspberry Pi, iOS, Linux.
 
 ### 13. Reference (`references/reference.md`)
 Read this file for technical reference material.
@@ -87,6 +93,8 @@ Read this file for miscellaneous documentation.
 2. **Understand the Delegate Architecture:** OpenClaw uses a unique delegate model for handling messages. Review `references/concepts.md` before building complex multi-agent setups.
 3. **Use the CLI for debugging:** The `openclaw status` and `openclaw memory` commands are essential for troubleshooting. See `references/cli.md`.
 4. **Secure your Secrets:** Never hardcode API keys. Use OpenClaw's secrets management and SecretRef system (`references/gateway.md` and `references/reference.md`).
+5. **Provider and runtime are separate layers:** When configuring models, remember that the provider prefix (e.g., `anthropic/`, `openai-codex/`) controls the API route, while `agentRuntime.id` controls the execution harness. Read `references/providers.md` before mixing these.
+6. **Channel selection:** For fastest setup use Telegram (simple bot token). For iMessage use BlueBubbles (not the legacy imsg integration). WhatsApp requires QR pairing. See `references/channels.md` for full channel matrix.
 
 ## How to Proceed
 
