@@ -15,7 +15,8 @@ This installs the skill and makes it available to your AI agent automatically.
 
 ## What It Does
 
-Once installed, your AI agent will have expert-level knowledge of the entire [OpenClaw](https://openclaw.ai) platform, sourced from **252 pages** scraped directly from [docs.openclaw.ai](https://docs.openclaw.ai). The skill covers all major areas:
+Once installed, your AI agent can navigate structured guidance sourced from
+[docs.openclaw.ai](https://docs.openclaw.ai). The skill covers all major areas:
 
 | Reference File | Topics Covered |
 |---|---|
@@ -34,8 +35,7 @@ Once installed, your AI agent will have expert-level knowledge of the entire [Op
 | `reference.md` | RPC, SecretRef, memory config, prompt caching, templates |
 | `help.md` | Troubleshooting, FAQs, debugging, testing, scripts |
 | `other.md` | Network, VPS, CI, prose, Pi-dev, web/TUI, webchat |
-
-**Total: ~2.7 MB of structured documentation across 49,809 lines.**
+| `tweetclaw.md` | Xquik plugin setup, tool access, approvals, and workflows |
 
 ## Example Prompts
 
@@ -44,11 +44,29 @@ After installing, ask your agent things like:
 - *"How do I configure a WhatsApp channel in OpenClaw?"*
 - *"Show me the full gateway configuration reference"*
 - *"How do I build a custom channel plugin with the SDK?"*
+- *"Install TweetClaw and configure approval boundaries for X/Twitter actions"*
 - *"Set up multi-agent routing in OpenClaw"*
 - *"How do I connect OpenClaw to Anthropic Claude via Bedrock?"*
 - *"Troubleshoot a broken OpenClaw gateway"*
 - *"What CLI commands are available for managing memory?"*
 - *"How do I deploy OpenClaw to Kubernetes?"*
+
+## Real Plugin Example
+
+For a concrete plugin workflow, install
+[TweetClaw](https://github.com/Xquik-dev/tweetclaw) from its verified ClawHub
+publisher:
+
+```bash
+openclaw plugins install clawhub:@xquik/tweetclaw
+```
+
+Read the [TweetClaw guide](references/tweetclaw.md) before enabling live tools.
+It covers credentials, tool access, verification, untrusted content, pagination,
+and required approvals.
+
+Xquik is an independent third-party service. Not affiliated with X Corp.
+"Twitter" and "X" are trademarks of X Corp.
 
 ## Skill Structure
 
@@ -70,7 +88,8 @@ openclaw-expert-skill/
     ├── platforms.md      # Platform-specific guides
     ├── reference.md      # Technical reference
     ├── help.md           # Help & troubleshooting
-    └── other.md          # Miscellaneous docs
+    ├── other.md          # Miscellaneous docs
+    └── tweetclaw.md      # TweetClaw setup and safe workflows
 ```
 
 ## Which AI Agents Support This Skill?
