@@ -17,6 +17,7 @@ Use this skill whenever you need to:
 - Troubleshoot OpenClaw operations (CLI, memory, security, telemetry)
 - Understand OpenClaw's core concepts (Delegate architecture, QMD memory, Dreaming)
 - Configure LLM providers (Anthropic, OpenAI, Google, DeepSeek, xAI, Groq, Mistral, Ollama, and 40+ more)
+- Install TweetClaw and configure approved X/Twitter workflows
 
 ## Reference Documentation
 
@@ -87,6 +88,10 @@ Read this file for troubleshooting and FAQs.
 Read this file for miscellaneous documentation.
 - **Topics covered:** Network, CI, Prose, VPS, Pi-dev.
 
+### 16. TweetClaw (`references/tweetclaw.md`)
+Read this file for approved X/Twitter workflows through Xquik.
+- **Topics covered:** Installation, credentials, tool access, runtime verification, approvals, pagination, untrusted content, and updates.
+
 ## Best Practices for OpenClaw
 
 1. **Always check the Gateway configuration:** Many issues stem from incorrect `config.yaml` settings. Refer to `references/gateway.md` for the exact schema.
@@ -95,9 +100,11 @@ Read this file for miscellaneous documentation.
 4. **Secure your Secrets:** Never hardcode API keys. Use OpenClaw's secrets management and SecretRef system (`references/gateway.md` and `references/reference.md`).
 5. **Provider and runtime are separate layers:** When configuring models, remember that the provider prefix (e.g., `anthropic/`, `openai-codex/`) controls the API route, while `agentRuntime.id` controls the execution harness. Read `references/providers.md` before mixing these.
 6. **Channel selection:** For fastest setup use Telegram (simple bot token). For iMessage use BlueBubbles (not the legacy imsg integration). WhatsApp requires QR pairing. See `references/channels.md` for full channel matrix.
+7. **Use real plugin examples carefully:** Read `references/tweetclaw.md` before guiding TweetClaw setup or live X/Twitter workflows.
+8. **Verify volatile commands:** Confirm install commands against current official OpenClaw documentation.
 
 ## How to Proceed
 
 1. Identify the specific area of OpenClaw the user needs help with.
-2. Use the `file` tool to read the corresponding reference markdown file from `/home/ubuntu/skills/openclaw-expert/references/`.
+2. Use the available file-reading tool. Read the chosen file under `{baseDir}/references/`.
 3. Synthesize the information and provide a detailed, accurate response or solution based on the official documentation.
